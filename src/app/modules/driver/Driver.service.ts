@@ -7,9 +7,7 @@ import { TPagination } from '../../../utils/server/serveResponse';
 
 export const DriverServices = {
   async superGetPendingDriver({ page, limit, search }: TList) {
-    const where: Prisma.UserWhereInput = {
-      is_pending_driver: true,
-    };
+    const where: Prisma.UserWhereInput = {};
 
     if (search)
       where.OR = searchFields.map(field => ({
@@ -46,7 +44,6 @@ export const DriverServices = {
       where: { id: driverId },
       omit: userOmit,
       data: {
-        is_pending_driver: false,
         role: EUserRole.DRIVER,
       },
     });
@@ -57,9 +54,7 @@ export const DriverServices = {
       where: { id: driverId },
       omit: userOmit,
       data: {
-        is_pending_driver: false,
         role: EUserRole.USER,
-        driver_info: null,
       },
     });
   },

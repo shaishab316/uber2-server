@@ -4,27 +4,23 @@ import { prisma } from '../../../utils/db';
 import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { deleteFile } from '../../middlewares/capture';
-import { TApplyForDriver, TUserEdit, TUserRegister } from './User.interface';
+import { TUserEdit, TUserRegister } from './User.interface';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
 import { errorLogger } from '../../../utils/logger';
-import { otpGenerator } from '../../../utils/crypto/otpGenerator';
 import config from '../../../config';
 import { otp_send_template } from '../../../templates';
-import ms from 'ms';
 import { sendEmail } from '../../../utils/sendMail';
 import { hashPassword } from '../auth/Auth.utils';
+import { generateOTP } from '../../../utils/crypto/otp';
 
-export const userOmit = {
-  location: true,
+export const userOmit: Prisma.UserOmit = {
   password: true,
-  otp: true,
-  otp_expires_at: true,
 };
 
 export const UserServices = {
-  async register({ password, name, email, phone }: TUserRegister) {
+  async userRegister({ password, name, email, phone }: TUserRegister) {
     AuthServices.validEmailORPhone({ email, phone });
 
     //! check if user already exists
@@ -38,11 +34,27 @@ export const UserServices = {
         `User already exists with this ${email ? 'email' : ''} ${phone ? 'phone' : ''}`.trim(),
       );
 
-    const otp = otpGenerator(config.otp.length);
+    //! finally create user and in return omit auth fields
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        phone,
+        password: await hashPassword(password),
+        role: EUserRole.USER,
+        wallet: { create: {} },
+      },
+      omit: userOmit,
+    });
 
     try {
+      const otp = generateOTP({
+        tokenType: 'access_token',
+        userId: user.id,
+      });
+
       if (email)
-        sendEmail({
+        await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
           html: otp_send_template({
@@ -55,20 +67,7 @@ export const UserServices = {
       errorLogger.error(error.message);
     }
 
-    //! finally create user and in return omit auth fields
-    return prisma.user.create({
-      data: {
-        name,
-        email,
-        phone,
-        password: await hashPassword(password),
-        role: EUserRole.USER,
-        otp,
-        otp_expires_at: new Date(Date.now() + ms(config.otp.exp)),
-        wallet: { create: {} },
-      },
-      omit: userOmit,
-    });
+    return user;
   },
 
   async updateUser({ user, body }: { user: Partial<TUser>; body: TUserEdit }) {
@@ -167,33 +166,5 @@ export const UserServices = {
     if (user?.avatar) await deleteFile(user.avatar);
 
     return prisma.user.delete({ where: { id: userId } });
-  },
-
-  async applyForDriver({
-    avatar,
-    driver_license,
-    business_contact,
-    car_name,
-    car_photo,
-    nid_number,
-    payment_method,
-    user_id,
-  }: TApplyForDriver & { user_id: string }) {
-    return prisma.user.update({
-      where: { id: user_id },
-      data: {
-        is_pending_driver: true,
-        avatar,
-        nid_number,
-        payment_method,
-        driver_info: {
-          business_contact,
-          car_name,
-          car_photo,
-          driver_license,
-        },
-      },
-      omit: userOmit,
-    });
   },
 };

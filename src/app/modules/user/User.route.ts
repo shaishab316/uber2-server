@@ -59,29 +59,6 @@ const user = Router();
   );
 
   user.post(
-    '/apply-for-driver',
-    capture({
-      avatar: {
-        size: 5 * 1024 * 1024,
-        maxCount: 1,
-        fileType: 'images',
-      },
-      driver_license: {
-        size: 100 * 1024 * 1024,
-        maxCount: 1,
-        fileType: 'images',
-      },
-      car_photo: {
-        size: 100 * 1024 * 1024,
-        maxCount: 1,
-        fileType: 'images',
-      },
-    }),
-    purifyRequest(UserValidations.applyForDriver),
-    UserControllers.applyForDriver,
-  );
-
-  user.post(
     '/update-location',
     purifyRequest(UserValidations.updateLocation),
     UserControllers.updateLocation,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { exists } from '../../../utils/db/exists';
-import { TModels } from '../../../utils/db';
 import { capitalize } from '../../../utils/transform/capitalize';
+import { TModels } from '../../../types/db';
 
 export const QueryValidations = {
   list: z.object({

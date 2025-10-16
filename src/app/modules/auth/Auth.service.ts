@@ -16,7 +16,6 @@ import { ZodError } from 'zod';
 import { prisma } from '../../../utils/db';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
-import { otpGenerator } from '../../../utils/crypto/otpGenerator';
 import config from '../../../config';
 import { sendEmail } from '../../../utils/sendMail';
 import { otp_send_template } from '../../../templates';
@@ -24,6 +23,7 @@ import { errorLogger } from '../../../utils/logger';
 import ms from 'ms';
 import { userOmit } from '../user/User.service';
 import { Response } from 'express';
+import { generateOTP, validateOTP } from '../../../utils/crypto/otp';
 
 export const AuthServices = {
   async login({ password, email, phone }: TUserLogin): Promise<Partial<TUser>> {
@@ -31,11 +31,6 @@ export const AuthServices = {
 
     const user = await prisma.user.findFirst({
       where: { OR: [{ email }, { phone }] },
-      omit: {
-        otp: true,
-        otp_expires_at: true,
-        location: true,
-      },
     });
 
     if (!user)
@@ -46,7 +41,10 @@ export const AuthServices = {
     }
 
     if (!user.is_verified) {
-      const otp = otpGenerator(config.otp.length);
+      const otp = generateOTP({
+        tokenType: 'access_token',
+        userId: user.id,
+      });
 
       try {
         if (email)
@@ -62,24 +60,12 @@ export const AuthServices = {
       } catch (error: any) {
         errorLogger.error(error.message);
       }
-
-      const { otp_expires_at } = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          otp,
-          otp_expires_at: new Date(Date.now() + ms(config.otp.exp)),
-        },
-        select: {
-          otp_expires_at: true,
-        },
-      });
-
-      Object.assign(user, { otp_expires_at });
     }
 
-    Object.assign(user, { password: undefined });
-
-    return user;
+    return {
+      ...user,
+      password: undefined,
+    };
   },
 
   validEmailORPhone({ email, phone }: { email?: string; phone?: string }) {
@@ -152,7 +138,10 @@ export const AuthServices = {
         'Your account is already verified',
       );
 
-    const otp = otpGenerator(config.otp.length);
+    const otp = generateOTP({
+      tokenType: 'access_token',
+      userId: user.id,
+    });
 
     try {
       if (email)
@@ -168,17 +157,6 @@ export const AuthServices = {
     } catch (error: any) {
       errorLogger.error(error.message);
     }
-
-    return prisma.user.update({
-      where: { id: user.id },
-      data: {
-        otp,
-        otp_expires_at: new Date(Date.now() + ms(config.otp.exp)),
-      },
-      select: {
-        otp_expires_at: true,
-      },
-    });
   },
 
   async forgotPassword({ email, phone }: TAccountVerifyOtpSend) {
@@ -191,7 +169,10 @@ export const AuthServices = {
     if (!user)
       throw new ServerError(StatusCodes.NOT_FOUND, "User doesn't exist");
 
-    const otp = otpGenerator(config.otp.length);
+    const otp = generateOTP({
+      tokenType: 'reset_token',
+      userId: user.id,
+    });
 
     try {
       if (email)
@@ -207,17 +188,6 @@ export const AuthServices = {
     } catch (error: any) {
       errorLogger.error(error.message);
     }
-
-    return prisma.user.update({
-      where: { id: user.id },
-      data: {
-        otp,
-        otp_expires_at: new Date(Date.now() + ms(config.otp.exp)),
-      },
-      select: {
-        otp_expires_at: true,
-      },
-    });
   },
 
   async accountVerify({ email, phone, otp }: TAccountVerify) {
@@ -230,18 +200,19 @@ export const AuthServices = {
     if (!user)
       throw new ServerError(StatusCodes.NOT_FOUND, "User doesn't exist");
 
-    if (user.otp !== otp)
+    if (
+      !validateOTP({
+        otp,
+        tokenType: 'access_token',
+        userId: user.id,
+      })
+    )
       throw new ServerError(StatusCodes.UNAUTHORIZED, 'Incorrect OTP');
-
-    if (!user.otp_expires_at || user.otp_expires_at < new Date())
-      throw new ServerError(StatusCodes.UNAUTHORIZED, 'OTP has expired');
 
     return prisma.user.update({
       where: { id: user.id },
       data: {
         is_verified: true,
-        otp: null,
-        otp_expires_at: null,
       },
       omit: userOmit,
     });

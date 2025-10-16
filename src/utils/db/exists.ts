@@ -1,4 +1,5 @@
-import { TModels, prisma } from '.';
+import { prisma } from '.';
+import { TModels } from '../../types/db';
 
 export const exists =
   (model: TModels) =>

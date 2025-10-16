@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import nodemailer from 'nodemailer';
 import config from '../config';
 import { errorLogger, logger } from './logger';
@@ -45,6 +46,14 @@ export const sendEmail = async ({
   html: string;
 }) => {
   logger.info(chalk.yellow('Sending email...'), to);
+
+  if (mock_mail) {
+    console.log(chalk.blue('sent mail'), {
+      to,
+      subject,
+    });
+  }
+
   try {
     const { accepted } = await transporter.sendMail({
       from,

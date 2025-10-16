@@ -2,15 +2,14 @@ import { UserServices } from './User.service';
 import catchAsync from '../../middlewares/catchAsync';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
-import { EUserRole, User as TUser } from '../../../../prisma';
+import { User as TUser } from '../../../../prisma';
 import { prisma } from '../../../utils/db';
-import ServerError from '../../../errors/ServerError';
 import { enum_decode } from '../../../utils/transform/enum';
 import { capitalize } from '../../../utils/transform/capitalize';
 
 export const UserControllers = {
   register: catchAsync(async ({ body }, res) => {
-    const user = await UserServices.register(body);
+    const user = await UserServices.userRegister(body);
 
     const { access_token, refresh_token } = AuthServices.retrieveToken(
       user.id,
@@ -115,24 +114,6 @@ export const UserControllers = {
 
     return {
       message: `Goodbye ${user?.name ?? enum_decode(user.role)}! Your account has been deleted successfully!`,
-    };
-  }),
-
-  applyForDriver: catchAsync(async ({ body, user }) => {
-    if (user.role === EUserRole.DRIVER)
-      throw new ServerError(
-        StatusCodes.BAD_REQUEST,
-        'You are already a driver',
-      );
-
-    const data = await UserServices.applyForDriver({
-      user_id: user.id,
-      ...body,
-    });
-
-    return {
-      message: 'Application submitted successfully!',
-      data,
     };
   }),
 };

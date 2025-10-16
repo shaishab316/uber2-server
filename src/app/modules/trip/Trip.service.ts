@@ -22,7 +22,6 @@ import {
   tripSearchableFields as searchableFields,
   cancelAbleTripStatus,
 } from './Trip.constant';
-import { otpGenerator } from '../../../utils/crypto/otpGenerator';
 import {
   TPagination,
   TServeResponse,
@@ -60,8 +59,8 @@ export const TripServices = {
     //     'You have a pending trip with id ' + existingTrip.id,
     //   );
 
-    const sOtp = otpGenerator(config.otp.length);
-    const eOtp = otpGenerator(config.otp.length);
+    const sOtp = '111111';
+    const eOtp = '111111';
 
     const { distance, duration } = await getDistanceAndTime(
       pickup_address.geo,

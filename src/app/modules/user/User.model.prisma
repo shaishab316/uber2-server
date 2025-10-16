@@ -4,15 +4,13 @@ model User {
   updated_at DateTime @updatedAt
 
   //! auth
-  role           EUserRole @default(USER)
-  email          String?
-  phone          String?
-  password       String
-  is_verified    Boolean   @default(false)
-  is_active      Boolean   @default(false)
-  is_admin       Boolean   @default(false)
-  otp            String?
-  otp_expires_at DateTime?
+  role        EUserRole @default(USER)
+  email       String?
+  phone       String?
+  password    String
+  is_verified Boolean   @default(false)
+  is_active   Boolean   @default(false)
+  is_admin    Boolean   @default(false)
   //! end
 
   //! profile
