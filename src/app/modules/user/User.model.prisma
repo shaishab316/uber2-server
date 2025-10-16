@@ -34,6 +34,16 @@ model User {
   vehicle_photo              String?
   //! end
 
+  //! trip history
+  trip_given_count    Int @default(0) // for drivers
+  trip_received_count Int @default(0) // for users
+  //! end
+
+  //! rating
+  rating       Float @default(5.0)
+  rating_count Int   @default(0)
+  //! end
+
   wallet               Wallet?           @relation("UserWallet")
   trips_received       Trip[]            @relation("Passenger")
   trips_given          Trip[]            @relation("Driver")
