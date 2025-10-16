@@ -21,7 +21,7 @@ export const userOmit: Prisma.UserOmit = {
 };
 
 export const UserServices = {
-  async userRegister({ password, name, email, phone }: TUserRegister) {
+  async userRegister({ password, email, phone }: TUserRegister) {
     AuthServices.validEmailORPhone({ email, phone });
 
     //! check if user already exists
@@ -38,7 +38,6 @@ export const UserServices = {
     //! finally create user and in return omit auth fields
     const user = await prisma.user.create({
       data: {
-        name,
         email,
         phone,
         password: await hashPassword(password),
@@ -59,7 +58,7 @@ export const UserServices = {
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
           html: otp_send_template({
-            userName: name,
+            userName: user.name,
             otp,
             template: 'account_verify',
           }),

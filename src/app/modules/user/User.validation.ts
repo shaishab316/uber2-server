@@ -1,15 +1,11 @@
 import { z } from 'zod';
 import { EGender, EUserRole } from '../../../../prisma';
-import { enum_decode, enum_encode } from '../../../utils/transform/enum';
+import { enum_encode } from '../../../utils/transform/enum';
 import { date } from '../../../utils/transform/date';
 
 export const UserValidations = {
   register: z.object({
     body: z.object({
-      name: z
-        .string({ error: 'Name is missing' })
-        .trim()
-        .nonempty('Name is required'),
       email: z.email({ error: 'Email is invalid' }).optional(),
       phone: z.string().optional(),
       password: z
@@ -78,7 +74,7 @@ export const UserValidations = {
         .string({
           error: 'Gender is required',
         })
-        .transform(enum_decode)
+        .transform(enum_encode)
         .pipe(z.enum(EGender)),
       nid_photo: z
         .string({
