@@ -32,7 +32,7 @@ export const AuthControllers = {
   }),
 
   accountVerify: catchAsync(async ({ body }, res) => {
-    const user = await AuthServices.accountVerify(body);
+    const user = await AuthServices.userOtpVerify(body);
 
     const { access_token, refresh_token } = AuthServices.retrieveToken(
       user.id!,
@@ -49,7 +49,10 @@ export const AuthControllers = {
   }),
 
   forgotPasswordOtpVerify: catchAsync(async ({ body }, res) => {
-    const user = await AuthServices.accountVerify(body);
+    const user = await AuthServices.userOtpVerify({
+      ...body,
+      token_type: 'reset_token',
+    });
 
     const { reset_token } = AuthServices.retrieveToken(user.id!, 'reset_token');
 

@@ -190,7 +190,12 @@ export const AuthServices = {
     }
   },
 
-  async accountVerify({ email, phone, otp }: TAccountVerify) {
+  async userOtpVerify({
+    email,
+    phone,
+    otp,
+    token_type = 'access_token',
+  }: TAccountVerify & { token_type: TToken }) {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
@@ -203,7 +208,7 @@ export const AuthServices = {
     if (
       !validateOTP({
         otp,
-        tokenType: 'access_token',
+        tokenType: token_type,
         userId: user.id,
       })
     )
