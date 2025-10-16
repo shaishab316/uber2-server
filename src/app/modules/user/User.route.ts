@@ -59,9 +59,21 @@ const user = Router();
   );
 
   user.post(
-    '/update-location',
-    purifyRequest(UserValidations.updateLocation),
-    UserControllers.updateLocation,
+    '/setup-user-profile',
+    capture({
+      nid_photo: {
+        size: 5 * 1024 * 1024,
+        maxCount: 1,
+        fileType: 'images',
+      },
+      avatar: {
+        size: 5 * 1024 * 1024,
+        maxCount: 1,
+        fileType: 'images',
+      },
+    }),
+    purifyRequest(UserValidations.setupUserProfile),
+    UserControllers.setupUserProfile,
   );
 }
 

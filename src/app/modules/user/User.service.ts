@@ -4,7 +4,7 @@ import { prisma } from '../../../utils/db';
 import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { deleteFile } from '../../middlewares/capture';
-import { TUserEdit, TUserRegister } from './User.interface';
+import { TSetupUserProfile, TUserEdit, TUserRegister } from './User.interface';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
@@ -17,6 +17,7 @@ import { generateOTP } from '../../../utils/crypto/otp';
 
 export const userOmit: Prisma.UserOmit = {
   password: true,
+  is_verification_pending: true,
 };
 
 export const UserServices = {
@@ -166,5 +167,36 @@ export const UserServices = {
     if (user?.avatar) await deleteFile(user.avatar);
 
     return prisma.user.delete({ where: { id: userId } });
+  },
+
+  async setupUserProfile({
+    avatar,
+    date_of_birth,
+    gender,
+    name,
+    nid_photo,
+    user_id,
+  }: TSetupUserProfile) {
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+
+    // Clean up old files
+    if (user?.avatar) await deleteFile(user.avatar);
+    if (user?.nid_photo) await deleteFile(user.nid_photo);
+
+    return prisma.user.update({
+      where: { id: user_id },
+      data: {
+        avatar,
+        date_of_birth,
+        gender,
+        name,
+        nid_photo,
+
+        is_verification_pending: true,
+      },
+      omit: userOmit,
+    });
   },
 };

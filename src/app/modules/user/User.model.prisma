@@ -11,6 +11,9 @@ model User {
   is_verified Boolean   @default(false)
   is_active   Boolean   @default(false)
   is_admin    Boolean   @default(false)
+
+  // only for admin verification
+  is_verification_pending Boolean?
   //! end
 
   //! profile

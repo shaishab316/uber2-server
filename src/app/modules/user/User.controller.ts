@@ -39,15 +39,6 @@ export const UserControllers = {
     };
   }),
 
-  updateLocation: catchAsync(async req => {
-    await UserServices.updateUser(req);
-
-    return {
-      message: 'Location updated successfully!',
-      data: req.body,
-    };
-  }),
-
   superEditProfile: catchAsync(async ({ params, body }) => {
     const user = (await prisma.user.findUnique({
       where: { id: params.userId },
@@ -114,6 +105,18 @@ export const UserControllers = {
 
     return {
       message: `Goodbye ${user?.name ?? enum_decode(user.role)}! Your account has been deleted successfully!`,
+    };
+  }),
+
+  setupUserProfile: catchAsync(async ({ body, user }) => {
+    const data = await UserServices.setupUserProfile({
+      ...body,
+      user_id: user.id,
+    });
+
+    return {
+      message: 'Profile setup successfully!',
+      data,
     };
   }),
 };

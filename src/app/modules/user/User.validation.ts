@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { EUserRole } from '../../../../prisma';
-import { enum_encode } from '../../../utils/transform/enum';
-import { locationSchema } from '../trip/Trip.validation';
+import { EGender, EUserRole } from '../../../../prisma';
+import { enum_decode, enum_encode } from '../../../utils/transform/enum';
+import { date } from '../../../utils/transform/date';
 
 export const UserValidations = {
   register: z.object({
@@ -58,49 +58,33 @@ export const UserValidations = {
     }),
   }),
 
-  applyForDriver: z.object({
+  setupUserProfile: z.object({
     body: z.object({
       avatar: z
         .string({
-          error: 'Avatar is missing',
+          error: 'Avatar is required',
         })
         .nonempty('Avatar is required'),
-      driver_license: z
+      name: z
         .string({
-          error: 'Driver License is missing',
+          error: 'Name is required',
         })
-        .nonempty('Driver License is required'),
-      car_photo: z
+        .nonempty('Name is required'),
+      date_of_birth: z.union([
+        z.string().transform(date).pipe(z.date()),
+        z.date(),
+      ]),
+      gender: z
         .string({
-          error: 'Car Photo is missing',
+          error: 'Gender is required',
         })
-        .nonempty('Car Photo is required'),
-      car_name: z
+        .transform(enum_decode)
+        .pipe(z.enum(EGender)),
+      nid_photo: z
         .string({
-          error: 'Car Name is missing',
+          error: 'NID or Passport is required',
         })
-        .nonempty('Car Name is required'),
-      nid_number: z
-        .string({
-          error: 'NID Number is missing',
-        })
-        .nonempty('NID Number is required'),
-      payment_method: z
-        .string({
-          error: 'Payment Method is missing',
-        })
-        .nonempty('Payment Method is required'),
-      business_contact: z
-        .string({
-          error: 'Business Contact is missing',
-        })
-        .nonempty('Business Contact is required'),
-    }),
-  }),
-
-  updateLocation: z.object({
-    body: z.object({
-      location: locationSchema,
+        .nonempty('NID or Passport is required'),
     }),
   }),
 };
