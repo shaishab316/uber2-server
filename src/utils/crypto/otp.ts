@@ -6,7 +6,7 @@ import ms from 'ms';
 totp.options = {
   digits: config?.otp?.length ?? 6,
   algorithm: 'sha256' as any,
-  step: ms(config?.otp?.exp), // 5 minutes
+  step: ms(config?.otp?.exp) / 1000,
 };
 
 /**
