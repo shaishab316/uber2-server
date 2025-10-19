@@ -20,8 +20,9 @@ model Parcel {
   parcel_type EParcelType
   weight      Float
   amount      Float
+  total_cost  Float         @default(0.00)
 
-  total_cost Float @default(0.00)
+  helper ParcelHelper? @relation("ParcelHelper")
 
   @@map("parcels")
 }
@@ -39,4 +40,15 @@ enum EParcelStatus {
   DELIVERED
   COMPLETED
   CANCELLED
+}
+
+model ParcelHelper {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  parcel_id             String   @unique @db.ObjectId
+  driver_ids            String[] // include 10 nearest drivers
+  next_driver_search_at DateTime @default(now())
+
+  parcel Parcel @relation("ParcelHelper", fields: [parcel_id], references: [id])
+
+  @@map("_parcels_helper")
 }

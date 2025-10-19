@@ -44,6 +44,10 @@ model User {
   rating_count Int   @default(0)
   //! end
 
+  //! location
+  location TLocation?
+  //! end
+
   wallet                 Wallet?           @relation("UserWallet")
   user_trips             Trip[]            @relation("Passenger")
   driver_trips           Trip[]            @relation("Driver")

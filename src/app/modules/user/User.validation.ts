@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { EGender, EUserRole } from '../../../../prisma';
 import { enum_encode } from '../../../utils/transform/enum';
 import { date } from '../../../utils/transform/date';
+import { locationSchema } from '../trip/Trip.validation';
 
 export const UserValidations = {
   register: z.object({
@@ -81,6 +82,12 @@ export const UserValidations = {
           error: 'NID or Passport is required',
         })
         .nonempty('NID or Passport is required'),
+    }),
+  }),
+
+  refreshLocation: z.object({
+    body: z.object({
+      location: locationSchema,
     }),
   }),
 };

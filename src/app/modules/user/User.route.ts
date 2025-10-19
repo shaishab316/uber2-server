@@ -75,6 +75,12 @@ const user = Router();
     purifyRequest(UserValidations.setupUserProfile),
     UserControllers.setupUserProfile,
   );
+
+  user.post(
+    '/refresh-location',
+    purifyRequest(UserValidations.refreshLocation),
+    UserControllers.refreshLocation,
+  );
 }
 
 export const UserRoutes = {

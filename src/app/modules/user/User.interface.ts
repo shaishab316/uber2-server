@@ -6,3 +6,6 @@ export type TUserEdit = z.infer<typeof UserValidations.edit>['body'];
 export type TSetupUserProfile = z.infer<
   typeof UserValidations.setupUserProfile
 >['body'] & { user_id: string };
+export type TRefreshLocation = z.infer<
+  typeof UserValidations.refreshLocation
+>['body'] & { user_id: string };

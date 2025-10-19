@@ -4,7 +4,12 @@ import { prisma } from '../../../utils/db';
 import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { deleteFile } from '../../middlewares/capture';
-import { TSetupUserProfile, TUserEdit, TUserRegister } from './User.interface';
+import {
+  TSetupUserProfile,
+  TRefreshLocation,
+  TUserEdit,
+  TUserRegister,
+} from './User.interface';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
@@ -196,6 +201,13 @@ export const UserServices = {
         is_verification_pending: true,
       },
       omit: userOmit,
+    });
+  },
+
+  async refreshLocation({ user_id, location }: TRefreshLocation) {
+    return prisma.user.update({
+      where: { id: user_id },
+      data: { location },
     });
   },
 };
