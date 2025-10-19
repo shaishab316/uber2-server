@@ -12,6 +12,7 @@ import { ChatRoutes } from '../app/modules/chat/Chat.route';
 import { PaymentRoutes } from '../app/modules/payment/Payment.route';
 import { TransactionRoutes } from '../app/modules/transaction/Transaction.route';
 import { injectRoutes } from '../utils/router/injectRouter';
+import { ParcelRoutes } from '../app/modules/parcel/Parcel.route';
 
 const appRouter = Router();
 
@@ -39,6 +40,7 @@ export default injectRoutes(appRouter, {
 
   // User auth
   '/trips': [auth.user, TripRoutes.user],
+  '/parcels': [auth.user, ParcelRoutes.user],
 
   // Driver auth
   '/drivers': [auth.driver, DriverRoutes.driver],

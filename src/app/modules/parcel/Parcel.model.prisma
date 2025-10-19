@@ -1,0 +1,42 @@
+model Parcel {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  slug         String    @unique
+  requested_at DateTime  @default(now())
+  accepted_at  DateTime?
+  started_at   DateTime?
+  delivered_at DateTime?
+  completed_at DateTime?
+  cancelled_at DateTime?
+
+  user_id   String  @db.ObjectId
+  user      User    @relation("UserParcel", fields: [user_id], references: [id])
+  driver_id String? @db.ObjectId
+  driver    User?   @relation("DriverParcel", fields: [driver_id], references: [id])
+
+  pickup_location  TLocation
+  dropoff_location TLocation
+
+  status      EParcelStatus
+  parcel_type EParcelType
+  weight      Float
+  amount      Float
+
+  total_cost Float @default(0.00)
+
+  @@map("parcels")
+}
+
+enum EParcelType {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum EParcelStatus {
+  REQUESTED
+  ACCEPTED
+  STARTED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}

@@ -44,18 +44,20 @@ model User {
   rating_count Int   @default(0)
   //! end
 
-  wallet               Wallet?           @relation("UserWallet")
-  trips_received       Trip[]            @relation("Passenger")
-  trips_given          Trip[]            @relation("Driver")
-  available_drivers    AvailableDriver[]
-  DriverCancelTrips    CancelTrip[]      @relation("DriverCancelTrips")
-  PassengerCancelTrips CancelTrip[]      @relation("PassengerCancelTrips")
-  driver_chat          Chat[]            @relation("DriverChat")
-  user_chat            Chat[]            @relation("UserChat")
-  driver_message       Message[]         @relation("DriverMessage")
-  user_message         Message[]         @relation("UserMessage")
-  Loan                 Loan[]
-  Transaction          Transaction[]
+  wallet                 Wallet?           @relation("UserWallet")
+  user_trips             Trip[]            @relation("Passenger")
+  driver_trips           Trip[]            @relation("Driver")
+  available_drivers      AvailableDriver[]
+  driver_cancel_trips    CancelTrip[]      @relation("DriverCancelTrips")
+  passenger_cancel_trips CancelTrip[]      @relation("PassengerCancelTrips")
+  driver_chats           Chat[]            @relation("DriverChat")
+  user_chats             Chat[]            @relation("UserChat")
+  driver_messages        Message[]         @relation("DriverMessage")
+  user_messages          Message[]         @relation("UserMessage")
+  driver_loans           Loan[]
+  transactions           Transaction[]
+  user_parcels           Parcel[]          @relation("UserParcel")
+  driver_parcels         Parcel[]          @relation("DriverParcel")
 
   @@map("users")
 }
