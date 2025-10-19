@@ -25,6 +25,7 @@ export const TransactionServices = {
     if (user_id) {
       where.user_id = user_id;
       omit.user_id = true;
+      omit.driver_id = true;
     }
 
     if (search) {
@@ -71,7 +72,7 @@ export const TransactionServices = {
           total,
           totalPages: Math.ceil(total / limit),
         } as TPagination,
-        totalExpenseAmount: totalExpenseAmount._sum.amount,
+        totalExpenseAmount: totalExpenseAmount._sum.amount ?? 0,
         availableBalance: wallet?.balance ?? 0,
       },
       transactions,
@@ -85,7 +86,7 @@ export const TransactionServices = {
     search,
   }: TList & { driver_id: string }) {
     const where: Prisma.TransactionWhereInput = { driver_id };
-    const omit: Prisma.TransactionOmit = { driver_id: true };
+    const omit: Prisma.TransactionOmit = { driver_id: true, user_id: true };
 
     if (search) {
       where.OR = searchableFields.map(field => ({

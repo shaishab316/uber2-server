@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import z, { ZodType } from 'zod';
+import type z from 'zod';
 import { TServeResponse } from '../../../utils/server/serveResponse';
 import { StatusCodes } from 'http-status-codes';
 import { formatError } from '../../middlewares/globalErrorHandler';
 import chalk from 'chalk';
 import { errorLogger } from '../../../utils/logger';
 
-export const catchAsyncSocket = <S extends ZodType>(
+export const catchAsyncSocket = <S extends z.ZodType>(
   fn: (data: z.infer<S>) => Promise<Partial<TServeResponse<any>>>,
   validator: S,
 ) => {

@@ -1,4 +1,4 @@
-import z from 'zod';
+import type z from 'zod';
 import { LoanValidations } from './Loan.validation';
 import { TList } from '../query/Query.interface';
 

@@ -1,4 +1,4 @@
-import z from 'zod';
+import type z from 'zod';
 import { stripWebhookEventMap } from './Payment.utils';
 import { PaymentValidations } from './Payment.validation';
 

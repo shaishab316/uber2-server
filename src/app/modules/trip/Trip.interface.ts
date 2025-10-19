@@ -1,4 +1,4 @@
-import z from 'zod';
+import type z from 'zod';
 import { TripValidations } from './Trip.validation';
 import { TList } from '../query/Query.interface';
 
