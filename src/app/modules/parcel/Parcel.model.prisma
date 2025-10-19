@@ -16,7 +16,7 @@ model Parcel {
   pickup_location  TLocation
   dropoff_location TLocation
 
-  status      EParcelStatus
+  status      EParcelStatus @default(REQUESTED)
   parcel_type EParcelType
   weight      Float
   amount      Float
