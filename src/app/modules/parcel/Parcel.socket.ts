@@ -36,6 +36,21 @@ const ParcelSocket: TSocketHandler = async (io, socket) => {
       };
     }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
   );
+
+  socket.on(
+    'cancel_parcel',
+    catchAsyncSocket(async ({ parcel_id }) => {
+      const data = await ParcelServices.cancelParcel({
+        parcel_id,
+        user_id: user.id,
+      });
+
+      return {
+        message: 'Parcel cancelled successfully!',
+        data,
+      };
+    }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
+  );
 };
 
 export default ParcelSocket;
