@@ -1,6 +1,7 @@
 import { prisma } from '../../../utils/db';
+import { TRequestForParcel } from './Parcel.interface';
 
-export default async function generateParcelSlug() {
+export async function generateParcelSlug() {
   const now = new Date();
 
   const year = now.getFullYear().toString().slice(-2); // Last 2 digits
@@ -32,4 +33,12 @@ export default async function generateParcelSlug() {
 
   const sequenceStr = String(sequence).padStart(5, '0');
   return `p-${datePrefix}-${sequenceStr}`;
+}
+
+export async function calculateParcelCost(parcel: TRequestForParcel) {
+  const { weight, amount } = parcel;
+
+  /** TODO: Calculate parcel cost */
+
+  return weight * amount;
 }
