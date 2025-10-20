@@ -22,6 +22,12 @@ model Parcel {
   amount      Float
   total_cost  Float         @default(0.00)
 
+  //! PROCESSING
+  processing_driver_id String?   @db.ObjectId
+  processing_at        DateTime?
+  is_processing        Boolean   @default(false)
+  //! end
+
   helper ParcelHelper? @relation("ParcelHelper")
 
   @@map("parcels")
