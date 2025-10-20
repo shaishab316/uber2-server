@@ -43,10 +43,10 @@ enum EParcelStatus {
 }
 
 model ParcelHelper {
-  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
-  parcel_id             String   @unique @db.ObjectId
-  driver_ids            String[] // include 10 nearest drivers
-  next_driver_search_at DateTime @default(now())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  parcel_id  String   @unique @db.ObjectId
+  driver_ids String[]
+  search_at  DateTime @default(now())
 
   parcel Parcel @relation("ParcelHelper", fields: [parcel_id], references: [id])
 
