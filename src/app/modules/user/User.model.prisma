@@ -48,6 +48,10 @@ model User {
   location TLocation?
   //! end
 
+  //! online status
+  is_online Boolean @default(false)
+  //! end
+
   wallet                 Wallet?           @relation("UserWallet")
   user_trips             Trip[]            @relation("Passenger")
   driver_trips           Trip[]            @relation("Driver")

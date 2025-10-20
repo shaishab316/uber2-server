@@ -1,5 +1,8 @@
 import { TList } from '../query/Query.interface';
-import { userSearchableFields as searchFields } from './User.constant';
+import {
+  userSearchableFields as searchFields,
+  userOmit,
+} from './User.constant';
 import { prisma } from '../../../utils/db';
 import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
@@ -19,11 +22,6 @@ import { otp_send_template } from '../../../templates';
 import { sendEmail } from '../../../utils/sendMail';
 import { hashPassword } from '../auth/Auth.utils';
 import { generateOTP } from '../../../utils/crypto/otp';
-
-export const userOmit: Prisma.UserOmit = {
-  password: true,
-  is_verification_pending: true,
-};
 
 export const UserServices = {
   async userRegister({ password, email, phone }: TUserRegister) {

@@ -2,9 +2,9 @@
 import { Socket } from 'socket.io';
 import { decodeToken } from '../auth/Auth.utils';
 import { prisma } from '../../../utils/db';
-import { userOmit } from '../user/User.service';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
+import { userOmit } from '../user/User.constant';
 
 const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   const token = socket.handshake?.auth?.token; //!Todo: if query auth needed ?? socket.handshake?.query?.token;

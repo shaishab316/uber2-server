@@ -3,7 +3,7 @@ import { prisma } from '../../../utils/db';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { TList } from '../query/Query.interface';
 import { tripOmit } from '../trip/Trip.constant';
-import { userOmit } from '../user/User.service';
+import { userOmit } from '../user/User.constant';
 
 export const CancelTripServices = {
   async cancelTrip({

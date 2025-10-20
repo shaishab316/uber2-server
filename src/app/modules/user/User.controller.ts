@@ -80,12 +80,6 @@ export const UserControllers = {
   }),
 
   profile: catchAsync(({ user }) => {
-    Object.assign(user, {
-      password: undefined,
-      otp: undefined,
-      otp_expires_at: undefined,
-    } as Partial<TUser>);
-
     return {
       message: 'Profile retrieved successfully!',
       data: user,

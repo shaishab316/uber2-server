@@ -5,7 +5,7 @@ import { decodeToken, TToken } from '../modules/auth/Auth.utils';
 import catchAsync from './catchAsync';
 import { prisma } from '../../utils/db';
 import { EUserRole, User as TUser } from '../../../prisma';
-import { userOmit } from '../modules/user/User.service';
+import { userOmit } from '../modules/user/User.constant';
 
 /**
  * Middleware to authenticate and authorize requests based on user roles
