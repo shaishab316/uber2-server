@@ -20,7 +20,7 @@ export const QueryValidations = {
   exists: (_id: string, model: TModels) =>
     z.object({
       params: z.object({
-        [_id]: z.string().refine(exists(model), {
+        [_id]: z.string({ error: `${_id} is required` }).refine(exists(model), {
           error: ({ input }) =>
             `${capitalize(model)} not found with id: ${input}`,
           path: [_id],
