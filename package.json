@@ -16,6 +16,7 @@
     "url": "https://github.com/Alpha-Bytes-Department/uber-server.git"
   },
   "scripts": {
+    "prepare": "simple-git-hooks",
     "new-module": "node ./src/app/modules/.builder.js",
     "build": "tsc",
     "start": "node dist/server.js",
@@ -25,6 +26,7 @@
     "seedIndex": "tsx scripts/seedIndex.ts",
     "lint": "eslint src --ignore-path .gitignore --ext .ts",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
@@ -38,6 +40,11 @@
     "platform"
   ],
   "license": "MIT",
+  "simple-git-hooks": {
+    "pre-commit": [
+      "npm run lint && npm run type-check && npm run prettier"
+    ]
+  },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
@@ -58,6 +65,7 @@
     "prettier-eslint": "^16.3.0",
     "prisma": "^6.13.0",
     "semantic-release": "^24.2.7",
+    "simple-git-hooks": "^2.13.1",
     "tsx": "^4.20.6",
     "typescript": "^5.5.4"
   },
