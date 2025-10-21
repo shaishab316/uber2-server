@@ -21,17 +21,17 @@ model User {
   name          String   @default("Pathao User")
   date_of_birth DateTime @default(now())
   gender        EGender  @default(OTHER)
-  nid_photo     String[]
+  nid_photos    String[]
   //! end
 
   //! driver
-  driving_license            String[]
-  vehicle_type               String?
-  vehicle_brand              String?
-  vehicle_model              String?
-  vehicle_plate_number       String?
-  vehicle_registration_photo String?
-  vehicle_photo              String?
+  driving_license_photos      String[]
+  vehicle_type                String?
+  vehicle_brand               String?
+  vehicle_model               String?
+  vehicle_plate_number        String?
+  vehicle_registration_photos String[]
+  vehicle_photos              String[]
   //! end
 
   //! trip history

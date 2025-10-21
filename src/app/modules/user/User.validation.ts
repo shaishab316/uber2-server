@@ -78,7 +78,7 @@ export const UserValidations = {
         })
         .transform(enum_encode)
         .pipe(z.enum(EGender)),
-      nid_photo: z
+      nid_photos: z
         .array(
           z
             .string({

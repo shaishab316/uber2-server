@@ -176,7 +176,7 @@ export const UserServices = {
     date_of_birth,
     gender,
     name,
-    nid_photo,
+    nid_photos,
     user_id,
   }: TSetupUserProfile) {
     const user = await prisma.user.findUnique({
@@ -185,7 +185,7 @@ export const UserServices = {
 
     // Clean up old files
     if (user?.avatar) await deleteFile(user.avatar);
-    if (user?.nid_photo) await deleteFiles(user.nid_photo);
+    if (user?.nid_photos) await deleteFiles(user.nid_photos);
 
     return prisma.user.update({
       where: { id: user_id },
@@ -194,7 +194,7 @@ export const UserServices = {
         date_of_birth,
         gender,
         name,
-        nid_photo,
+        nid_photos,
 
         is_verification_pending: true,
       },

@@ -61,7 +61,7 @@ const user = Router();
   user.post(
     '/setup-user-profile',
     capture({
-      nid_photo: {
+      nid_photos: {
         size: 5 * 1024 * 1024,
         maxCount: 10,
         fileType: 'images',

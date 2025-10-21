@@ -45,12 +45,12 @@ const driver = injectRoutes(Router(), {
   driver.post(
     '/setup-driver-profile',
     capture({
-      nid_photo: {
+      nid_photos: {
         size: 5 * 1024 * 1024,
         maxCount: 10,
         fileType: 'images',
       },
-      driving_license: {
+      driving_license_photos: {
         size: 5 * 1024 * 1024,
         maxCount: 10,
         fileType: 'images',
@@ -63,6 +63,24 @@ const driver = injectRoutes(Router(), {
     }),
     purifyRequest(DriverValidations.setupDriverProfile),
     DriverControllers.setupDriverProfile,
+  );
+
+  driver.post(
+    '/setup-vehicle',
+    capture({
+      vehicle_registration_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      vehicle_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+    }),
+    purifyRequest(DriverValidations.setupVehicle),
+    DriverControllers.setupVehicle,
   );
 }
 

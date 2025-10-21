@@ -6,7 +6,7 @@ import {
   userOmit,
 } from '../user/User.constant';
 import { TPagination } from '../../../utils/server/serveResponse';
-import { TSetupDriverProfile } from './Driver.interface';
+import { TSetupDriverProfile, TSetupVehicle } from './Driver.interface';
 import { deleteFile, deleteFiles } from '../../middlewares/capture';
 
 export const DriverServices = {
@@ -70,7 +70,7 @@ export const DriverServices = {
 
     // Clean up old files
     if (driver?.avatar) await deleteFile(driver.avatar);
-    if (driver?.nid_photo) await deleteFiles(driver.nid_photo);
+    if (driver?.nid_photos) await deleteFiles(driver.nid_photos);
 
     return prisma.user.update({
       where: { id: driver_id },
@@ -79,6 +79,22 @@ export const DriverServices = {
         ...payload,
         is_verification_pending: true,
       },
+    });
+  },
+
+  async setupVehicle({ driver_id, ...payload }: TSetupVehicle) {
+    const driver = await prisma.user.findUnique({
+      where: { id: driver_id },
+    });
+
+    if (driver?.vehicle_registration_photos)
+      await deleteFiles(driver.vehicle_registration_photos);
+    if (driver?.vehicle_photos) await deleteFiles(driver.vehicle_photos);
+
+    return prisma.user.update({
+      where: { id: driver_id },
+      omit: userOmit,
+      data: payload,
     });
   },
 };

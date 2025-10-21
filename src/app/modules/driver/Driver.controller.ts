@@ -41,4 +41,16 @@ export const DriverControllers = {
       data,
     };
   }),
+
+  setupVehicle: catchAsync(async ({ body, user }) => {
+    const data = await DriverServices.setupVehicle({
+      ...body,
+      driver_id: user.id,
+    });
+
+    return {
+      message: 'Vehicle setup successfully!',
+      data,
+    };
+  }),
 };
