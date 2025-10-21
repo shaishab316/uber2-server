@@ -13,8 +13,8 @@ let io: IOServer | null = null;
 const onlineUsers: OnlineMap = {};
 
 export const SocketServices = {
-  init(server: Server) {
-    if (io) return;
+  init(server: Server): () => void {
+    if (io) return this.cleanup;
 
     io = new IOServer(server, {
       cors: { origin: config.server.allowed_origins },
@@ -24,9 +24,6 @@ export const SocketServices = {
 
     // Disable default namespace
     io.of('/').on('connection', socket => socket.disconnect(true));
-
-    // Attach cleanup on server close
-    server.on('close', this.cleanup);
 
     // Initialize each namespace
     SocketRoutes.forEach((handler, namespace) => {
@@ -71,6 +68,8 @@ export const SocketServices = {
         }
       });
     });
+
+    return this.cleanup;
   },
 
   markOnline(namespace: string, userId: string) {

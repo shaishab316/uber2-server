@@ -17,7 +17,8 @@ import { socketResponse } from '../socket/Socket.utils';
  *
  * @param server - HTTP server instance for Socket.IO integration
  */
-export function ParcelJob(server: Server): void {
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+export function ParcelJob(server: Server): () => void {
   const parcelDispatchJob = cron.schedule('*/5 * * * * *', async () => {
     /**
      * STEP 1: Find eligible parcel helpers for processing
@@ -43,8 +44,7 @@ export function ParcelJob(server: Server): void {
     await Promise.all(eligibleHelpers.map(processSingleDriverDispatch));
   });
 
-  // Cleanup job when server shuts down
-  server.on('close', parcelDispatchJob.destroy);
+  return parcelDispatchJob.stop;
 }
 
 /**
