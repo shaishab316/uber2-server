@@ -9,6 +9,7 @@ export const UserValidations = {
     body: z.object({
       email: z.email({ error: 'Email is invalid' }).optional(),
       phone: z.string().optional(),
+      role: z.enum(EUserRole).optional(),
       password: z
         .string({ error: 'Password is missing' })
         .min(6, 'Password must be at least 6 characters long'),

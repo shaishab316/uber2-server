@@ -4,7 +4,7 @@ import {
   userOmit,
 } from './User.constant';
 import { prisma } from '../../../utils/db';
-import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
+import { Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { deleteFile } from '../../middlewares/capture';
 import {
@@ -24,7 +24,7 @@ import { hashPassword } from '../auth/Auth.utils';
 import { generateOTP } from '../../../utils/crypto/otp';
 
 export const UserServices = {
-  async userRegister({ password, email, phone }: TUserRegister) {
+  async userRegister({ password, email, phone, role }: TUserRegister) {
     AuthServices.validEmailORPhone({ email, phone });
 
     //! check if user already exists
@@ -44,7 +44,7 @@ export const UserServices = {
         email,
         phone,
         password: await hashPassword(password),
-        role: EUserRole.USER,
+        role,
         wallet: { create: {} },
       },
       omit: userOmit,

@@ -79,7 +79,8 @@ export const UserControllers = {
     };
   }),
 
-  profile: catchAsync(({ user }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  profile: catchAsync(({ user: { password: _, ...user } }) => {
     return {
       message: 'Profile retrieved successfully!',
       data: user,
