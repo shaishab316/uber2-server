@@ -2,7 +2,25 @@ import { z } from 'zod';
 import { EGender, EUserRole } from '../../../../prisma';
 import { enum_encode } from '../../../utils/transform/enum';
 import { date } from '../../../utils/transform/date';
-import { locationSchema } from '../trip/Trip.validation';
+
+export const locationSchema = z.object({
+  geo: z.tuple([
+    z.coerce
+      .number()
+      .refine(
+        long => long >= -180 && long <= 180,
+        'Longitude must be between -180 and 180',
+      ),
+    z.coerce
+      .number()
+      .refine(
+        lat => lat >= -90 && lat <= 90,
+        'Latitude must be between -90 and 90',
+      ),
+  ]),
+  address: z.coerce.string(),
+  type: z.literal('Point').default('Point'),
+});
 
 export const UserValidations = {
   register: z.object({

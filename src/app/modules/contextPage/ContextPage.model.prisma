@@ -1,7 +1,0 @@
-model ContextPage {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  pageName String @unique
-  content  String
-
-  @@map("contextPages")
-}

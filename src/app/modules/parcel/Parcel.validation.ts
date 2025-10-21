@@ -1,6 +1,6 @@
 import z from 'zod';
 import { EParcelType } from '../../../../prisma';
-import { locationSchema } from '../trip/Trip.validation';
+import { locationSchema } from '../user/User.validation';
 
 export const ParcelValidations = {
   requestForParcel: z.object({

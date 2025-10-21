@@ -52,20 +52,10 @@ model User {
   is_online Boolean @default(false)
   //! end
 
-  wallet                 Wallet?           @relation("UserWallet")
-  user_trips             Trip[]            @relation("Passenger")
-  driver_trips           Trip[]            @relation("Driver")
-  available_drivers      AvailableDriver[]
-  driver_cancel_trips    CancelTrip[]      @relation("DriverCancelTrips")
-  passenger_cancel_trips CancelTrip[]      @relation("PassengerCancelTrips")
-  driver_chats           Chat[]            @relation("DriverChat")
-  user_chats             Chat[]            @relation("UserChat")
-  driver_messages        Message[]         @relation("DriverMessage")
-  user_messages          Message[]         @relation("UserMessage")
-  driver_loans           Loan[]
-  transactions           Transaction[]
-  user_parcels           Parcel[]          @relation("UserParcel")
-  driver_parcels         Parcel[]          @relation("DriverParcel")
+  wallet         Wallet?       @relation("UserWallet")
+  transactions   Transaction[]
+  user_parcels   Parcel[]      @relation("UserParcel")
+  driver_parcels Parcel[]      @relation("DriverParcel")
 
   @@map("users")
 }
