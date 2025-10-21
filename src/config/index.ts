@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 import './configure';
-import env from '../utils/env/env';
+import env from '../utils/env';
 import type ms from 'ms';
 import { genSecret } from '../utils/crypto/genSecret';
 import path from 'path';
@@ -162,7 +162,6 @@ const config = {
     stripe: {
       secret_key: env('stripe secret key', `sk_test_${genSecret(24)}`, {
         regex: `^sk_${isDevelopment ? 'test' : 'live'}_[0-9a-zA-Z]{24,}$`,
-        up: '\n',
       }),
       web_hook_secret: process.env.STRIPE_WEB_HOOK_SECRET ?? '',
       webhook_endpoint: env(

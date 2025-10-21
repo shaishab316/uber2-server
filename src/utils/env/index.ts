@@ -98,14 +98,14 @@ ${new Error().stack?.split('\n')[2] ?? 'unknown'}
   }
 
   if (typeof defaultValue === 'boolean')
-    return (value!.toLowerCase() === 'true') as T;
+    return (value?.toString().toLowerCase() === 'true') as T;
 
   if (typeof defaultValue === 'number') {
     return Number(value) as T;
   }
 
   if (Array.isArray(defaultValue))
-    return value!.split(',').map((item: string) => item.trim()) as T;
+    return (value?.split(',').map((item: string) => item.trim()) ?? []) as T;
 
   return (value ?? defaultValue) as T;
 }
