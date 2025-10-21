@@ -8,6 +8,8 @@ import { LoanRoutes } from '../loan/Loan.route';
 import { injectRoutes } from '../../../utils/router/injectRouter';
 import { TransactionRoutes } from '../transaction/Transaction.route';
 import { ParcelRoutes } from '../parcel/Parcel.route';
+import capture from '../../middlewares/capture';
+import { DriverValidations } from './Driver.validation';
 
 const admin = injectRoutes(Router(), {
   '/loans': [LoanRoutes.admin],
@@ -39,5 +41,29 @@ const driver = injectRoutes(Router(), {
   '/loans': [LoanRoutes.driver],
   '/transactions': [TransactionRoutes.driver],
 });
+{
+  driver.post(
+    '/setup-driver-profile',
+    capture({
+      nid_photo: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      driving_license: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      avatar: {
+        size: 5 * 1024 * 1024,
+        maxCount: 1,
+        fileType: 'images',
+      },
+    }),
+    purifyRequest(DriverValidations.setupDriverProfile),
+    DriverControllers.setupDriverProfile,
+  );
+}
 
 export const DriverRoutes = { admin, driver };

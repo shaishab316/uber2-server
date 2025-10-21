@@ -1,7 +1,7 @@
 model Wallet {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
   user_id      String @unique @db.ObjectId
-  balance      Float  @default(0)
+  balance      Float  @default(100000)
   total_expend Float  @default(0)
   total_income Float  @default(0)
 

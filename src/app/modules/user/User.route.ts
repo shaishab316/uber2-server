@@ -63,7 +63,7 @@ const user = Router();
     capture({
       nid_photo: {
         size: 5 * 1024 * 1024,
-        maxCount: 2,
+        maxCount: 10,
         fileType: 'images',
       },
       avatar: {

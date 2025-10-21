@@ -29,4 +29,16 @@ export const DriverControllers = {
       data,
     };
   }),
+
+  setupDriverProfile: catchAsync(async ({ body, user }) => {
+    const data = await DriverServices.setupDriverProfile({
+      ...body,
+      driver_id: user.id,
+    });
+
+    return {
+      message: 'Driver Profile setup successfully!',
+      data,
+    };
+  }),
 };

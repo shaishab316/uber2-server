@@ -6,7 +6,7 @@ import {
 import { prisma } from '../../../utils/db';
 import { Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
-import { deleteFile } from '../../middlewares/capture';
+import { deleteFile, deleteFiles } from '../../middlewares/capture';
 import {
   TSetupUserProfile,
   TRefreshLocation,
@@ -185,7 +185,7 @@ export const UserServices = {
 
     // Clean up old files
     if (user?.avatar) await deleteFile(user.avatar);
-    if (user?.nid_photo) await Promise.all(user.nid_photo.map(deleteFile));
+    if (user?.nid_photo) await deleteFiles(user.nid_photo);
 
     return prisma.user.update({
       where: { id: user_id },

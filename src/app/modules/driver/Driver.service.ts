@@ -6,6 +6,8 @@ import {
   userOmit,
 } from '../user/User.constant';
 import { TPagination } from '../../../utils/server/serveResponse';
+import { TSetupDriverProfile } from './Driver.interface';
+import { deleteFile, deleteFiles } from '../../middlewares/capture';
 
 export const DriverServices = {
   async superGetPendingDriver({ page, limit, search }: TList) {
@@ -57,6 +59,25 @@ export const DriverServices = {
       omit: userOmit,
       data: {
         role: EUserRole.USER,
+      },
+    });
+  },
+
+  async setupDriverProfile({ driver_id, ...payload }: TSetupDriverProfile) {
+    const driver = await prisma.user.findUnique({
+      where: { id: driver_id },
+    });
+
+    // Clean up old files
+    if (driver?.avatar) await deleteFile(driver.avatar);
+    if (driver?.nid_photo) await deleteFiles(driver.nid_photo);
+
+    return prisma.user.update({
+      where: { id: driver_id },
+      omit: userOmit,
+      data: {
+        ...payload,
+        is_verification_pending: true,
       },
     });
   },
