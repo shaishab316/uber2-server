@@ -4,7 +4,7 @@ import { ParcelValidations } from '../Parcel.validation';
 import { QueryValidations } from '../../query/Query.validation';
 import { TSocketHandler } from '../../socket/Socket.interface';
 
-export const UserSocket: TSocketHandler = (io, socket) => {
+export const UserSocket: TSocketHandler = ({ socket }) => {
   const { user } = socket.data;
 
   socket.on(

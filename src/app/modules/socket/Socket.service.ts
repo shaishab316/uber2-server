@@ -62,7 +62,7 @@ export const SocketServices = {
 
         // Call module-specific handler
         try {
-          handler(nsp, socket);
+          handler({ io: nsp, socket });
         } catch (err) {
           logger.error(`Namespace "${namespace}" handler error:`, err);
         }

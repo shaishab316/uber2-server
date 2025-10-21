@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // import { StatusCodes } from 'http-status-codes';
 // import { ETripStatus } from '../../../../prisma';
 // import ServerError from '../../../errors/ServerError';

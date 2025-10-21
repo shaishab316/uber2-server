@@ -8,7 +8,7 @@ import { MessageServices } from '../message/Message.service';
 import { ChatValidations } from './Chat.validation';
 import { catchAsyncSocket, socketResponse } from '../socket/Socket.utils';
 
-const ChatSocket: TSocketHandler = (io, socket) => {
+const ChatSocket: TSocketHandler = ({ io, socket }) => {
   const { user } = socket.data;
   const isUser = user.role === EUserRole.USER;
 

@@ -3,7 +3,7 @@ import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { TSocketHandler } from '../../socket/Socket.interface';
 
-export const DriverSocket: TSocketHandler = (io, socket) => {
+export const DriverSocket: TSocketHandler = ({ socket }) => {
   const driver = socket.data.user;
 
   socket.on(

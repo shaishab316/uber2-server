@@ -12,7 +12,7 @@ import { AvailableDriverServices } from '../availableDriver/AvailableDriver.serv
 import getDistanceAndTime from '../../../utils/location/getDistanceAndTime';
 import { calculateFare } from '../../../utils/uber/calculateFare';
 
-const TripSocket: TSocketHandler = async (io, socket) => {
+const TripSocket: TSocketHandler = async ({ io, socket }) => {
   const { user } = socket.data;
 
   //! Launch started trip quickly
