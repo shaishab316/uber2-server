@@ -218,6 +218,7 @@ export const AuthServices = {
       where: { id: user.id },
       data: {
         is_verified: true,
+        is_active: true, //TODO: account activation
       },
       omit: userOmit,
     });

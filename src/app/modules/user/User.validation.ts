@@ -79,9 +79,13 @@ export const UserValidations = {
         .transform(enum_encode)
         .pipe(z.enum(EGender)),
       nid_photo: z
-        .string({
-          error: 'NID or Passport is required',
-        })
+        .array(
+          z
+            .string({
+              error: 'NID or Passport is required',
+            })
+            .nonempty('NID or Passport is required'),
+        )
         .nonempty('NID or Passport is required'),
     }),
   }),

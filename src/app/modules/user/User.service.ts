@@ -185,7 +185,7 @@ export const UserServices = {
 
     // Clean up old files
     if (user?.avatar) await deleteFile(user.avatar);
-    if (user?.nid_photo) await deleteFile(user.nid_photo);
+    if (user?.nid_photo) await Promise.all(user.nid_photo.map(deleteFile));
 
     return prisma.user.update({
       where: { id: user_id },
