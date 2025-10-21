@@ -1,15 +1,18 @@
 version: "3.8"
+
 services:
   postgres:
-    image: postgres:latest
-    container_name: postgres-db-pathao
+    image: postgis/postgis:15-3.4
+    container_name: postgres-pathao-new
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: pathao
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pathao_postgres_new:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
-  postgres_data:
+  pathao_postgres_new:

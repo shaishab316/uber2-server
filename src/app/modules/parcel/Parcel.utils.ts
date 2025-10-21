@@ -1,5 +1,3 @@
-import { EUserRole, Prisma, TLocation } from '../../../../prisma';
-import config from '../../../config';
 import { prisma } from '../../../utils/db';
 import { TRequestForParcel } from './Parcel.interface';
 
@@ -45,34 +43,34 @@ export async function calculateParcelCost(parcel: TRequestForParcel) {
   return weight * amount;
 }
 
-export async function getNearestDriver(location: TLocation) {
-  const pipeline: any = [
-    {
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: location.geo,
-        },
-        distanceField: 'distance',
-        spherical: true,
-        maxDistance: config.uber.max_distance,
-        query: {
-          is_online: true,
-          role: EUserRole.DRIVER,
-        } as Prisma.UserWhereInput,
-      },
-    },
-    { $limit: 20 },
-    {
-      $project: {
-        driver_id: 1,
-      },
-    },
-  ];
+// export async function getNearestDriver(location: TLocation) {
+//   const pipeline: any = [
+//     {
+//       $geoNear: {
+//         near: {
+//           type: 'Point',
+//           coordinates: location.geo,
+//         },
+//         distanceField: 'distance',
+//         spherical: true,
+//         maxDistance: config.uber.max_distance,
+//         query: {
+//           is_online: true,
+//           role: EUserRole.DRIVER,
+//         } as Prisma.UserWhereInput,
+//       },
+//     },
+//     { $limit: 20 },
+//     {
+//       $project: {
+//         driver_id: 1,
+//       },
+//     },
+//   ];
 
-  return (
-    (await prisma.user.aggregateRaw({
-      pipeline,
-    })) as unknown as { _id: { $oid: string } }[]
-  ).map(({ _id: { $oid } }) => $oid);
-}
+//   return (
+//     (await prisma.user.aggregateRaw({
+//       pipeline,
+//     })) as unknown as { _id: { $oid: string } }[]
+//   ).map(({ _id: { $oid } }) => $oid);
+// }

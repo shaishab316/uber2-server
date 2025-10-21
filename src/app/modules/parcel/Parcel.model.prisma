@@ -1,5 +1,5 @@
 model Parcel {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(uuid())
   slug         String    @unique
   requested_at DateTime  @default(now())
   accepted_at  DateTime?
@@ -8,13 +8,22 @@ model Parcel {
   completed_at DateTime?
   cancelled_at DateTime?
 
-  user_id   String  @db.ObjectId
+  user_id   String
   user      User    @relation("UserParcel", fields: [user_id], references: [id])
-  driver_id String? @db.ObjectId
+  driver_id String?
   driver    User?   @relation("DriverParcel", fields: [driver_id], references: [id])
 
-  pickup_location  TLocation
-  dropoff_location TLocation
+  // Pickup location fields
+  pickup_type    String  @default("Point")
+  pickup_lat     Float
+  pickup_lng     Float
+  pickup_address String?
+
+  // Dropoff location fields
+  dropoff_type    String  @default("Point")
+  dropoff_lat     Float
+  dropoff_lng     Float
+  dropoff_address String?
 
   status      EParcelStatus @default(REQUESTED)
   parcel_type EParcelType
@@ -23,13 +32,15 @@ model Parcel {
   total_cost  Float         @default(0.00)
 
   //! PROCESSING
-  processing_driver_id String?   @db.ObjectId
+  processing_driver_id String?
   processing_at        DateTime?
   is_processing        Boolean   @default(false)
   //! end
 
   helper ParcelHelper? @relation("ParcelHelper")
 
+  @@index([pickup_lat, pickup_lng])
+  @@index([dropoff_lat, dropoff_lng])
   @@map("parcels")
 }
 
@@ -49,8 +60,8 @@ enum EParcelStatus {
 }
 
 model ParcelHelper {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  parcel_id  String   @unique @db.ObjectId
+  id         String   @id @default(uuid())
+  parcel_id  String   @unique
   driver_ids String[]
   search_at  DateTime @default(now())
 

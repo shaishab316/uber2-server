@@ -114,16 +114,4 @@ export const UserControllers = {
       data,
     };
   }),
-
-  refreshLocation: catchAsync(async ({ body, user }) => {
-    const data = await UserServices.refreshLocation({
-      ...body,
-      user_id: user.id,
-    });
-
-    return {
-      message: 'Location updated successfully!',
-      data: data.location,
-    };
-  }),
 };

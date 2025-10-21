@@ -9,6 +9,7 @@ import { PaymentRoutes } from '../app/modules/payment/Payment.route';
 import { TransactionRoutes } from '../app/modules/transaction/Transaction.route';
 import { injectRoutes } from '../utils/router/injectRouter';
 import { ParcelRoutes } from '../app/modules/parcel/Parcel.route';
+import { DriverRoutes } from '../app/modules/driver/Driver.route';
 
 const appRouter = Router();
 
@@ -33,6 +34,9 @@ export default injectRoutes(appRouter, {
 
   // User auth
   '/parcels': [auth.user, ParcelRoutes.user],
+
+  // Driver auth
+  '/drivers': [auth.driver, DriverRoutes.driver],
 
   // Admin auth
   '/admin': [auth.admin, AdminRoutes],

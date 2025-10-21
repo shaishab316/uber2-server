@@ -76,9 +76,9 @@ const config = {
   },
 
   url: {
-    database: env('database url', `mongodb://127.0.0.1:27017/${db_name}`, {
+    database: env('database url', ``, {
       up: 'Database info - start',
-      regex: '^mongodb(\\+srv)?://.*$',
+      regex: '^.+$',
     }),
     ui: env('ui url', `http://localhost:${port}`, {
       regex: '^https?:\\/\\/.*$|^$',

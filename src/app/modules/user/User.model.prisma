@@ -1,5 +1,5 @@
 model User {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(uuid())
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -45,7 +45,10 @@ model User {
   //! end
 
   //! location
-  location TLocation?
+  location_type    String? @default("Point")
+  location_lat     Float?
+  location_lng     Float?
+  location_address String?
   //! end
 
   //! online status
@@ -57,18 +60,13 @@ model User {
   user_parcels   Parcel[]      @relation("UserParcel")
   driver_parcels Parcel[]      @relation("DriverParcel")
 
+  @@index([location_lat, location_lng])
   @@map("users")
 }
 
 enum EUserRole {
   USER
   DRIVER
-}
-
-type TLocation {
-  type    String  @default("Point")
-  geo     Float[]
-  address String?
 }
 
 enum EGender {

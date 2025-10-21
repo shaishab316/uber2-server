@@ -29,9 +29,9 @@
     "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:studio": "npx prisma studio",
-    "prisma:generate": "npx prisma generate",
-    "prisma:push": "npx prisma db push",
-    "prisma:cleanup": "rm -rf ./prisma"
+    "prisma:reset": "npx prisma migrate reset --force",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:seed": "npx prisma db seed"
   },
   "keywords": [
     "uber",

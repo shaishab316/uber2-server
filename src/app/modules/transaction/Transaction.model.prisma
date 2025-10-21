@@ -1,10 +1,10 @@
 model Transaction {
-  id                    String           @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String           @id @default(uuid())
   created_at            DateTime         @default(now())
   updated_at            DateTime         @updatedAt
   stripe_transaction_id String?
-  user_id               String           @db.ObjectId
-  driver_id             String?          @db.ObjectId
+  user_id               String
+  driver_id             String?
   amount                Float
   type                  ETransactionType @default(TOPUP)
   payment_method        String           @default("unknown")
