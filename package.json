@@ -18,7 +18,7 @@
   "scripts": {
     "prepare": "simple-git-hooks",
     "new-module": "node ./src/app/modules/.builder.js",
-    "build": "tsc",
+    "build": "node esbuild.js",
     "start": "node dist/server.js",
     "dev": "set DEBUG=socket.io* && tsx --watch src/server.ts",
     "stripe": "tsx scripts/stripe.ts",
@@ -58,6 +58,7 @@
     "@types/nodemailer": "^6.4.16",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
+    "esbuild": "^0.25.11",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "inquirer": "^7.3.3",
