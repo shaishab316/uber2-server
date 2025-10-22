@@ -60,10 +60,6 @@ export function ParcelJob(server: Server): () => void {
  */
 async function processSingleDriverDispatch(parcelHelper: any): Promise<void> {
   try {
-    console.log(
-      `Processing driver dispatch for parcel: ${parcelHelper.parcel_id}`,
-    );
-
     /**
      * STEP 1: Extract next driver from the queue (FIFO)
      */
@@ -138,7 +134,7 @@ async function processSingleDriverDispatch(parcelHelper: any): Promise<void> {
  * @param processingParcel - The parcel data to send to the driver
  */
 function sendDriverDispatchNotification(processingParcel: TParcel): void {
-  SocketServices.getIO('/parcel')!
+  SocketServices.getIO('/driver')!
     .to(processingParcel.processing_driver_id!)
     .emit(
       'parcel_request',
