@@ -6,7 +6,12 @@ import {
   userOmit,
 } from '../user/User.constant';
 import { TPagination } from '../../../utils/server/serveResponse';
-import { TSetupDriverProfile, TSetupVehicle } from './Driver.interface';
+import {
+  TRefreshLocation,
+  TSetupDriverProfile,
+  TSetupVehicle,
+  TToggleOnline,
+} from './Driver.interface';
 import { deleteFile, deleteFiles } from '../../middlewares/capture';
 
 export const DriverServices = {
@@ -98,17 +103,18 @@ export const DriverServices = {
     });
   },
 
-  async toggleOnline({
-    online,
-    driver_id,
-  }: {
-    online: boolean;
-    driver_id: string;
-  }) {
+  async toggleOnline({ online, driver_id }: TToggleOnline) {
     return prisma.user.update({
       where: { id: driver_id },
       data: { is_online: online },
       select: { is_online: true },
+    });
+  },
+
+  async refreshLocation({ driver_id, ...payload }: TRefreshLocation) {
+    return prisma.user.update({
+      where: { id: driver_id },
+      data: payload,
     });
   },
 };

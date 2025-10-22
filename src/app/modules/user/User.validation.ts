@@ -3,25 +3,6 @@ import { EGender, EUserRole } from '../../../../prisma';
 import { enum_encode } from '../../../utils/transform/enum';
 import { date } from '../../../utils/transform/date';
 
-export const locationSchema = z.object({
-  geo: z.tuple([
-    z.coerce
-      .number()
-      .refine(
-        long => long >= -180 && long <= 180,
-        'Longitude must be between -180 and 180',
-      ),
-    z.coerce
-      .number()
-      .refine(
-        lat => lat >= -90 && lat <= 90,
-        'Latitude must be between -90 and 90',
-      ),
-  ]),
-  address: z.coerce.string(),
-  type: z.literal('Point').default('Point'),
-});
-
 export const UserValidations = {
   register: z.object({
     body: z.object({
@@ -105,12 +86,6 @@ export const UserValidations = {
             .nonempty('NID or Passport is required'),
         )
         .nonempty('NID or Passport is required'),
-    }),
-  }),
-
-  refreshLocation: z.object({
-    body: z.object({
-      location: locationSchema,
     }),
   }),
 };

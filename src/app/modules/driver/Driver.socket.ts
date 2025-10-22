@@ -20,4 +20,19 @@ export const DriverSocket: TSocketHandler = ({ socket }) => {
       };
     }, DriverValidations.toggleOnline),
   );
+
+  socket.on(
+    'refresh_location',
+    catchAsyncSocket(async payload => {
+      await DriverServices.refreshLocation({
+        ...payload,
+        driver_id: driver.id,
+      });
+
+      return {
+        message: 'Location updated successfully!',
+        data: payload,
+      };
+    }, DriverValidations.refreshLocation),
+  );
 };

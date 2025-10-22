@@ -31,6 +31,7 @@
     "prisma:studio": "npx prisma studio",
     "prisma:reset": "npx prisma migrate reset --force",
     "prisma:migrate": "npx prisma migrate dev",
+    "prisma:generate": "rm -rf prisma && npx prisma generate",
     "prisma:seed": "npx prisma db seed"
   },
   "keywords": [
