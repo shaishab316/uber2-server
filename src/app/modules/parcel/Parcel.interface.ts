@@ -9,3 +9,7 @@ export type TGetNearestDriver = {
   pickup_lat: number;
   pickup_lng: number;
 };
+
+export type TParcelRefreshLocation = z.infer<
+  typeof ParcelValidations.refreshLocation
+>;

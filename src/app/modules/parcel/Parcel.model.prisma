@@ -25,6 +25,12 @@ model Parcel {
   dropoff_lng     Float
   dropoff_address String?
 
+  // Parcel location fields
+  location_type    String? @default("Point")
+  location_lat     Float?
+  location_lng     Float?
+  location_address String?
+
   status      EParcelStatus @default(REQUESTED)
   parcel_type EParcelType
   weight      Float

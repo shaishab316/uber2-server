@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { EParcelStatus } from '../../../../prisma';
 import ServerError from '../../../errors/ServerError';
 import { prisma } from '../../../utils/db';
-import { TRequestForParcel } from './Parcel.interface';
+import { TParcelRefreshLocation, TRequestForParcel } from './Parcel.interface';
 import {
   calculateParcelCost,
   generateParcelSlug,
@@ -137,6 +137,13 @@ export const ParcelServices = {
       orderBy: {
         accepted_at: 'desc',
       },
+    });
+  },
+
+  async refreshLocation({ parcel_id, ...payload }: TParcelRefreshLocation) {
+    return prisma.parcel.update({
+      where: { id: parcel_id },
+      data: payload,
     });
   },
 };
