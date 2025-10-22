@@ -10,6 +10,7 @@ import {
 } from './Parcel.utils';
 
 export const ParcelServices = {
+  //! Socket
   async requestForParcel(payload: TRequestForParcel) {
     const driver_ids = await getNearestDriver(payload);
 
@@ -90,6 +91,52 @@ export const ParcelServices = {
     return prisma.parcel.update({
       where: { id: parcel_id },
       data: { status: EParcelStatus.CANCELLED, cancelled_at: new Date() },
+    });
+  },
+
+  async getProcessingDriverParcel({ driver_id }: { driver_id: string }) {
+    return prisma.parcel.findFirst({
+      where: { processing_driver_id: driver_id },
+      orderBy: { processing_at: 'desc' },
+    });
+  },
+
+  async getLastUserParcel({ user_id }: { user_id: string }) {
+    return prisma.parcel.findFirst({
+      where: {
+        user_id,
+        status: {
+          notIn: [EParcelStatus.COMPLETED, EParcelStatus.CANCELLED],
+        },
+      },
+      include: {
+        driver: {
+          select: {
+            name: true,
+            avatar: true,
+            location_lat: true,
+            location_lng: true,
+            location_address: true,
+          },
+        },
+      },
+      orderBy: {
+        requested_at: 'desc',
+      },
+    });
+  },
+
+  async getLastDriverParcel({ driver_id }: { driver_id: string }) {
+    return prisma.parcel.findFirst({
+      where: {
+        driver_id,
+        status: {
+          notIn: [EParcelStatus.COMPLETED, EParcelStatus.CANCELLED],
+        },
+      },
+      orderBy: {
+        accepted_at: 'desc',
+      },
     });
   },
 };

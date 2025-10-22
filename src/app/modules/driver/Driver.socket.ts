@@ -1,10 +1,25 @@
+import { ParcelServices } from '../parcel/Parcel.service';
 import { TSocketHandler } from '../socket/Socket.interface';
-import { catchAsyncSocket } from '../socket/Socket.utils';
+import { catchAsyncSocket, socketResponse } from '../socket/Socket.utils';
 import { DriverServices } from './Driver.service';
 import { DriverValidations } from './Driver.validation';
 
-export const DriverSocket: TSocketHandler = ({ socket }) => {
+export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
+
+  const processingParcel = await ParcelServices.getProcessingDriverParcel({
+    driver_id: driver.id,
+  });
+
+  if (processingParcel) {
+    socket.emit(
+      'parcel_request',
+      socketResponse({
+        message: 'New parcel request',
+        data: processingParcel,
+      }),
+    );
+  }
 
   socket.on(
     'toggle_online',

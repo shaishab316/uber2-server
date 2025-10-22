@@ -3,8 +3,23 @@ import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { TSocketHandler } from '../../socket/Socket.interface';
 
-export const DriverSocket: TSocketHandler = ({ socket, io }) => {
+export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   const driver = socket.data.user;
+
+  //! Recover driver last parcel
+  const lastParcel = await ParcelServices.getLastDriverParcel({
+    driver_id: driver.id,
+  });
+
+  if (lastParcel) {
+    socket.emit(
+      'recover_parcel',
+      socketResponse({
+        message: `${lastParcel.status} recover parcel`,
+        data: lastParcel,
+      }),
+    );
+  }
 
   socket.on(
     'accept_parcel',

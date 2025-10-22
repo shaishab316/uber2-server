@@ -1,11 +1,26 @@
-import { catchAsyncSocket } from '../../socket/Socket.utils';
+import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { ParcelValidations } from '../Parcel.validation';
 import { QueryValidations } from '../../query/Query.validation';
 import { TSocketHandler } from '../../socket/Socket.interface';
 
-export const UserSocket: TSocketHandler = ({ socket }) => {
+export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
+
+  //! Recover user last parcel
+  const lastParcel = await ParcelServices.getLastUserParcel({
+    user_id: user.id,
+  });
+
+  if (lastParcel) {
+    socket.emit(
+      'recover_parcel',
+      socketResponse({
+        message: `${lastParcel.status} recover parcel`,
+        data: lastParcel,
+      }),
+    );
+  }
 
   socket.on(
     'request_for_parcel',
