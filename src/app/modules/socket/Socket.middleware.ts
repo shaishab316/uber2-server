@@ -7,7 +7,8 @@ import { StatusCodes } from 'http-status-codes';
 import { userOmit } from '../user/User.constant';
 
 const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
-  const token = socket.handshake?.auth?.token; //!Todo: if query auth needed ?? socket.handshake?.query?.token;
+  const token =
+    socket.handshake?.auth?.token ?? socket.handshake?.headers?.authorization;
 
   try {
     const { uid } = decodeToken(token, 'access_token');

@@ -89,4 +89,9 @@ export const DriverValidations = {
         .nonempty('Vehicle photo is required'),
     }),
   }),
+
+  //! socket
+  toggleOnline: z.object({
+    online: z.boolean({ error: 'Online status is required' }),
+  }),
 };

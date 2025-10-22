@@ -97,4 +97,18 @@ export const DriverServices = {
       data: payload,
     });
   },
+
+  async toggleOnline({
+    online,
+    driver_id,
+  }: {
+    online: boolean;
+    driver_id: string;
+  }) {
+    return prisma.user.update({
+      where: { id: driver_id },
+      data: { is_online: online },
+      select: { is_online: true },
+    });
+  },
 };

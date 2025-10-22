@@ -11,15 +11,14 @@ export const catchAsyncSocket = <S extends z.ZodType>(
   validator: S,
 ) => {
   return async (
-    payload: string,
+    payload: JSON | string,
     ack?: (response: any) => void,
   ): Promise<void> => {
     const response: any = { success: false };
-    payload = payload.trim();
+
     try {
-      const parsed = await validator.parseAsync(
-        payload ? JSON.parse(payload) : {},
-      );
+      if (typeof payload === 'string') payload = JSON.parse(payload.trim());
+      const parsed = await validator.parseAsync(payload);
 
       Object.assign(response, {
         success: true,
@@ -31,7 +30,7 @@ export const catchAsyncSocket = <S extends z.ZodType>(
       Object.assign(response, formatError(error));
       errorLogger.error(chalk.red(response.message));
     } finally {
-      ack?.(JSON.stringify(response));
+      ack?.(response);
     }
   };
 };
