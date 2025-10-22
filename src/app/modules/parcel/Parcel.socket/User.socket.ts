@@ -19,7 +19,7 @@ export const UserSocket: TSocketHandler = ({ socket }) => {
         message: 'Parcel requested successfully!',
         data,
       };
-    }, ParcelValidations.requestForParcel.shape.body),
+    }, ParcelValidations.requestForParcel),
   );
 
   socket.on(

@@ -3,24 +3,28 @@ import { EParcelStatus } from '../../../../prisma';
 import ServerError from '../../../errors/ServerError';
 import { prisma } from '../../../utils/db';
 import { TRequestForParcel } from './Parcel.interface';
+import {
+  calculateParcelCost,
+  generateParcelSlug,
+  getNearestDriver,
+} from './Parcel.utils';
 
 export const ParcelServices = {
   async requestForParcel(payload: TRequestForParcel) {
-    void payload;
-    // const driver_ids = await getNearestDriver(payload.pickup_location);
+    const driver_ids = await getNearestDriver(payload);
 
-    // return prisma.parcel.create({
-    //   data: {
-    //     ...payload,
-    //     slug: await generateParcelSlug(),
-    //     total_cost: await calculateParcelCost(payload),
-    //     helper: {
-    //       create: {
-    //         driver_ids,
-    //       },
-    //     },
-    //   },
-    // });
+    return prisma.parcel.create({
+      data: {
+        ...payload,
+        slug: await generateParcelSlug(),
+        total_cost: await calculateParcelCost(payload),
+        helper: {
+          create: {
+            driver_ids,
+          },
+        },
+      },
+    });
   },
 
   async acceptParcel({

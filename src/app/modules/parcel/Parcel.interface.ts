@@ -3,4 +3,9 @@ import { ParcelValidations } from './Parcel.validation';
 
 export type TRequestForParcel = z.infer<
   typeof ParcelValidations.requestForParcel
->['body'] & { user_id: string };
+> & { user_id: string };
+
+export type TGetNearestDriver = {
+  pickup_lat: number;
+  pickup_lng: number;
+};
