@@ -6,6 +6,7 @@ model Review {
   rating      Float    @default(5.0)
   comment     String   @default("")
   reviewed_at DateTime @default(now())
+  last_edited DateTime @updatedAt
   is_deleted  Boolean  @default(false)
 
   ref_parcel_id String?
