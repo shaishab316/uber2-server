@@ -1,0 +1,19 @@
+model Review {
+  id          String @id @default(uuid())
+  reviewer_id String
+  user_id     String
+
+  rating      Float    @default(5.0)
+  comment     String   @default("")
+  reviewed_at DateTime @default(now())
+  is_deleted  Boolean  @default(false)
+
+  ref_parcel_id String?
+
+  reviewer User @relation("ReviewerReviews", fields: [reviewer_id], references: [id])
+  user     User @relation("UserReviews", fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([reviewer_id])
+  @@map("reviews")
+}

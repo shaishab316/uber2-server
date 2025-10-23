@@ -10,6 +10,7 @@ import { TransactionRoutes } from '../app/modules/transaction/Transaction.route'
 import { injectRoutes } from '../utils/router/injectRouter';
 import { ParcelRoutes } from '../app/modules/parcel/Parcel.route';
 import { DriverRoutes } from '../app/modules/driver/Driver.route';
+import { ReviewRoutes } from '../app/modules/review/Review.route';
 
 const appRouter = Router();
 
@@ -31,6 +32,7 @@ export default injectRoutes(appRouter, {
   // Free auth
   '/profile': [auth.all, UserRoutes.user],
   '/transactions': [auth.all, TransactionRoutes.user],
+  '/reviews': [auth.all, ReviewRoutes.user],
 
   // User auth
   '/parcels': [auth.user, ParcelRoutes.user],
