@@ -1,0 +1,22 @@
+model Message {
+  id         String   @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  chat_id    String
+  parent_id  String? //? for reply
+  user_id    String
+  text       String   @default("")
+  media_urls String[] @default([])
+  isDeleted  Boolean  @default(false)
+
+  // many-to-many relation for seen users
+  seen_by User[]    @relation("SeenMessages")
+  chat    Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  // self-relation (for replies)
+  parent  Message?  @relation("MessageToReplies", fields: [parent_id], references: [id])
+  replies Message[] @relation("MessageToReplies")
+
+  @@map("messages")
+}

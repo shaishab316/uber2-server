@@ -11,6 +11,8 @@ import { injectRoutes } from '../utils/router/injectRouter';
 import { ParcelRoutes } from '../app/modules/parcel/Parcel.route';
 import { DriverRoutes } from '../app/modules/driver/Driver.route';
 import { ReviewRoutes } from '../app/modules/review/Review.route';
+import { MessageRoutes } from '../app/modules/message/Message.route';
+import { ChatRoutes } from '../app/modules/chat/Chat.route';
 
 const appRouter = Router();
 
@@ -33,6 +35,8 @@ export default injectRoutes(appRouter, {
   '/profile': [auth.all, UserRoutes.user],
   '/transactions': [auth.all, TransactionRoutes.user],
   '/reviews': [auth.all, ReviewRoutes.user],
+  '/inbox': [auth.all, ChatRoutes.all],
+  '/messages': [auth.all, MessageRoutes.all],
 
   // User auth
   '/parcels': [auth.user, ParcelRoutes.user],

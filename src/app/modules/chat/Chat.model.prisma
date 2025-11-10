@@ -1,0 +1,12 @@
+model Chat {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+
+  user_ids String[]
+
+  messages Message[]
+  users    User[]    @relation("UserChats")
+
+  @@unique([user_ids])
+  @@map("chats")
+}
