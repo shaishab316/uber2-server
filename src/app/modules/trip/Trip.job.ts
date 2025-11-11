@@ -114,7 +114,7 @@ function sendDriverDispatchNotification(processingTrip: TTrip): void {
     .emit(
       'trip_request',
       socketResponse({
-        message: 'New parcel request',
+        message: 'New trip request',
         data: processingTrip,
       }),
     );
