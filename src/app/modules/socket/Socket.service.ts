@@ -1,7 +1,7 @@
 import { Server } from 'http';
 import { Server as IOServer, Namespace } from 'socket.io';
 import config from '../../../config';
-import { SocketRoutes } from './Socket.route';
+import { SocketRoutes, TSocketRoutes } from './Socket.route';
 import auth from './Socket.middleware';
 import { TAuthenticatedSocket } from './Socket.interface';
 import { logger } from '../../../utils/logger';
@@ -86,7 +86,7 @@ export const SocketServices = {
     io?.of(namespace).emit('online_users', Array.from(onlineUsers[namespace]));
   },
 
-  getIO(namespace: string): Namespace | undefined {
+  getIO(namespace: TSocketRoutes): Namespace | undefined {
     return io?.of(namespace);
   },
 

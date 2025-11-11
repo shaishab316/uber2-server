@@ -4,6 +4,8 @@ import { ParcelSocket } from '../parcel/Parcel.socket';
 import { TripSocket } from '../trip/Trip.socket';
 import type { TSocketHandler } from './Socket.interface';
 
+export type TSocketRoutes = '/' | '/trip' | '/parcel' | '/driver' | '/message';
+
 const router = new Map<string, TSocketHandler>();
 {
   router.set('/trip', TripSocket);

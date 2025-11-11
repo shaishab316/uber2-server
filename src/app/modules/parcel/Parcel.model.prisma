@@ -71,7 +71,7 @@ model ParcelHelper {
   driver_ids String[]
   search_at  DateTime @default(now())
 
-  parcel Parcel @relation("ParcelHelper", fields: [parcel_id], references: [id])
+  parcel Parcel @relation("ParcelHelper", fields: [parcel_id], references: [id], onDelete: Cascade)
 
   @@map("_parcels_helper")
 }

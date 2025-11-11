@@ -62,7 +62,7 @@ model TripHelper {
   driver_ids String[]
   search_at  DateTime @default(now())
 
-  trip Trip @relation("TripHelper", fields: [trip_id], references: [id])
+  trip Trip @relation("TripHelper", fields: [trip_id], references: [id], onDelete: Cascade)
 
   @@map("_trips_helper")
 }

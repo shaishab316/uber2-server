@@ -2,7 +2,10 @@
 import { Server } from 'http';
 import cron from 'node-cron';
 import { prisma } from '../../../utils/db';
-import { Parcel as TParcel } from '../../../../prisma';
+import {
+  ParcelHelper as TParcelHelper,
+  Parcel as TParcel,
+} from '../../../../prisma';
 import { SocketServices } from '../socket/Socket.service';
 import { socketResponse } from '../socket/Socket.utils';
 
@@ -44,7 +47,7 @@ export function ParcelJob(server: Server): () => void {
     await Promise.all(eligibleHelpers.map(processSingleDriverDispatch));
   });
 
-  return parcelDispatchJob.stop;
+  return () => parcelDispatchJob.destroy();
 }
 
 /**
@@ -58,7 +61,9 @@ export function ParcelJob(server: Server): () => void {
  *
  * @param parcelHelper - The helper containing driver queue and parcel reference
  */
-async function processSingleDriverDispatch(parcelHelper: any): Promise<void> {
+async function processSingleDriverDispatch(
+  parcelHelper: TParcelHelper,
+): Promise<void> {
   try {
     /**
      * STEP 1: Extract next driver from the queue (FIFO)
