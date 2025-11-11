@@ -1,0 +1,68 @@
+model Trip {
+  id           String    @id @default(uuid())
+  slug         String    @unique
+  requested_at DateTime  @default(now())
+  accepted_at  DateTime?
+  started_at   DateTime?
+  delivered_at DateTime?
+  completed_at DateTime?
+  cancelled_at DateTime?
+
+  user_id   String
+  user      User    @relation("UserTrip", fields: [user_id], references: [id])
+  driver_id String?
+  driver    User?   @relation("DriverTrip", fields: [driver_id], references: [id])
+
+  // Pickup location fields
+  pickup_type    String  @default("Point")
+  pickup_lat     Float
+  pickup_lng     Float
+  pickup_address String?
+
+  // Dropoff location fields
+  dropoff_type    String  @default("Point")
+  dropoff_lat     Float
+  dropoff_lng     Float
+  dropoff_address String?
+
+  // Parcel location fields
+  location_type    String? @default("Point")
+  location_lat     Float?
+  location_lng     Float?
+  location_address String?
+
+  status     ETripStatus @default(REQUESTED)
+  total_cost Float       @default(0.00)
+
+  //! PROCESSING
+  processing_driver_id String?
+  processing_at        DateTime?
+  is_processing        Boolean   @default(false)
+  //! end
+
+  helper TripHelper? @relation("TripHelper")
+
+  @@index([pickup_lat, pickup_lng])
+  @@index([dropoff_lat, dropoff_lng])
+  @@map("trips")
+}
+
+enum ETripStatus {
+  REQUESTED
+  ACCEPTED
+  STARTED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+model TripHelper {
+  id         String   @id @default(uuid())
+  trip_id    String   @unique
+  driver_ids String[]
+  search_at  DateTime @default(now())
+
+  trip Trip @relation("TripHelper", fields: [trip_id], references: [id])
+
+  @@map("_trips_helper")
+}

@@ -20,7 +20,7 @@
     "new-module": "node ./src/app/modules/.builder.js",
     "build": "node esbuild.js",
     "start": "node dist/server.js",
-    "dev": "set DEBUG=socket.io* && tsx --watch src/server.ts",
+    "dev": "set DEBUG=socket.io* && tsx --watch --inspect src/server.ts",
     "stripe": "tsx scripts/stripe.ts",
     "seedAdmin": "tsx scripts/seedAdmin.ts",
     "seedIndex": "tsx scripts/seedIndex.ts",

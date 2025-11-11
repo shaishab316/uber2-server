@@ -59,6 +59,8 @@ model User {
   transactions     Transaction[]
   user_parcels     Parcel[]      @relation("UserParcel")
   driver_parcels   Parcel[]      @relation("DriverParcel")
+  user_trips       Trip[]        @relation("UserTrip")
+  driver_trips     Trip[]        @relation("DriverTrip")
   given_reviews    Review[]      @relation("ReviewerReviews")
   received_reviews Review[]      @relation("UserReviews")
   chats            Chat[]        @relation("UserChats")

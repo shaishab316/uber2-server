@@ -18,7 +18,7 @@ export async function generateParcelSlug() {
         startsWith: `p-${datePrefix}-`,
       },
     },
-    orderBy: { slug: 'desc' },
+    orderBy: { requested_at: 'desc' },
     select: { slug: true },
   });
 

@@ -2,7 +2,10 @@ import { StatusCodes } from 'http-status-codes';
 import { EParcelStatus } from '../../../../prisma';
 import ServerError from '../../../errors/ServerError';
 import { prisma } from '../../../utils/db';
-import { TParcelRefreshLocation, TRequestForParcel } from './Parcel.interface';
+import type {
+  TParcelRefreshLocation,
+  TRequestForParcel,
+} from './Parcel.interface';
 import {
   calculateParcelCost,
   generateParcelSlug,
