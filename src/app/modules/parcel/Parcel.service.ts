@@ -149,4 +149,29 @@ export const ParcelServices = {
       data: payload,
     });
   },
+
+  async driverCancelParcel({
+    parcel_id,
+    driver_id,
+  }: {
+    parcel_id: string;
+    driver_id: string;
+  }) {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcel_id },
+    });
+
+    if (parcel?.processing_driver_id !== driver_id) {
+      throw new Error('You are not assigned to this parcel');
+    }
+
+    await prisma.parcel.update({
+      where: { id: parcel_id },
+      data: {
+        processing_driver_id: null,
+        is_processing: false,
+        processing_at: new Date(), //? invoke time
+      },
+    });
+  },
 };
