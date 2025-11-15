@@ -3,8 +3,9 @@ import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { TSocketHandler } from '../../socket/Socket.interface';
 import { ParcelValidations } from '../Parcel.validation';
+import { SocketServices } from '../../socket/Socket.service';
 
-export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
+export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
 
   //! Recover driver last parcel
@@ -14,7 +15,7 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
 
   if (lastParcel) {
     socket.emit(
-      'recover_parcel',
+      'parcel:recover',
       socketResponse({
         message: `${lastParcel.status} recover parcel`,
         data: lastParcel,
@@ -23,15 +24,16 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   }
 
   socket.on(
-    'accept_parcel',
+    'parcel:accept',
     catchAsyncSocket(async ({ parcel_id }) => {
       const parcel = await ParcelServices.acceptParcel({
         driver_id: driver.id,
         parcel_id,
       });
 
-      io.to(parcel.user_id).emit(
-        'accepted_parcel',
+      SocketServices.emitToUser(
+        parcel.user_id,
+        'parcel:accepted',
         socketResponse({
           message: 'Parcel accepted successfully!',
           data: {
@@ -52,12 +54,13 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   );
 
   socket.on(
-    'refresh_location',
+    'parcel:refresh_location',
     catchAsyncSocket(async payload => {
       const parcel = await ParcelServices.refreshLocation(payload);
 
-      io.to(parcel.user_id).emit(
-        'refresh_location',
+      SocketServices.emitToUser(
+        parcel.user_id,
+        'parcel:refresh_location',
         socketResponse({
           message: 'Location updated successfully!',
           data: payload,

@@ -110,13 +110,13 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
  * @param processingTrip - The trip data to send to the driver
  */
 function sendDriverDispatchNotification(processingTrip: TTrip): void {
-  SocketServices.getIO('/driver')!
-    .to(processingTrip.processing_driver_id!)
-    .emit(
-      'trip_request',
-      socketResponse({
-        message: 'New trip request',
-        data: processingTrip,
-      }),
-    );
+  if (!processingTrip.processing_driver_id) return;
+  SocketServices.emitToUser(
+    processingTrip.processing_driver_id,
+    'trip:request',
+    socketResponse({
+      message: 'New trip request',
+      data: processingTrip,
+    }),
+  );
 }

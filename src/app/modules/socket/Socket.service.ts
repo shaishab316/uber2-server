@@ -1,16 +1,15 @@
 import { Server } from 'http';
 import { Server as IOServer, Namespace } from 'socket.io';
 import config from '../../../config';
-import { SocketRoutes, TSocketRoutes } from './Socket.route';
+import { SocketRoutes } from './Socket.route';
 import auth from './Socket.middleware';
 import { TAuthenticatedSocket } from './Socket.interface';
 import { logger } from '../../../utils/logger';
 import chalk from 'chalk';
 
-type OnlineMap = Record<string, Set<string>>;
-
 let io: IOServer | null = null;
-const onlineUsers: OnlineMap = {};
+const onlineUsers = new Set<string>();
+const userSockets = new Map<string, Set<string>>();
 
 export const SocketServices = {
   init(server: Server): () => void {
@@ -22,78 +21,90 @@ export const SocketServices = {
 
     logger.info(chalk.green('🚀 Socket services initialized successfully'));
 
-    // Disable default namespace
-    io.of('/').on('connection', socket => socket.disconnect(true));
+    // Single root namespace only
+    const nsp = io.of('/');
+    nsp.use(auth);
 
-    // Initialize each namespace
-    SocketRoutes.forEach((handler, namespace) => {
-      const nsp = io!.of(namespace);
-      onlineUsers[namespace] = new Set();
+    // Attach all feature handlers on root namespace
+    const rootHandler = SocketRoutes.get('/')!;
 
-      nsp.use(auth);
-      nsp.on('connection', (socket: TAuthenticatedSocket) => {
-        const { user } = socket.data;
+    nsp.on('connection', (socket: TAuthenticatedSocket) => {
+      const { user } = socket.data;
 
-        // Join private room
-        socket.join(user.id);
-        this.markOnline(namespace, user.id);
+      this._trackConnection(user.id, socket.id);
+      this._markOnline(user.id);
+      logger.info(`👤 User (${user.name}) connected on /`);
 
-        logger.info(
-          `👤 User (${user.name}) connected to namespace: ${namespace}`,
-        );
+      // errors
+      socket.on('error', logger.error);
 
-        // Event: leave room
-        socket.on('leave', (roomId: string) => {
-          socket.leave(roomId);
-          logger.info(`👤 User (${user.name}) left room: ${roomId}`);
-        });
+      // wire up feature handlers
+      try {
+        rootHandler({ io: nsp as unknown as Namespace, socket });
+      } catch (err) {
+        logger.error('Root namespace handler error:', err);
+      }
 
-        // Event: disconnect
-        socket.on('disconnect', () => {
-          socket.leave(user.id);
-          this.markOffline(namespace, user.id);
-          logger.info(
-            `👤 User (${user.name}) disconnected from namespace: ${namespace}`,
-          );
-        });
-
-        // Event: error
-        socket.on('error', logger.error);
-
-        // Call module-specific handler
-        try {
-          handler({ io: nsp, socket });
-        } catch (err) {
-          logger.error(`Namespace "${namespace}" handler error:`, err);
-        }
+      socket.on('disconnect', () => {
+        this._trackDisconnection(user.id, socket.id);
+        logger.info(`👤 User (${user.name}) disconnected from /`);
       });
     });
 
     return this.cleanup;
   },
 
-  markOnline(namespace: string, userId: string) {
-    onlineUsers[namespace].add(userId);
-    this.emitOnline(namespace);
+  emitToUser(userId: string, event: string, payload: any) {
+    const sockets = userSockets.get(userId);
+    if (!io || !sockets || sockets.size === 0) return;
+    for (const sid of sockets) {
+      io.of('/').to(sid).emit(event, payload);
+    }
   },
 
-  markOffline(namespace: string, userId: string) {
-    onlineUsers[namespace].delete(userId);
-    this.emitOnline(namespace);
+  broadcast(event: string, payload: any) {
+    io?.of('/').emit(event, payload);
   },
 
-  emitOnline(namespace: string) {
-    io?.of(namespace).emit('online_users', Array.from(onlineUsers[namespace]));
-  },
-
-  getIO(namespace: TSocketRoutes): Namespace | undefined {
-    return io?.of(namespace);
+  getIO(): Namespace | undefined {
+    return io?.of('/');
   },
 
   cleanup() {
     if (!io) return;
-    Object.keys(onlineUsers).forEach(ns => onlineUsers[ns].clear());
+    onlineUsers.clear();
+    userSockets.clear();
     io.close(() => logger.info('Socket.IO server closed.'));
     io = null;
+  },
+
+  _trackConnection(userId: string, socketId: string) {
+    if (!userSockets.has(userId)) userSockets.set(userId, new Set());
+    userSockets.get(userId)!.add(socketId);
+  },
+
+  _trackDisconnection(userId: string, socketId: string) {
+    const set = userSockets.get(userId);
+    if (set) {
+      set.delete(socketId);
+      if (set.size === 0) {
+        userSockets.delete(userId);
+        this._markOffline(userId);
+      }
+    }
+  },
+
+  _markOnline(userId: string) {
+    onlineUsers.add(userId);
+    this._emitOnline();
+  },
+
+  _markOffline(userId: string) {
+    onlineUsers.delete(userId);
+    this._emitOnline();
+  },
+
+  _emitOnline() {
+    io?.of('/').emit('presence:online', Array.from(onlineUsers));
   },
 };

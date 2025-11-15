@@ -13,7 +13,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
   if (processingParcel) {
     socket.emit(
-      'parcel_request',
+      'parcel:request',
       socketResponse({
         message: 'New parcel request',
         data: processingParcel,
@@ -22,7 +22,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
   }
 
   socket.on(
-    'toggle_online',
+    'driver:toggle_online',
     catchAsyncSocket(async ({ online }) => {
       const data = await DriverServices.toggleOnline({
         driver_id: driver.id,
@@ -37,7 +37,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
   );
 
   socket.on(
-    'refresh_location',
+    'driver:refresh_location',
     catchAsyncSocket(async payload => {
       await DriverServices.refreshLocation({
         ...payload,

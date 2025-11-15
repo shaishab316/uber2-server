@@ -14,7 +14,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
 
   if (lastParcel) {
     socket.emit(
-      'recover_parcel',
+      'parcel:recover',
       socketResponse({
         message: `${lastParcel.status} recover parcel`,
         data: lastParcel,
@@ -23,7 +23,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   }
 
   socket.on(
-    'request_for_parcel',
+    'parcel:request',
     catchAsyncSocket(async payload => {
       const data = await ParcelServices.requestForParcel({
         ...payload,
@@ -38,7 +38,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   );
 
   socket.on(
-    'cancel_parcel',
+    'parcel:cancel',
     catchAsyncSocket(async ({ parcel_id }) => {
       const data = await ParcelServices.cancelParcel({
         parcel_id,

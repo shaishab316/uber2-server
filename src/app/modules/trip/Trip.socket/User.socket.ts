@@ -14,7 +14,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
 
   if (lastTrip) {
     socket.emit(
-      'recover_trip',
+      'trip:recover',
       socketResponse({
         message: `${lastTrip.status} recover trip`,
         data: lastTrip,
@@ -23,7 +23,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   }
 
   socket.on(
-    'request_for_trip',
+    'trip:request',
     catchAsyncSocket(async payload => {
       const data = await TripServices.requestForTrip({
         ...payload,
@@ -38,7 +38,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   );
 
   socket.on(
-    'cancel_trip',
+    'trip:cancel',
     catchAsyncSocket(async ({ trip_id }) => {
       const data = await TripServices.cancelTrip({
         trip_id,

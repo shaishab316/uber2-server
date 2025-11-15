@@ -3,8 +3,9 @@ import { TSocketHandler } from '../../socket/Socket.interface';
 import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
 import { TripServices } from '../Trip.service';
 import { TripValidations } from '../Trip.validation';
+import { SocketServices } from '../../socket/Socket.service';
 
-export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
+export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
 
   //! Recover driver last trip
@@ -14,7 +15,7 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
 
   if (lastTrip) {
     socket.emit(
-      'recover_trip',
+      'trip:recover',
       socketResponse({
         message: `${lastTrip.status} recover trip`,
         data: lastTrip,
@@ -23,15 +24,16 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   }
 
   socket.on(
-    'accept_trip',
+    'trip:accept',
     catchAsyncSocket(async ({ trip_id }) => {
       const trip = await TripServices.acceptTrip({
         driver_id: driver.id,
         trip_id,
       });
 
-      io.to(trip.user_id).emit(
-        'accepted_trip',
+      SocketServices.emitToUser(
+        trip.user_id,
+        'trip:accepted',
         socketResponse({
           message: 'trip accepted successfully!',
           data: {
@@ -52,12 +54,13 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   );
 
   socket.on(
-    'refresh_location',
+    'trip:refresh_location',
     catchAsyncSocket(async payload => {
       const trip = await TripServices.refreshLocation(payload);
 
-      io.to(trip.user_id).emit(
-        'refresh_location',
+      SocketServices.emitToUser(
+        trip.user_id,
+        'trip:refresh_location',
         socketResponse({
           message: 'Location updated successfully!',
           data: payload,

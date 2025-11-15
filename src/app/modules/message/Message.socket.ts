@@ -3,13 +3,14 @@ import type { TSocketHandler } from '../socket/Socket.interface';
 import { catchAsyncSocket, socketResponse } from '../socket/Socket.utils';
 import { MessageServices } from './Message.service';
 import { MessageValidations } from './Message.validation';
+import { SocketServices } from '../socket/Socket.service';
 
-export const MessageSocket: TSocketHandler = ({ socket, io }) => {
+export const MessageSocket: TSocketHandler = ({ socket }) => {
   const { user } = socket.data;
 
   //? send message
   socket.on(
-    'send_message',
+    'message:send',
     catchAsyncSocket(async payload => {
       //? ensure that text or media is provided
       if (!payload.text && !payload.media_urls?.length) {
@@ -31,18 +32,21 @@ export const MessageSocket: TSocketHandler = ({ socket, io }) => {
 
       const opponent_ids = chat.user_ids.filter(id => id !== user.id);
 
-      //? notify opponent
-      io.to(opponent_ids).emit(
-        'new_message',
-        socketResponse({
-          message: "You've received a new message!",
-          data: {
-            ...message,
-            seen_by: seen_by.map(({ avatar }) => avatar),
-            name: user.name,
-            avatar: user.avatar,
-          },
-        }),
+      //? notify opponent(s)
+      opponent_ids.forEach(id =>
+        SocketServices.emitToUser(
+          id,
+          'message:new',
+          socketResponse({
+            message: "You've received a new message!",
+            data: {
+              ...message,
+              seen_by: seen_by.map(({ avatar }) => avatar),
+              name: user.name,
+              avatar: user.avatar,
+            },
+          }),
+        ),
       );
 
       return {
@@ -54,7 +58,7 @@ export const MessageSocket: TSocketHandler = ({ socket, io }) => {
 
   //? delete message
   socket.on(
-    'delete_message',
+    'message:delete',
     catchAsyncSocket(async ({ message_id }) => {
       const { chat } = await MessageServices.deleteMessage({
         message_id,
@@ -63,16 +67,19 @@ export const MessageSocket: TSocketHandler = ({ socket, io }) => {
 
       const opponent_ids = chat.user_ids.filter(id => id !== user.id);
 
-      //? notify opponent
-      io.to(opponent_ids).emit(
-        'delete_message',
-        socketResponse({
-          message: 'A message has been deleted!',
-          data: {
-            message_id,
-            chat_id: chat.id,
-          },
-        }),
+      //? notify opponent(s)
+      opponent_ids.forEach(id =>
+        SocketServices.emitToUser(
+          id,
+          'message:delete',
+          socketResponse({
+            message: 'A message has been deleted!',
+            data: {
+              message_id,
+              chat_id: chat.id,
+            },
+          }),
+        ),
       );
 
       return {

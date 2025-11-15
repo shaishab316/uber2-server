@@ -139,13 +139,13 @@ async function processSingleDriverDispatch(
  * @param processingParcel - The parcel data to send to the driver
  */
 function sendDriverDispatchNotification(processingParcel: TParcel): void {
-  SocketServices.getIO('/driver')!
-    .to(processingParcel.processing_driver_id!)
-    .emit(
-      'parcel_request',
-      socketResponse({
-        message: 'New parcel request',
-        data: processingParcel,
-      }),
-    );
+  if (!processingParcel.processing_driver_id) return;
+  SocketServices.emitToUser(
+    processingParcel.processing_driver_id,
+    'parcel:request',
+    socketResponse({
+      message: 'New parcel request',
+      data: processingParcel,
+    }),
+  );
 }
