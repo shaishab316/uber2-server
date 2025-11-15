@@ -1,4 +1,4 @@
-import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
+import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { ParcelValidations } from '../Parcel.validation';
 import { QueryValidations } from '../../query/Query.validation';
@@ -13,13 +13,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   });
 
   if (lastParcel) {
-    socket.emit(
-      'parcel:recover',
-      socketResponse({
-        message: `${lastParcel.status} recover parcel`,
-        data: lastParcel,
-      }),
-    );
+    socket.emit('parcel:recover', lastParcel);
   }
 
   socket.on(
@@ -30,10 +24,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
         user_id: user.id,
       });
 
-      return {
-        message: 'Parcel requested successfully!',
-        data,
-      };
+      return data;
     }, ParcelValidations.requestForParcel),
   );
 
@@ -45,10 +36,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
         user_id: user.id,
       });
 
-      return {
-        message: 'Parcel cancelled successfully!',
-        data,
-      };
+      return data;
     }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
   );
 };

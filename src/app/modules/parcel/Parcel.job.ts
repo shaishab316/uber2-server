@@ -7,7 +7,6 @@ import {
   Parcel as TParcel,
 } from '../../../../prisma';
 import { SocketServices } from '../socket/Socket.service';
-import { socketResponse } from '../socket/Socket.utils';
 
 /**
  * Parcel Dispatch Job Scheduler
@@ -143,9 +142,6 @@ function sendDriverDispatchNotification(processingParcel: TParcel): void {
   SocketServices.emitToUser(
     processingParcel.processing_driver_id,
     'parcel:request',
-    socketResponse({
-      message: 'New parcel request',
-      data: processingParcel,
-    }),
+    processingParcel,
   );
 }

@@ -1,6 +1,6 @@
 import { QueryValidations } from '../../query/Query.validation';
 import { TSocketHandler } from '../../socket/Socket.interface';
-import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
+import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { TripServices } from '../Trip.service';
 import { TripValidations } from '../Trip.validation';
 import { SocketServices } from '../../socket/Socket.service';
@@ -14,13 +14,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
   });
 
   if (lastTrip) {
-    socket.emit(
-      'trip:recover',
-      socketResponse({
-        message: `${lastTrip.status} recover trip`,
-        data: lastTrip,
-      }),
-    );
+    socket.emit('trip:recover', lastTrip);
   }
 
   socket.on(
@@ -31,25 +25,15 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
-      SocketServices.emitToUser(
-        trip.user_id,
-        'trip:accepted',
-        socketResponse({
-          message: 'trip accepted successfully!',
-          data: {
-            name: driver.name,
-            avatar: driver.avatar,
-            trip_id,
-            location_lat: driver.location_lat,
-            location_lng: driver.location_lng,
-          },
-        }),
-      );
+      SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
+        name: driver.name,
+        avatar: driver.avatar,
+        trip_id,
+        location_lat: driver.location_lat,
+        location_lng: driver.location_lng,
+      });
 
-      return {
-        message: 'trip accepted successfully!',
-        data: trip,
-      };
+      return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
   );
 
@@ -58,19 +42,9 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     catchAsyncSocket(async payload => {
       const trip = await TripServices.refreshLocation(payload);
 
-      SocketServices.emitToUser(
-        trip.user_id,
-        'trip:refresh_location',
-        socketResponse({
-          message: 'Location updated successfully!',
-          data: payload,
-        }),
-      );
+      SocketServices.emitToUser(trip.user_id, 'trip:refresh_location', payload);
 
-      return {
-        message: 'Location updated successfully!',
-        data: payload,
-      };
+      return payload;
     }, TripValidations.refreshLocation),
   );
 };

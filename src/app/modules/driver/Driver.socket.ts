@@ -1,6 +1,6 @@
 import { ParcelServices } from '../parcel/Parcel.service';
 import { TSocketHandler } from '../socket/Socket.interface';
-import { catchAsyncSocket, socketResponse } from '../socket/Socket.utils';
+import { catchAsyncSocket } from '../socket/Socket.utils';
 import { DriverServices } from './Driver.service';
 import { DriverValidations } from './Driver.validation';
 
@@ -12,13 +12,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
   });
 
   if (processingParcel) {
-    socket.emit(
-      'parcel:request',
-      socketResponse({
-        message: 'New parcel request',
-        data: processingParcel,
-      }),
-    );
+    socket.emit('parcel:request', processingParcel);
   }
 
   socket.on(
@@ -29,10 +23,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         online,
       });
 
-      return {
-        message: 'Online status updated successfully!',
-        data,
-      };
+      return data;
     }, DriverValidations.toggleOnline),
   );
 
@@ -44,10 +35,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         driver_id: driver.id,
       });
 
-      return {
-        message: 'Location updated successfully!',
-        data: payload,
-      };
+      return payload;
     }, DriverValidations.refreshLocation),
   );
 };

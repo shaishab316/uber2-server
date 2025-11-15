@@ -1,6 +1,6 @@
 import { ZodError } from 'zod';
 import type { TSocketHandler } from '../socket/Socket.interface';
-import { catchAsyncSocket, socketResponse } from '../socket/Socket.utils';
+import { catchAsyncSocket } from '../socket/Socket.utils';
 import { MessageServices } from './Message.service';
 import { MessageValidations } from './Message.validation';
 import { SocketServices } from '../socket/Socket.service';
@@ -34,25 +34,15 @@ export const MessageSocket: TSocketHandler = ({ socket }) => {
 
       //? notify opponent(s)
       opponent_ids.forEach(id =>
-        SocketServices.emitToUser(
-          id,
-          'message:new',
-          socketResponse({
-            message: "You've received a new message!",
-            data: {
-              ...message,
-              seen_by: seen_by.map(({ avatar }) => avatar),
-              name: user.name,
-              avatar: user.avatar,
-            },
-          }),
-        ),
+        SocketServices.emitToUser(id, 'message:new', {
+          ...message,
+          seen_by: seen_by.map(({ avatar }) => avatar),
+          name: user.name,
+          avatar: user.avatar,
+        }),
       );
 
-      return {
-        message: 'Message sent successfully!',
-        data: message,
-      };
+      return message;
     }, MessageValidations.createMessage),
   );
 
@@ -69,22 +59,13 @@ export const MessageSocket: TSocketHandler = ({ socket }) => {
 
       //? notify opponent(s)
       opponent_ids.forEach(id =>
-        SocketServices.emitToUser(
-          id,
-          'message:delete',
-          socketResponse({
-            message: 'A message has been deleted!',
-            data: {
-              message_id,
-              chat_id: chat.id,
-            },
-          }),
-        ),
+        SocketServices.emitToUser(id, 'message:delete', {
+          message_id,
+          chat_id: chat.id,
+        }),
       );
 
-      return {
-        message: 'Message deleted successfully!',
-      };
+      return { message_id, chat_id: chat.id };
     }, MessageValidations.deleteMessage),
   );
 };

@@ -6,8 +6,8 @@ import {
   TripHelper as TTripHelper,
 } from '../../../utils/db';
 import { SocketServices } from '../socket/Socket.service';
-import { socketResponse } from '../socket/Socket.utils';
 import ms from 'ms';
+import { errorLogger } from '../../../utils/logger';
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export function TripJob(server: Server): () => void {
@@ -100,7 +100,7 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
       await prisma.tripHelper.delete({ where: { id: tripHelper.id } });
     }
   } catch (error) {
-    console.error(`Error processing trip: ${tripHelper.id}`, error);
+    errorLogger.error(`Error processing trip: ${tripHelper.id}`, error);
   }
 }
 
@@ -114,9 +114,6 @@ function sendDriverDispatchNotification(processingTrip: TTrip): void {
   SocketServices.emitToUser(
     processingTrip.processing_driver_id,
     'trip:request',
-    socketResponse({
-      message: 'New trip request',
-      data: processingTrip,
-    }),
+    processingTrip,
   );
 }
