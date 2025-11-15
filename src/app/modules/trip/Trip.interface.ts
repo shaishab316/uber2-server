@@ -7,3 +7,7 @@ import { TripValidations } from './Trip.validation';
 export type TRequestForTrip = z.infer<typeof TripValidations.requestForTrip> & {
   user_id: string;
 };
+
+export type TTripRefreshLocation = z.infer<
+  typeof TripValidations.refreshLocation
+>;

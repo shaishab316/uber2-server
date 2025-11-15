@@ -2,9 +2,25 @@ import { QueryValidations } from '../../query/Query.validation';
 import { TSocketHandler } from '../../socket/Socket.interface';
 import { catchAsyncSocket, socketResponse } from '../../socket/Socket.utils';
 import { TripServices } from '../Trip.service';
+import { TripValidations } from '../Trip.validation';
 
 export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
   const driver = socket.data.user;
+
+  //! Recover driver last trip
+  const lastTrip = await TripServices.getLastDriverTrip({
+    driver_id: driver.id,
+  });
+
+  if (lastTrip) {
+    socket.emit(
+      'recover_trip',
+      socketResponse({
+        message: `${lastTrip.status} recover trip`,
+        data: lastTrip,
+      }),
+    );
+  }
 
   socket.on(
     'accept_trip',
@@ -33,5 +49,25 @@ export const DriverSocket: TSocketHandler = async ({ socket, io }) => {
         data: trip,
       };
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
+  );
+
+  socket.on(
+    'refresh_location',
+    catchAsyncSocket(async payload => {
+      const trip = await TripServices.refreshLocation(payload);
+
+      io.to(trip.user_id).emit(
+        'refresh_location',
+        socketResponse({
+          message: 'Location updated successfully!',
+          data: payload,
+        }),
+      );
+
+      return {
+        message: 'Location updated successfully!',
+        data: payload,
+      };
+    }, TripValidations.refreshLocation),
   );
 };

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TModelZod } from '../../../types/zod';
 import { Trip as TTrip } from '../../../../prisma';
+import { exists } from '../../../utils/db/exists';
 
 export const TripValidations = {
   //! Socket
@@ -31,4 +32,22 @@ export const TripValidations = {
       }),
     dropoff_address: z.string().optional(),
   } satisfies TModelZod<TTrip>),
+
+  refreshLocation: z.object({
+    location_type: z.literal('Point').default('Point'),
+    location_lat: z.coerce
+      .number({ error: 'Location latitude is required' })
+      .refine(lat => lat >= -90 && lat <= 90, {
+        error: 'Location latitude must be between -90 and 90',
+      }),
+    location_lng: z.coerce
+      .number({ error: 'Location longitude is required' })
+      .refine(lng => lng >= -180 && lng <= 180, {
+        error: 'Location longitude must be between -180 and 180',
+      }),
+    location_address: z.string().optional(),
+    trip_id: z.string().refine(exists('trip'), {
+      error: ({ input }) => `Trip not found with id: ${input}`,
+    }),
+  }),
 };

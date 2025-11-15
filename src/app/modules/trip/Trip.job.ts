@@ -7,6 +7,7 @@ import {
 } from '../../../utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import { socketResponse } from '../socket/Socket.utils';
+import ms from 'ms';
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export function TripJob(server: Server): () => void {
@@ -91,7 +92,7 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         where: { id: tripHelper.id },
         data: {
           driver_ids: remainingDriverQueue,
-          search_at: new Date(), //? Retry in 5 seconds
+          search_at: new Date(Date.now() + ms('5s')), // Retry after 5 seconds
         },
       });
     } else {
