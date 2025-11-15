@@ -7,6 +7,7 @@ import {
   Parcel as TParcel,
 } from '../../../../prisma';
 import { SocketServices } from '../socket/Socket.service';
+import ms from 'ms';
 
 /**
  * Parcel Dispatch Job Scheduler
@@ -120,7 +121,7 @@ async function processSingleDriverDispatch(
         where: { id: parcelHelper.id },
         data: {
           driver_ids: remainingDriverQueue,
-          search_at: new Date(Date.now() + 5000), // Retry after 5 seconds
+          search_at: new Date(Date.now() + ms('5s')), // Retry after 5 seconds
         },
       });
     } else {
