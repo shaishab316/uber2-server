@@ -24,11 +24,17 @@ const serveResponse = <T>(
   res: Response,
   {
     statusCode = StatusCodes.OK,
-    success = true,
-    message = 'Success',
+    message,
     meta,
     data,
   }: Partial<TServeResponse<T>> = {},
-) => res.status(statusCode).json({ success, statusCode, message, meta, data });
+): void => {
+  res.statusCode = statusCode;
+  if (message) {
+    res.statusMessage = message;
+  }
+
+  res.json(meta ? { meta, data } : data);
+};
 
 export default serveResponse;

@@ -33,13 +33,14 @@ const globalErrorHandler: ErrorRequestHandler = async (error, req, res, _) => {
 
   const { statusCode, message, errorMessages } = formatError(error);
 
-  res.status(statusCode).json({
-    success: false,
-    statusCode,
-    message,
-    errorMessages,
-    stack: config.server.isDevelopment && error.stack,
-  });
+  res.statusCode = statusCode;
+  res.statusMessage = message;
+
+  if (config.server.isDevelopment) {
+    Object.assign(errorMessages?.[0] ?? {}, { stack: error.stack });
+  }
+
+  res.status(statusCode).json(errorMessages);
 };
 
 export default globalErrorHandler;
