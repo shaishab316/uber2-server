@@ -38,6 +38,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
   );
 
   socket.on(
+    'trip:driver_cancel',
+    catchAsyncSocket(async ({ trip_id }) => {
+      await TripServices.driverCancelTrip({
+        driver_id: driver.id,
+        trip_id,
+      });
+
+      return { trip_id };
+    }, QueryValidations.exists('trip_id', 'trip').shape.params),
+  );
+
+  socket.on(
     'trip:refresh_location',
     catchAsyncSocket(async payload => {
       const trip = await TripServices.refreshLocation(payload);
