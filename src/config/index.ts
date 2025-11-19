@@ -185,12 +185,6 @@ const config = {
     },
   },
 
-  google_map_key: env('google map key', genSecret(8), {
-    regex: '^.{10,}$',
-    up: 'Google map key - start',
-    down: 'Google map key - end',
-  }),
-
   uber: {
     max_distance: env('max distance', 1000, {
       regex: '^\\d+$',
