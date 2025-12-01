@@ -3,9 +3,9 @@ import { TransactionControllers } from './Transaction.controller';
 import purifyRequest from '../../middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
 
-const user = Router();
+const all = Router();
 {
-  user.get(
+  all.get(
     '/',
     purifyRequest(QueryValidations.list),
     TransactionControllers.getUserTransactions,
@@ -30,4 +30,4 @@ const admin = Router();
   );
 }
 
-export const TransactionRoutes = { user, admin, driver };
+export const TransactionRoutes = { all, admin, driver };

@@ -17,7 +17,13 @@ export const ReviewValidations = {
           path: ['ref_parcel_id'],
         })
         .optional(),
-      //Todo: give review  for trip
+      ref_trip_id: z
+        .string()
+        .refine(exists('trip'), {
+          error: ({ input }) => `Trip not found with id: ${input}`,
+          path: ['ref_trip_id'],
+        })
+        .optional(),
     }),
   }),
 };

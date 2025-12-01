@@ -1,0 +1,11 @@
+model Notification {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+  user_id   String
+
+  title   String
+  message String
+  is_read Boolean @default(false)
+
+  @@map("notifications")
+}

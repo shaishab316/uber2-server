@@ -13,6 +13,7 @@ import { DriverRoutes } from '../app/modules/driver/Driver.route';
 import { ReviewRoutes } from '../app/modules/review/Review.route';
 import { MessageRoutes } from '../app/modules/message/Message.route';
 import { ChatRoutes } from '../app/modules/chat/Chat.route';
+import { NotificationRoutes } from '../app/modules/notification/Notification.route';
 
 const appRouter = Router();
 
@@ -32,11 +33,12 @@ export default injectRoutes(appRouter, {
   '/payments': [PaymentRoutes.user],
 
   // Free auth
-  '/profile': [auth.all, UserRoutes.user],
-  '/transactions': [auth.all, TransactionRoutes.user],
-  '/reviews': [auth.all, ReviewRoutes.user],
+  '/profile': [auth.all, UserRoutes.all],
+  '/transactions': [auth.all, TransactionRoutes.all],
+  '/reviews': [auth.all, ReviewRoutes.all],
   '/inbox': [auth.all, ChatRoutes.all],
   '/messages': [auth.all, MessageRoutes.all],
+  '/notifications': [auth.all, NotificationRoutes.all],
 
   // User auth
   '/parcels': [auth.user, ParcelRoutes.user],

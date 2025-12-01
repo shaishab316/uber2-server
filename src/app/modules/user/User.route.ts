@@ -39,26 +39,26 @@ const admin = Router();
   );
 }
 
-const user = Router();
+const all = Router();
 {
-  user.get('/', UserControllers.profile);
+  all.get('/', UserControllers.profile);
 
-  user.patch(
+  all.patch(
     '/edit',
     avatarCapture,
     purifyRequest(UserValidations.edit),
     UserControllers.editProfile,
   );
 
-  user.delete('/delete', UserControllers.deleteAccount);
+  all.delete('/delete', UserControllers.deleteAccount);
 
-  user.post(
+  all.post(
     '/change-password',
     purifyRequest(UserValidations.changePassword),
     AuthControllers.changePassword,
   );
 
-  user.post(
+  all.post(
     '/setup-user-profile',
     capture({
       nid_photos: {
@@ -79,5 +79,5 @@ const user = Router();
 
 export const UserRoutes = {
   admin,
-  user,
+  all,
 };

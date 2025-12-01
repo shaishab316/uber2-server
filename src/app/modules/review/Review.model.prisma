@@ -10,6 +10,7 @@ model Review {
   is_deleted  Boolean  @default(false)
 
   ref_parcel_id String?
+  ref_trip_id   String?
 
   reviewer User @relation("ReviewerReviews", fields: [reviewer_id], references: [id])
   user     User @relation("UserReviews", fields: [user_id], references: [id])

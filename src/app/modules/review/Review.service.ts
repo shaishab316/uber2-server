@@ -22,15 +22,28 @@ export const ReviewServices = {
           data: payload,
         });
     }
-    // Todo: do for ref_trip_id
-    else {
-      throw new ZodError([
-        {
-          code: 'custom',
-          path: ['ref_parcel_id'],
-          message: 'Reference parcel id is missing',
+    if (payload.ref_trip_id) {
+      const existingReview = await prisma.review.findFirst({
+        where: {
+          reviewer_id,
+          ref_trip_id: payload.ref_trip_id,
         },
-      ]);
+        select: { id: true },
+      });
+
+      if (existingReview)
+        review = await prisma.review.update({
+          where: { id: existingReview.id },
+          data: payload,
+        });
+    } else {
+      throw new ZodError(
+        ['trip', 'parcel'].map(field => ({
+          code: 'custom',
+          path: [`ref_${field}_id`],
+          message: `Reference ${field} id is missing`,
+        })),
+      );
     }
 
     // Create new review

@@ -3,13 +3,13 @@ import { ReviewControllers } from './Review.controller';
 import { ReviewValidations } from './Review.validation';
 import purifyRequest from '../../middlewares/purifyRequest';
 
-const user = Router();
+const all = Router();
 {
-  user.post(
+  all.post(
     '/give-review',
     purifyRequest(ReviewValidations.giveReview),
     ReviewControllers.giveReview,
   );
 }
 
-export const ReviewRoutes = { user };
+export const ReviewRoutes = { all };
