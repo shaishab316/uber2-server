@@ -198,7 +198,7 @@ export const UserServices = {
 
         is_verification_pending: true,
       },
-      omit: userOmit.USER,
+      omit: userSelfOmit.USER,
     });
   },
 

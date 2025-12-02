@@ -12,14 +12,14 @@ import {
   verifyPassword,
 } from './Auth.utils';
 import { ZodError } from 'zod';
-import { prisma } from '../../../utils/db';
-import ServerError from '../../../errors/ServerError';
+import { prisma, User as TUser } from '@/utils/db';
+import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
-import config from '../../../config';
-import { errorLogger } from '../../../utils/logger';
+import config from '@/config';
+import { errorLogger } from '@/utils/logger';
 import ms from 'ms';
 import { Response } from 'express';
-import { generateOTP, validateOTP } from '../../../utils/crypto/otp';
+import { generateOTP, validateOTP } from '@/utils/crypto/otp';
 import { userSelfOmit } from '../user/User.constant';
 import { emailTemplate } from '@/templates';
 import emailQueue from '@/utils/mq/emailQueue';
@@ -225,18 +225,16 @@ export const AuthServices = {
   },
 
   async modifyPassword({
-    userId,
+    user,
     password,
   }: {
-    userId: string;
+    user: Pick<TUser, 'id' | 'role'>;
     password: string;
   }) {
     return prisma.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: { password: await hashPassword(password) },
-      select: {
-        id: true,
-      },
+      omit: userSelfOmit[user.role],
     });
   },
 };

@@ -5,6 +5,7 @@ import { AuthServices } from '../auth/Auth.service';
 import { prisma, User as TUser } from '@/utils/db';
 import { enum_decode } from '@/utils/transform/enum';
 import { capitalize } from '@/utils/transform/capitalize';
+import { userSelfOmit } from './User.constant';
 
 export const UserControllers = {
   register: catchAsync(async ({ body }, res) => {
@@ -79,10 +80,13 @@ export const UserControllers = {
   }),
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  profile: catchAsync(({ user: { password: _, ...user } }) => {
+  profile: catchAsync(async ({ user }) => {
     return {
       message: 'Profile retrieved successfully!',
-      data: user,
+      data: await prisma.user.findUnique({
+        where: { id: user.id },
+        omit: userSelfOmit[user.role],
+      }),
     };
   }),
 

@@ -82,8 +82,8 @@ export const AuthControllers = {
         );
       }
 
-      await AuthServices.modifyPassword({
-        userId: user.id,
+      const updatedUser = await AuthServices.modifyPassword({
+        user,
         password: body.password,
       });
 
@@ -98,7 +98,7 @@ export const AuthControllers = {
 
       return {
         message: 'Password reset successfully!',
-        data: { access_token, refresh_token, user },
+        data: { access_token, refresh_token, user: updatedUser },
       };
     },
   ),
@@ -116,7 +116,7 @@ export const AuthControllers = {
     }
 
     await AuthServices.modifyPassword({
-      userId: user.id,
+      user,
       password: body.newPassword,
     });
 

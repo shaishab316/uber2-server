@@ -18,41 +18,39 @@ const auth = ({
   token_type?: TToken;
   validators?: ((user: TUser) => void)[];
 } = {}) =>
-  catchAsync(async (req, _, next) => {
-    const token = req.headers.authorization; //Todo: || req.cookies[token_type];
+  catchAsync(
+    async (req, _, next) => {
+      const token = req.headers.authorization; //Todo: || req.cookies[token_type];
 
-    const id = decodeToken(token, token_type)?.uid;
+      const id = decodeToken(token, token_type)?.uid;
 
-    if (!id)
-      throw new ServerError(
-        StatusCodes.UNAUTHORIZED,
-        'Your session has expired. Login again.',
-      );
-
-    const user = await prisma.user.update({
-      where: { id },
-      data: { last_online_at: new Date() },
-      include: {
-        wallet: {
-          select: {
-            balance: true,
+      const user = await prisma.user.update({
+        where: { id },
+        data: { last_online_at: new Date() },
+        include: {
+          wallet: {
+            select: {
+              balance: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!user)
-      throw new ServerError(
-        StatusCodes.UNAUTHORIZED,
-        'Maybe your account has been deleted. Register again.',
+      await Promise.all(validators.map(fn => fn(user)));
+
+      Object.assign(req, { user });
+
+      next();
+    },
+    (_err, _req, _res, next) => {
+      next(
+        new ServerError(
+          StatusCodes.UNAUTHORIZED,
+          'Your session has expired. Login again.',
+        ),
       );
-
-    await Promise.all(validators.map(fn => fn(user)));
-
-    Object.assign(req, { user });
-
-    next();
-  });
+    },
+  );
 
 auth.all = auth();
 

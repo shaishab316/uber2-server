@@ -1,5 +1,5 @@
 /* eslint-disable no-var */
-import { User as TUser } from '../../prisma';
+import { User as TUser } from '@/utils/db';
 
 declare global {
   namespace Express {
