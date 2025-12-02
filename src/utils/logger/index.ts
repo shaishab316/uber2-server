@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { createLogger, format, transports } from 'winston';
-import config from '../../config';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import config from '@/config';
 import stripAnsi from 'strip-ansi';
 import path from 'path';
 
@@ -39,8 +40,11 @@ export const logger = createLogger({
   level: 'info',
   transports: [
     new transports.Console({ format: consoleFormat }),
-    new transports.File({
-      filename: path.join(logDir, 'app.log'),
+    new DailyRotateFile({
+      filename: path.join(logDir, 'app-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '30d',
       level: 'info',
       format: fileFormat,
     }),
@@ -54,8 +58,11 @@ export const errorLogger = createLogger({
   level: 'error',
   transports: [
     new transports.Console({ format: consoleFormat }),
-    new transports.File({
-      filename: path.join(logDir, 'error.log'),
+    new DailyRotateFile({
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '90d',
       level: 'error',
       format: fileFormat,
     }),

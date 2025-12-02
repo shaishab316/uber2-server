@@ -2,6 +2,7 @@ import { TList } from '../query/Query.interface';
 import {
   userSearchableFields as searchFields,
   userOmit,
+  userSelfOmit,
 } from './User.constant';
 import { Prisma, prisma, User as TUser } from '@/utils/db';
 import { TPagination } from '@/utils/server/serveResponse';
@@ -17,10 +18,10 @@ import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
 import { errorLogger } from '@/utils/logger';
 import config from '@/config';
-import { otp_send_template } from '@/templates';
 import { sendEmail } from '@/utils/sendMail';
 import { hashPassword } from '../auth/Auth.utils';
 import { generateOTP } from '@/utils/crypto/otp';
+import { emailTemplate } from '@/templates';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {
@@ -46,7 +47,7 @@ export const UserServices = {
         role,
         wallet: { create: {} },
       },
-      omit: userOmit[role],
+      omit: userSelfOmit[role],
     });
 
     try {
@@ -59,7 +60,7 @@ export const UserServices = {
         await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-          html: otp_send_template({
+          html: await emailTemplate({
             userName: user.name,
             otp,
             template: 'account_verify',

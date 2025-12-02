@@ -29,8 +29,9 @@ const auth = ({
         'Your session has expired. Login again.',
       );
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.update({
       where: { id },
+      data: { last_online_at: new Date() },
       include: {
         wallet: {
           select: {

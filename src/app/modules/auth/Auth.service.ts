@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { $ZodIssue } from 'zod/v4/core';
-import { User as TUser } from '@/utils/db';
 import {
   TAccountVerify,
   TAccountVerifyOtpSend,
@@ -18,15 +17,15 @@ import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import config from '../../../config';
 import { sendEmail } from '../../../utils/sendMail';
-import { otp_send_template } from '../../../templates';
 import { errorLogger } from '../../../utils/logger';
 import ms from 'ms';
 import { Response } from 'express';
 import { generateOTP, validateOTP } from '../../../utils/crypto/otp';
 import { userSelfOmit } from '../user/User.constant';
+import { emailTemplate } from '@/templates';
 
 export const AuthServices = {
-  async login({ password, email, phone }: TUserLogin): Promise<Partial<TUser>> {
+  async login({ password, email, phone }: TUserLogin) {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
@@ -51,7 +50,7 @@ export const AuthServices = {
           sendEmail({
             to: email,
             subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-            html: otp_send_template({
+            html: await emailTemplate({
               userName: user.name,
               otp,
               template: 'account_verify',
@@ -62,10 +61,10 @@ export const AuthServices = {
       }
     }
 
-    return {
-      ...user,
-      password: undefined,
-    };
+    return prisma.user.findUnique({
+      where: { id: user.id },
+      omit: userSelfOmit[user.role],
+    });
   },
 
   validEmailORPhone({ email, phone }: { email?: string; phone?: string }) {
@@ -148,7 +147,7 @@ export const AuthServices = {
         sendEmail({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-          html: otp_send_template({
+          html: await emailTemplate({
             userName: user.name,
             otp,
             template: 'account_verify',
@@ -176,10 +175,10 @@ export const AuthServices = {
 
     try {
       if (email)
-        sendEmail({
+        await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Password Reset OTP is ⚡ ${otp} ⚡.`,
-          html: otp_send_template({
+          html: await emailTemplate({
             userName: user.name,
             otp,
             template: 'reset_password',
