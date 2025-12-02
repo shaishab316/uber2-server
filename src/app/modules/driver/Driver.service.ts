@@ -12,7 +12,7 @@ import {
   TSetupVehicle,
   TToggleOnline,
 } from './Driver.interface';
-import { deleteFile, deleteFiles } from '../../middlewares/capture';
+import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 
 export const DriverServices = {
   async superGetPendingDriver({ page, limit, search }: TList) {
@@ -74,8 +74,10 @@ export const DriverServices = {
     });
 
     // Clean up old files
-    if (driver?.avatar) await deleteFile(driver.avatar);
-    if (driver?.nid_photos) await deleteFiles(driver.nid_photos);
+    if (payload?.avatar && driver?.avatar)
+      await deleteFilesQueue.add([driver.avatar]);
+    if (payload?.nid_photos && driver?.nid_photos)
+      await deleteFilesQueue.add(driver.nid_photos);
 
     return prisma.user.update({
       where: { id: driver_id },
@@ -93,8 +95,9 @@ export const DriverServices = {
     });
 
     if (driver?.vehicle_registration_photos)
-      await deleteFiles(driver.vehicle_registration_photos);
-    if (driver?.vehicle_photos) await deleteFiles(driver.vehicle_photos);
+      await deleteFilesQueue.add(driver.vehicle_registration_photos);
+    if (driver?.vehicle_photos)
+      await deleteFilesQueue.add(driver.vehicle_photos);
 
     return prisma.user.update({
       where: { id: driver_id },

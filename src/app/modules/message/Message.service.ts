@@ -8,7 +8,7 @@ import type {
 } from './Message.interface';
 import { messageSearchableFields } from './Message.constant';
 import type { TPagination } from '../../../utils/server/serveResponse';
-import { deleteFiles } from '../../middlewares/capture';
+import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 
 /**
  * All message related services
@@ -72,7 +72,7 @@ export const MessageServices = {
       throw new ServerError(StatusCodes.BAD_REQUEST, 'Message already deleted');
     }
 
-    await deleteFiles(message.media_urls);
+    await deleteFilesQueue.add(message.media_urls);
 
     return prisma.message.update({
       where: { id: message_id },

@@ -87,6 +87,9 @@ const config = {
       regex: '^https?:\\/\\/.*$|^$',
       down: 'Database info - end',
     }),
+    redis: env('redis url', `redis://localhost:6379`, {
+      regex: '^redis://.*',
+    }),
   },
 
   bcrypt_salt_rounds: env('bcrypt salt rounds', 10, {

@@ -1,28 +1,38 @@
 /* eslint-disable no-console */
 import nodemailer from 'nodemailer';
 import config from '../config';
-import { errorLogger, logger } from './logger';
-import { StatusCodes } from 'http-status-codes';
-import ServerError from '../errors/ServerError';
 import chalk from 'chalk';
+import type { TSendMail } from '../types/utils.types';
+import ora from 'ora';
+
 const { host, port, user, pass, from } = config.email;
 const { mock_mail } = config.server;
 
+/**
+ * Nodemailer transporter
+ *
+ * used to send emails
+ */
 let transporter = nodemailer.createTransport({
   host,
   port,
-  secure: false,
+  secure: false, //! true for 465, false for other ports
   auth: {
     user,
     pass,
   },
 });
 
+/**
+ * If mock mail is enabled, use a mock transporter
+ *
+ * used for testing
+ */
 if (mock_mail) {
-  logger.info(chalk.yellow('Mock mail enabled'));
+  console.info(chalk.yellow('Mock mail enabled'));
   transporter = {
     sendMail: ({ to = 'mock_mail' }) => {
-      logger.info(chalk.green('Mock mail sent'));
+      console.info(chalk.green('Mock mail sent'));
       return {
         accepted: [to],
       };
@@ -32,21 +42,17 @@ if (mock_mail) {
 }
 
 /**
- * Send email
- * @param {TEmailProps} values - Email values
- * @returns void
+ * Send email using nodemailer
+ *
+ * @param {TSendMail} { to, subject, html }
+ *
+ * @deprecated use emailQueue
  */
 export const sendEmail = async ({
   to,
   subject,
   html,
-}: {
-  to: string;
-  subject: string;
-  html: string;
-}) => {
-  logger.info(chalk.yellow('Sending email...'), to);
-
+}: TSendMail): Promise<void> => {
   if (mock_mail) {
     console.log(chalk.blue('sent mail'), {
       to,
@@ -54,7 +60,13 @@ export const sendEmail = async ({
     });
   }
 
+  const spinner = ora({
+    color: 'yellow',
+    text: `📧 Sending email to ${chalk.cyan(to)}...`,
+  }).start();
+
   try {
+    //? Send email
     const { accepted } = await transporter.sendMail({
       from,
       to,
@@ -62,12 +74,14 @@ export const sendEmail = async ({
       html,
     });
 
-    if (!accepted.length)
-      throw new ServerError(StatusCodes.SERVICE_UNAVAILABLE, 'Mail not sent');
-
-    logger.info(chalk.green(`✔ Mail send successfully. On: ${accepted[0]}`));
-  } catch (error: any) {
-    errorLogger.error(chalk.red('❌ Email send failed'), error.message);
-    throw new ServerError(StatusCodes.SERVICE_UNAVAILABLE, error.message);
+    if (!accepted.length) {
+      spinner.fail(chalk.red(`Email not accepted by server.`));
+    } else {
+      spinner.succeed(chalk.green(`Email sent successfully to ${accepted[0]}`));
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      spinner.fail(chalk.red(`Failed to send email to ${to}`));
+    }
   }
 };

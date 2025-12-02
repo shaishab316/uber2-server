@@ -16,13 +16,13 @@ import { prisma } from '../../../utils/db';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import config from '../../../config';
-import { sendEmail } from '../../../utils/sendMail';
 import { errorLogger } from '../../../utils/logger';
 import ms from 'ms';
 import { Response } from 'express';
 import { generateOTP, validateOTP } from '../../../utils/crypto/otp';
 import { userSelfOmit } from '../user/User.constant';
 import { emailTemplate } from '@/templates';
+import emailQueue from '@/utils/mq/emailQueue';
 
 export const AuthServices = {
   async login({ password, email, phone }: TUserLogin) {
@@ -47,7 +47,7 @@ export const AuthServices = {
 
       try {
         if (email)
-          sendEmail({
+          await emailQueue.add({
             to: email,
             subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
             html: await emailTemplate({
@@ -144,7 +144,7 @@ export const AuthServices = {
 
     try {
       if (email)
-        sendEmail({
+        await emailQueue.add({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
           html: await emailTemplate({
@@ -175,7 +175,7 @@ export const AuthServices = {
 
     try {
       if (email)
-        await sendEmail({
+        await emailQueue.add({
           to: email,
           subject: `Your ${config.server.name} Password Reset OTP is ⚡ ${otp} ⚡.`,
           html: await emailTemplate({
