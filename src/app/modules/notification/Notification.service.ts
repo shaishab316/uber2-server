@@ -1,11 +1,24 @@
 import { Prisma } from '../../../../prisma';
 import { prisma } from '../../../utils/db';
 import { TPagination } from '../../../utils/server/serveResponse';
+import { SocketServices } from '../socket/Socket.service';
 import { notificationSearchableFields } from './Notification.constants';
 import { TGetAllNotificationsArgs } from './Notification.interface';
 
 export const NotificationServices = {
   async createNotification(payload: Prisma.NotificationCreateArgs['data']) {
+    const user = await prisma.user.findUnique({
+      where: { id: payload.user_id },
+      select: { is_online: true },
+    });
+
+    if (user?.is_online) {
+      SocketServices.getIO()?.to(payload.user_id).emit('notification', payload);
+
+      //? if user is online, mark notification as read
+      payload.is_read = true;
+    }
+
     //? create a new notification
     return prisma.notification.create({
       data: payload,

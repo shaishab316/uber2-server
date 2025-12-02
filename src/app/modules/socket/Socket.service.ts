@@ -6,6 +6,7 @@ import auth from './Socket.middleware';
 import { TAuthenticatedSocket } from './Socket.interface';
 import { logger } from '../../../utils/logger';
 import chalk from 'chalk';
+import { prisma } from '../../../utils/db';
 
 let io: IOServer | null = null;
 const onlineUsers = new Set<string>();
@@ -45,8 +46,8 @@ export const SocketServices = {
         logger.error('Root namespace handler error:', err);
       }
 
-      socket.on('disconnect', () => {
-        this._trackDisconnection(user.id, socket.id);
+      socket.on('disconnect', async () => {
+        await this._trackDisconnection(user.id, socket.id);
         logger.info(`👤 User (${user.name}) disconnected from /`);
       });
     });
@@ -83,13 +84,13 @@ export const SocketServices = {
     userSockets.get(userId)!.add(socketId);
   },
 
-  _trackDisconnection(userId: string, socketId: string) {
+  async _trackDisconnection(userId: string, socketId: string) {
     const set = userSockets.get(userId);
     if (set) {
       set.delete(socketId);
       if (set.size === 0) {
         userSockets.delete(userId);
-        this._markOffline(userId);
+        await this._markOffline(userId);
       }
     }
   },
@@ -99,9 +100,15 @@ export const SocketServices = {
     this._emitOnline();
   },
 
-  _markOffline(userId: string) {
+  async _markOffline(userId: string) {
     onlineUsers.delete(userId);
     this._emitOnline();
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { is_online: false },
+      select: { id: true },
+    });
   },
 
   _emitOnline() {

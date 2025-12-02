@@ -13,8 +13,10 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   try {
     const { uid } = decodeToken(token, 'access_token');
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.update({
       where: { id: uid },
+      //? Set user as online on every socket connection
+      data: { is_online: true },
       omit: userOmit,
     });
 
