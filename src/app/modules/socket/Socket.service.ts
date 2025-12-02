@@ -106,7 +106,7 @@ export const SocketServices = {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { is_online: false },
+      data: { is_online: false, last_online_at: new Date() },
       select: { id: true },
     });
   },

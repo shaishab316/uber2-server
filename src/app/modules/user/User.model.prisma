@@ -52,7 +52,8 @@ model User {
   //! end
 
   //! online status
-  is_online Boolean @default(false)
+  is_online      Boolean   @default(false)
+  last_online_at DateTime? @default(now())
   //! end
 
   wallet           Wallet?       @relation("UserWallet")
