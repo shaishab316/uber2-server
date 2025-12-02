@@ -42,7 +42,7 @@ export const AuthServices = {
     if (!user.is_verified) {
       const otp = generateOTP({
         tokenType: 'access_token',
-        userId: user.id,
+        otpId: user.id + user.otp_id,
       });
 
       try {
@@ -139,7 +139,7 @@ export const AuthServices = {
 
     const otp = generateOTP({
       tokenType: 'access_token',
-      userId: user.id,
+      otpId: user.id + user.otp_id,
     });
 
     try {
@@ -170,7 +170,7 @@ export const AuthServices = {
 
     const otp = generateOTP({
       tokenType: 'reset_token',
-      userId: user.id,
+      otpId: user.id + user.otp_id,
     });
 
     try {
@@ -199,7 +199,7 @@ export const AuthServices = {
 
     const user = await prisma.user.findFirst({
       where: { OR: [{ email }, { phone }] },
-      select: { role: true, id: true },
+      select: { role: true, id: true, otp_id: true },
     });
 
     if (!user)
@@ -209,7 +209,7 @@ export const AuthServices = {
       !validateOTP({
         otp,
         tokenType: token_type,
-        userId: user.id,
+        otpId: user.id + user.otp_id,
       })
     )
       throw new ServerError(StatusCodes.UNAUTHORIZED, 'Incorrect OTP');
@@ -218,7 +218,7 @@ export const AuthServices = {
       where: { id: user.id },
       data: {
         is_verified: true,
-        is_active: true, //TODO: account activation
+        otp_id: { increment: 1 },
       },
       omit: userSelfOmit[user.role],
     });

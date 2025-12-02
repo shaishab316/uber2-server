@@ -53,7 +53,7 @@ export const UserServices = {
     try {
       const otp = generateOTP({
         tokenType: 'access_token',
-        userId: user.id,
+        otpId: user.id + user.otp_id,
       });
 
       if (email)

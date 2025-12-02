@@ -1,7 +1,7 @@
 import { totp } from 'otplib';
-import config from '../../config';
-import { TToken } from '../../app/modules/auth/Auth.utils';
+import config from '@/config';
 import ms from 'ms';
+import { TGenerateOTP, TValidateOTP } from '@/types/utils.types';
 
 totp.options = {
   digits: config?.otp?.length ?? 6,
@@ -10,34 +10,13 @@ totp.options = {
 };
 
 /**
- * Generate numeric OTP for a user
- * @param userId User ID
- * @param tokenType Token type
- * @returns OTP string
+ * Generate numeric OTP using TOTP
  */
-export const generateOTP = ({
-  tokenType,
-  userId,
-}: {
-  userId: string;
-  tokenType: TToken;
-}): string => totp.generate(config.jwt[tokenType].secret + userId);
+export const generateOTP: TGenerateOTP = ({ tokenType, otpId }) =>
+  totp.generate(config.jwt[tokenType].secret + otpId);
 
 /**
- * Validate OTP for a user
- * @param userId User ID
- * @param tokenType Token type
- * @param otp OTP string
- * @returns boolean
+ * Validate OTP using TOTP
  */
-// export const validateOTP = ({
-//   otp,
-//   tokenType,
-//   userId,
-// }: {
-//   userId: string;
-//   tokenType: TToken;
-//   otp: string;
-// }): boolean => totp.check(otp, config.jwt[tokenType].secret + userId);
-// TODO: validateOTP
-export const validateOTP: any = () => true;
+export const validateOTP: TValidateOTP = ({ otp, tokenType, otpId }) =>
+  totp.check(otp, config.jwt[tokenType].secret + otpId);

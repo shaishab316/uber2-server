@@ -11,6 +11,9 @@ const selfOmit = {
   location_lng: true,
   location_lat: true,
   location_type: true,
+  is_online: true,
+  last_online_at: true,
+  nid_photos: true,
 } satisfies Prisma.UserOmit;
 
 export const userDefaultOmit = {
@@ -25,6 +28,8 @@ export const userDefaultOmit = {
   date_of_birth: true,
   nid_photos: true,
   location_address: true,
+  is_online: false,
+  last_online_at: false,
 } satisfies Prisma.UserOmit;
 
 export const userUserOmit = {

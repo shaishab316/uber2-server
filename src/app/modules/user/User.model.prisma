@@ -11,6 +11,7 @@ model User {
   is_verified Boolean   @default(false)
   is_active   Boolean   @default(false)
   is_admin    Boolean   @default(false)
+  otp_id      Int       @default(0)
 
   // only for admin verification
   is_verification_pending Boolean?
