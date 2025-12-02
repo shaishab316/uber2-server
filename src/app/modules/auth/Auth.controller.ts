@@ -1,7 +1,7 @@
 import { AuthServices } from './Auth.service';
 import catchAsync from '../../middlewares/catchAsync';
 import { TToken, verifyPassword } from './Auth.utils';
-import ServerError from '../../../errors/ServerError';
+import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 
 export const AuthControllers = {

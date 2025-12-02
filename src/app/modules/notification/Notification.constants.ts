@@ -1,4 +1,4 @@
-import { Notification as TNotification } from '../../../../prisma';
+import { Notification as TNotification } from '@/utils/db';
 
 export const notificationSearchableFields = [
   'title',

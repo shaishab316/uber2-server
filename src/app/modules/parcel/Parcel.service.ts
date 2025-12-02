@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
-import { EParcelStatus } from '../../../../prisma';
-import ServerError from '../../../errors/ServerError';
-import { prisma } from '../../../utils/db';
+import ServerError from '@/errors/ServerError';
+import { EParcelStatus, prisma } from '@/utils/db';
 import type {
   TParcelRefreshLocation,
   TRequestForParcel,

@@ -1,4 +1,4 @@
-import { EUserRole, Prisma } from '../../../../prisma';
+import { EUserRole, Prisma } from '@/utils/db';
 import { prisma } from '../../../utils/db';
 import { TList } from '../query/Query.interface';
 import {

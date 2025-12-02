@@ -3,9 +3,8 @@ import {
   userSearchableFields as searchFields,
   userOmit,
 } from './User.constant';
-import { prisma } from '../../../utils/db';
-import { Prisma, User as TUser } from '../../../../prisma';
-import { TPagination } from '../../../utils/server/serveResponse';
+import { Prisma, prisma, User as TUser } from '@/utils/db';
+import { TPagination } from '@/utils/server/serveResponse';
 import { deleteFile, deleteFiles } from '../../middlewares/capture';
 import {
   TGetPendingUsers,
@@ -13,15 +12,15 @@ import {
   TUserEdit,
   TUserRegister,
 } from './User.interface';
-import ServerError from '../../../errors/ServerError';
+import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
-import { errorLogger } from '../../../utils/logger';
-import config from '../../../config';
-import { otp_send_template } from '../../../templates';
-import { sendEmail } from '../../../utils/sendMail';
+import { errorLogger } from '@/utils/logger';
+import config from '@/config';
+import { otp_send_template } from '@/templates';
+import { sendEmail } from '@/utils/sendMail';
 import { hashPassword } from '../auth/Auth.utils';
-import { generateOTP } from '../../../utils/crypto/otp';
+import { generateOTP } from '@/utils/crypto/otp';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {

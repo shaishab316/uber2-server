@@ -7,6 +7,7 @@
   "version": "1.0.1",
   "description": "A driver management platform for Uber-like services",
   "main": "dist/server.js",
+  "type": "module",
   "author": {
     "name": "Shaishab Chandra Shil",
     "github": "https://github.com/shaishab316"
@@ -17,22 +18,24 @@
   },
   "scripts": {
     "prepare": "simple-git-hooks",
-    "new-module": "node ./src/app/modules/.builder.js",
-    "build": "node esbuild.js",
+    "new-module": "tsx ./src/modules/.builder.ts",
+    "build": "tsx esbuild.mts",
     "start": "node dist/server.js",
-    "dev": "set DEBUG=socket.io* && tsx --watch --inspect src/server.ts",
-    "stripe": "tsx scripts/stripe.ts",
-    "seedAdmin": "tsx scripts/seedAdmin.ts",
-    "seedIndex": "tsx scripts/seedIndex.ts",
+    "dev": "tsx --watch src/server.ts",
+    "dev-f5": "npm run type-check && set DEBUG=socket.io* && tsx --watch --inspect src/server.ts",
+    "seed-env": "tsx src/config",
+    "seed-admin": "tsx scripts/seedAdmin.ts",
+    "seed-stripe": "tsx scripts/seedStripe.ts",
     "lint": "eslint src --ignore-path .gitignore --ext .ts",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
     "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma:studio": "npx prisma studio",
-    "prisma:reset": "npx prisma migrate reset --force",
-    "prisma:migrate": "npx prisma migrate dev",
-    "prisma:generate": "rm -rf prisma && npx prisma generate",
-    "prisma:seed": "npx prisma db seed"
+    "prisma-studio": "npx prisma studio",
+    "prisma-reset": "npx prisma migrate reset --force",
+    "prisma-migrate": "npx prisma migrate dev",
+    "prisma-generate": "npx prisma generate",
+    "prisma-clean": "rm -rf prisma/client",
+    "prisma-seed": "npx prisma db seed"
   },
   "keywords": [
     "uber",
@@ -42,9 +45,7 @@
   ],
   "license": "MIT",
   "simple-git-hooks": {
-    "pre-commit": [
-      "npm run lint && npm run type-check && npm run prettier"
-    ]
+    "pre-commit": "npm run lint && npm run type-check && npm run prettier"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
@@ -53,10 +54,12 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/inquirer": "^9.0.9",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.11",
     "@types/nodemailer": "^6.4.16",
+    "@types/pg": "^8.15.6",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
     "esbuild": "^0.25.11",
@@ -65,14 +68,15 @@
     "inquirer": "^7.3.3",
     "prettier": "^3.4.2",
     "prettier-eslint": "^16.3.0",
-    "prisma": "^6.18.0",
+    "prisma": "^7.0.0",
     "semantic-release": "^24.2.7",
     "simple-git-hooks": "^2.13.1",
     "tsx": "^4.20.6",
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@prisma/client": "^6.18.0",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
     "@types/node": "^24.3.0",
     "axios": "^1.7.7",
     "bcryptjs": "^3.0.2",
@@ -80,6 +84,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "esbuild-node-externals": "^1.20.1",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "http-status-codes": "^2.3.0",
@@ -90,10 +95,13 @@
     "multer": "^1.4.4",
     "node-cron": "^4.2.1",
     "nodemailer": "^6.9.16",
+    "ora": "^9.0.0",
     "otplib": "^12.0.1",
+    "pg": "^8.16.3",
     "socket.io": "^4.8.1",
     "strip-ansi": "^7.1.2",
     "stripe": "^19.1.0",
+    "table": "^6.9.0",
     "winston": "^3.13.0",
     "zod": "^4.1.5"
   }

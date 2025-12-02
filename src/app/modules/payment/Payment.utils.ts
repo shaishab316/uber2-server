@@ -1,7 +1,6 @@
 import Stripe from 'stripe';
-import config from '../../../config';
-import { prisma } from '../../../utils/db';
-import { ETransactionType } from '../../../../prisma';
+import config from '@/config';
+import { ETransactionType, prisma } from '@/utils/db';
 
 /**
  * Stripe instance

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { EGender, EUserRole } from '../../../../prisma';
-import { enum_encode } from '../../../utils/transform/enum';
-import { date } from '../../../utils/transform/date';
+import { EGender, EUserRole } from '@/utils/db';
+import { enum_encode } from '@/utils/transform/enum';
+import { date } from '@/utils/transform/date';
 
 export const UserValidations = {
   register: z.object({

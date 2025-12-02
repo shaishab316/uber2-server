@@ -1,7 +1,7 @@
 import z from 'zod';
-import { date } from '../../../utils/transform/date';
-import { enum_encode } from '../../../utils/transform/enum';
-import { EGender } from '../../../../prisma';
+import { date } from '@/utils/transform/date';
+import { enum_encode } from '@/utils/transform/enum';
+import { EGender } from '@/utils/db';
 
 export const DriverValidations = {
   setupDriverProfile: z.object({

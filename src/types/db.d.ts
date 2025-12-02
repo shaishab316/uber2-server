@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../prisma';
+import { PrismaClient } from '@/utils/db';
 
 export type TModels = {
   [K in keyof PrismaClient]: PrismaClient[K] extends { findMany: any }

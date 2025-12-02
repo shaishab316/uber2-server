@@ -1,7 +1,6 @@
-import { prisma } from '../../../utils/db';
+import { prisma, Review } from '@/utils/db';
 import { TGiveReview } from './Review.interface';
 import { ZodError } from 'zod';
-import { Review } from '../../../../prisma';
 
 export const ReviewServices = {
   async giveReview({ reviewer_id, user_id, ...payload }: TGiveReview) {

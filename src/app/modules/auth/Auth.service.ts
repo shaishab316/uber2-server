@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { $ZodIssue } from 'zod/v4/core/errors.cjs';
-import { User as TUser } from '../../../../prisma';
+import { $ZodIssue } from 'zod/v4/core';
+import { User as TUser } from '@/utils/db';
 import {
   TAccountVerify,
   TAccountVerifyOtpSend,
@@ -200,6 +200,7 @@ export const AuthServices = {
 
     const user = await prisma.user.findFirst({
       where: { OR: [{ email }, { phone }] },
+      select: { role: true, id: true },
     });
 
     if (!user)

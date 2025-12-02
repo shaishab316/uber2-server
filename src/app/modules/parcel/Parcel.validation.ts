@@ -1,6 +1,6 @@
 import z from 'zod';
-import { EParcelType } from '../../../../prisma';
-import { exists } from '../../../utils/db/exists';
+import { EParcelType } from '@/utils/db';
+import { exists } from '@/utils/db/exists';
 
 export const ParcelValidations = {
   //! socket

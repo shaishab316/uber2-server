@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Namespace, Socket } from 'socket.io';
-import { User as TUser } from '../../../../prisma';
+import { User as TUser } from '@/utils/db';
 
 export type TSocketHandler = ({
   io,

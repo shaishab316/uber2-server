@@ -1,6 +1,5 @@
-import { Prisma } from '../../../../prisma';
-import { prisma } from '../../../utils/db';
-import { TPagination } from '../../../utils/server/serveResponse';
+import { prisma, type Prisma } from '@/utils/db';
+import { TPagination } from '@/utils/server/serveResponse';
 import { SocketServices } from '../socket/Socket.service';
 import { notificationSearchableFields } from './Notification.constants';
 import { TGetAllNotificationsArgs } from './Notification.interface';

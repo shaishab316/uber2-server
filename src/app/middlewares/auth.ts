@@ -4,7 +4,7 @@ import ServerError from '../../errors/ServerError';
 import { decodeToken, TToken } from '../modules/auth/Auth.utils';
 import catchAsync from './catchAsync';
 import { prisma } from '../../utils/db';
-import { EUserRole, User as TUser } from '../../../prisma';
+import { EUserRole, User as TUser } from '@/utils/db';
 
 /**
  * Middleware to authenticate and authorize requests based on user roles

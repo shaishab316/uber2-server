@@ -2,10 +2,7 @@
 import { Server } from 'http';
 import cron from 'node-cron';
 import { prisma } from '../../../utils/db';
-import {
-  ParcelHelper as TParcelHelper,
-  Parcel as TParcel,
-} from '../../../../prisma';
+import { ParcelHelper as TParcelHelper, Parcel as TParcel } from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
 

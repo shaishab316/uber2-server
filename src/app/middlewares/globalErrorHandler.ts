@@ -3,18 +3,18 @@ import { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import chalk from 'chalk';
 import { ZodError } from 'zod';
-import config from '../../config';
-import ServerError from '../../errors/ServerError';
-import handleZodError from '../../errors/handleZodError';
-import { errorLogger } from '../../utils/logger';
-import { TErrorHandler, TErrorMessage } from '../../types/errors';
+import config from '@/config';
+import ServerError from '@/errors/ServerError';
+import handleZodError from '@/errors/handleZodError';
+import { errorLogger } from '@/utils/logger';
+import { TErrorHandler, TErrorMessage } from '@/types/errors';
 import multer from 'multer';
-import handleMulterError from '../../errors/handleMulterError';
-import { Prisma } from '../../../prisma';
+import handleMulterError from '@/errors/handleMulterError';
+import { Prisma } from '@/utils/db';
 import {
   handlePrismaRequestError,
   handlePrismaValidationError,
-} from '../../errors/handlePrismaErrors';
+} from '@/errors/handlePrismaErrors';
 import { deleteFiles } from './capture';
 
 export const defaultError: TErrorHandler = {

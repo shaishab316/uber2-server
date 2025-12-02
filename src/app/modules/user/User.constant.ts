@@ -1,4 +1,4 @@
-import { EUserRole, Prisma, User as TUser } from '../../../../prisma';
+import { EUserRole, Prisma, User as TUser } from '@/utils/db';
 
 export const userSearchableFields = [
   'name',

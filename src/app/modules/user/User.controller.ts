@@ -2,10 +2,9 @@ import { UserServices } from './User.service';
 import catchAsync from '../../middlewares/catchAsync';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
-import { User as TUser } from '../../../../prisma';
-import { prisma } from '../../../utils/db';
-import { enum_decode } from '../../../utils/transform/enum';
-import { capitalize } from '../../../utils/transform/capitalize';
+import { prisma, User as TUser } from '@/utils/db';
+import { enum_decode } from '@/utils/transform/enum';
+import { capitalize } from '@/utils/transform/capitalize';
 
 export const UserControllers = {
   register: catchAsync(async ({ body }, res) => {

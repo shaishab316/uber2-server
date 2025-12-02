@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { TModelZod } from '../../../types/zod';
-import { Trip as TTrip } from '../../../../prisma';
-import { exists } from '../../../utils/db/exists';
+import { TModelZod } from '@/types/zod';
+import { Trip as TTrip } from '@/utils/db';
+import { exists } from '@/utils/db/exists';
 
 export const TripValidations = {
   //! Socket
