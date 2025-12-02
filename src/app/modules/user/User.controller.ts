@@ -114,4 +114,14 @@ export const UserControllers = {
       data,
     };
   }),
+
+  getPendingUsers: catchAsync(async ({ query }) => {
+    const { meta, users } = await UserServices.getPendingUsers(query);
+
+    return {
+      message: 'Pending users retrieved successfully!',
+      meta,
+      data: users,
+    };
+  }),
 };

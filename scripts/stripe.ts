@@ -5,7 +5,7 @@ import {
 } from '../src/app/modules/payment/Payment.utils';
 import { type TStripWebhookEvent } from '../src/app/modules/payment/Payment.interface';
 import config from '../src/config';
-import env from '../src/utils/env/env';
+import env from '../src/utils/env';
 import chalk from 'chalk';
 
 (async () => {

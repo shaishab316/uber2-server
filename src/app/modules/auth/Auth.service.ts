@@ -23,7 +23,7 @@ import { errorLogger } from '../../../utils/logger';
 import ms from 'ms';
 import { Response } from 'express';
 import { generateOTP, validateOTP } from '../../../utils/crypto/otp';
-import { userOmit } from '../user/User.constant';
+import { userSelfOmit } from '../user/User.constant';
 
 export const AuthServices = {
   async login({ password, email, phone }: TUserLogin): Promise<Partial<TUser>> {
@@ -220,7 +220,7 @@ export const AuthServices = {
         is_verified: true,
         is_active: true, //TODO: account activation
       },
-      omit: userOmit,
+      omit: userSelfOmit[user.role],
     });
   },
 

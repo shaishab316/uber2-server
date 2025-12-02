@@ -4,7 +4,7 @@ import { decodeToken } from '../auth/Auth.utils';
 import { prisma } from '../../../utils/db';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
-import { userOmit } from '../user/User.constant';
+import { userSelfOmit } from '../user/User.constant';
 
 const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   const token =
@@ -17,7 +17,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
       where: { id: uid },
       //? Set user as online on every socket connection
       data: { is_online: true },
-      omit: userOmit,
+      omit: userSelfOmit.USER,
     });
 
     if (!user)

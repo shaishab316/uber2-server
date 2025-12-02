@@ -29,8 +29,8 @@ fileTypes.map((filetype: string) =>
 
 export default injectRoutes(appRouter, {
   // No auth
-  '/auth': [AuthRoutes],
-  '/payments': [PaymentRoutes.user],
+  '/auth': [AuthRoutes.free],
+  '/payments': [PaymentRoutes.free],
 
   // Free auth
   '/profile': [auth.all, UserRoutes.all],

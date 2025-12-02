@@ -4,11 +4,11 @@ import purifyRequest from '../../middlewares/purifyRequest';
 import { PaymentValidations } from './Payment.validation';
 import auth from '../../middlewares/auth';
 
-const user = Router();
+const free = Router();
 {
-  user.all('/stripe/webhook', PaymentControllers.stripeWebhook);
+  free.all('/stripe/webhook', PaymentControllers.stripeWebhook);
 
-  user.get(
+  free.get(
     '/topup',
     auth.all,
     purifyRequest(PaymentValidations.topup),
@@ -16,4 +16,4 @@ const user = Router();
   );
 }
 
-export const PaymentRoutes = { user };
+export const PaymentRoutes = { free };

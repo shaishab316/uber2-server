@@ -37,6 +37,15 @@ const admin = Router();
     purifyRequest(QueryValidations.exists('userId', 'user')),
     UserControllers.superDeleteAccount,
   );
+
+  /**
+   * GET Pending Users
+   */
+  admin.get(
+    '/pending-users',
+    purifyRequest(QueryValidations.list),
+    UserControllers.getPendingUsers,
+  );
 }
 
 const all = Router();

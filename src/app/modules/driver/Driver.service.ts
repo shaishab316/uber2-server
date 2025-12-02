@@ -28,7 +28,7 @@ export const DriverServices = {
 
     const users = await prisma.user.findMany({
       where,
-      omit: userOmit,
+      omit: userOmit.DRIVER,
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -51,7 +51,7 @@ export const DriverServices = {
   async superApproveDriver(driverId: string) {
     return prisma.user.update({
       where: { id: driverId },
-      omit: userOmit,
+      omit: userOmit.DRIVER,
       data: {
         role: EUserRole.DRIVER,
       },
@@ -61,7 +61,7 @@ export const DriverServices = {
   async superRejectDriver(driverId: string) {
     return prisma.user.update({
       where: { id: driverId },
-      omit: userOmit,
+      omit: userOmit.DRIVER,
       data: {
         role: EUserRole.USER,
       },
@@ -79,7 +79,7 @@ export const DriverServices = {
 
     return prisma.user.update({
       where: { id: driver_id },
-      omit: userOmit,
+      omit: userOmit.DRIVER,
       data: {
         ...payload,
         is_verification_pending: true,
@@ -98,7 +98,7 @@ export const DriverServices = {
 
     return prisma.user.update({
       where: { id: driver_id },
-      omit: userOmit,
+      omit: userOmit.DRIVER,
       data: payload,
     });
   },

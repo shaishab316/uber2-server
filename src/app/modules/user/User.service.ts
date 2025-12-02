@@ -7,7 +7,12 @@ import { prisma } from '../../../utils/db';
 import { Prisma, User as TUser } from '../../../../prisma';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { deleteFile, deleteFiles } from '../../middlewares/capture';
-import { TSetupUserProfile, TUserEdit, TUserRegister } from './User.interface';
+import {
+  TGetPendingUsers,
+  TSetupUserProfile,
+  TUserEdit,
+  TUserRegister,
+} from './User.interface';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
@@ -42,7 +47,7 @@ export const UserServices = {
         role,
         wallet: { create: {} },
       },
-      omit: userOmit,
+      omit: userOmit[role],
     });
 
     try {
@@ -88,7 +93,7 @@ export const UserServices = {
 
     return prisma.user.update({
       where: { id: user.id },
-      omit: userOmit,
+      omit: userOmit[body.role ?? user.role!],
       data: body,
     });
   },
@@ -193,7 +198,46 @@ export const UserServices = {
 
         is_verification_pending: true,
       },
-      omit: userOmit,
+      omit: userOmit.USER,
     });
+  },
+
+  async getPendingUsers({ limit, page, search, role }: TGetPendingUsers) {
+    const where: Prisma.UserWhereInput = {
+      is_verification_pending: true,
+      role,
+    };
+
+    if (search) {
+      where.OR = searchFields.map(field => ({
+        [field]: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      }));
+    }
+
+    const users = await prisma.user.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      omit: userOmit[role],
+    });
+
+    const total = await prisma.user.count({
+      where,
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+      },
+      users,
+    };
   },
 };

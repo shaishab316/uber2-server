@@ -8,7 +8,7 @@ export const UserValidations = {
     body: z.object({
       email: z.email({ error: 'Email is invalid' }).optional(),
       phone: z.string().optional(),
-      role: z.enum(EUserRole).optional(),
+      role: z.enum(EUserRole).default(EUserRole.USER),
       password: z
         .string({ error: 'Password is missing' })
         .min(6, 'Password must be at least 6 characters long'),
@@ -86,6 +86,12 @@ export const UserValidations = {
             .nonempty('NID or Passport is required'),
         )
         .nonempty('NID or Passport is required'),
+    }),
+  }),
+
+  getPendingUsers: z.object({
+    query: z.object({
+      role: z.enum(EUserRole).default(EUserRole.USER),
     }),
   }),
 };
