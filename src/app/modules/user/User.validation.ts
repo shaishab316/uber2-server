@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { EGender, EUserRole } from '@/utils/db';
 import { enum_encode } from '@/utils/transform/enum';
 import { date } from '@/utils/transform/date';
+import { exists } from '@/utils/db/exists';
 
 export const UserValidations = {
   register: z.object({
@@ -46,12 +47,7 @@ export const UserValidations = {
 
   getAllUser: z.object({
     query: z.object({
-      search: z.string().trim().optional(),
-      role: z
-        .string()
-        .optional()
-        .transform(enum_encode)
-        .pipe(z.enum(EUserRole).optional()),
+      role: z.enum(EUserRole).default(EUserRole.USER),
     }),
   }),
 
@@ -92,6 +88,23 @@ export const UserValidations = {
   getPendingUsers: z.object({
     query: z.object({
       role: z.enum(EUserRole).default(EUserRole.USER),
+    }),
+  }),
+
+  pendingUserAction: z.object({
+    body: z.object({
+      user_id: z.string().refine(exists('user'), {
+        error: ({ input }) => `User with id "${input}" does not exist`,
+      }),
+      action: z.enum(['approve', 'reject']),
+    }),
+  }),
+
+  deleteUser: z.object({
+    body: z.object({
+      user_id: z.string().refine(exists('user'), {
+        error: ({ input }) => `User with id "${input}" does not exist`,
+      }),
     }),
   }),
 };

@@ -1,4 +1,3 @@
-import { TList } from '../query/Query.interface';
 import {
   userSearchableFields as searchFields,
   userOmit,
@@ -7,7 +6,10 @@ import {
 import { Prisma, prisma, User as TUser } from '@/utils/db';
 import { TPagination } from '@/utils/server/serveResponse';
 import {
+  TDeleteUser,
+  TGetAllUser,
   TGetPendingUsers,
+  TPendingUserAction,
   TSetupUserProfile,
   TUserEdit,
   TUserRegister,
@@ -39,7 +41,7 @@ export const UserServices = {
       );
 
     //! finally create user and in return omit auth fields
-    const user = await prisma.user.create({
+    const { otp_id, ...user } = await prisma.user.create({
       data: {
         email,
         phone,
@@ -47,13 +49,16 @@ export const UserServices = {
         role,
         wallet: { create: {} },
       },
-      omit: userSelfOmit[role],
+      omit: {
+        ...userSelfOmit[role],
+        otp_id: false,
+      },
     });
 
     try {
       const otp = generateOTP({
         tokenType: 'access_token',
-        otpId: user.id + user.otp_id,
+        otpId: user.id + otp_id,
       });
 
       if (email)
@@ -98,14 +103,10 @@ export const UserServices = {
     });
   },
 
-  async getAllUser({
-    page,
-    limit,
-    search,
-    omit,
-    ...where
-  }: Prisma.UserWhereInput & TList & { omit: Prisma.UserOmit }) {
-    where ??= {} as any;
+  async getAllUser({ page, limit, search, role }: TGetAllUser) {
+    const where: Prisma.UserWhereInput = {
+      role,
+    };
 
     if (search)
       where.OR = searchFields.map(field => ({
@@ -117,7 +118,7 @@ export const UserServices = {
 
     const users = await prisma.user.findMany({
       where,
-      omit,
+      omit: userSelfOmit[role],
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -163,12 +164,12 @@ export const UserServices = {
     );
   },
 
-  async deleteAccount(userId: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+  async deleteAccount({ user_id }: TDeleteUser) {
+    const user = await prisma.user.findUnique({ where: { id: user_id } });
 
     if (user?.avatar) await deleteFilesQueue.add([user.avatar]);
 
-    return prisma.user.delete({ where: { id: userId } });
+    return prisma.user.delete({ where: { id: user_id } });
   },
 
   async setupUserProfile({
@@ -221,7 +222,7 @@ export const UserServices = {
       where,
       skip: (page - 1) * limit,
       take: limit,
-      omit: userOmit[role],
+      omit: userSelfOmit[role],
     });
 
     const total = await prisma.user.count({
@@ -239,5 +240,15 @@ export const UserServices = {
       },
       users,
     };
+  },
+
+  async pendingUserAction({ action, user_id }: TPendingUserAction) {
+    await prisma.user.update({
+      where: { id: user_id },
+      data: {
+        is_verification_pending: false,
+        is_active: action === 'approve',
+      },
+    });
   },
 };

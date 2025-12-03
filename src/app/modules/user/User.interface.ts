@@ -12,3 +12,12 @@ export type TGetPendingUsers = z.infer<
   typeof UserValidations.getPendingUsers
 >['query'] &
   TList;
+
+export type TPendingUserAction = z.infer<
+  typeof UserValidations.pendingUserAction
+>['body'];
+
+export type TGetAllUser = z.infer<typeof UserValidations.getAllUser>['query'] &
+  TList;
+
+export type TDeleteUser = z.infer<typeof UserValidations.deleteUser>['body'];

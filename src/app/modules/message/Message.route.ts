@@ -16,15 +16,10 @@ const all = Router();
   all.post(
     '/upload-media',
     capture({
-      images: {
-        size: 15 * 1024 * 1024,
+      any: {
+        size: 200 * 1024 * 1024,
         maxCount: 10,
-        fileType: 'images',
-      },
-      videos: {
-        size: 100 * 1024 * 1024,
-        maxCount: 10,
-        fileType: 'videos',
+        fileType: 'any',
       },
     }),
     MessageControllers.uploadMedia,

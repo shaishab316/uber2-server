@@ -58,16 +58,6 @@ export const UserControllers = {
   getAllUser: catchAsync(async ({ query }) => {
     const { meta, users } = await UserServices.getAllUser(query);
 
-    return {
-      message: 'Users retrieved successfully!',
-      meta,
-      data: users,
-    };
-  }),
-
-  superGetAllUser: catchAsync(async ({ query }) => {
-    const { meta, users } = await UserServices.getAllUser(query);
-
     Object.assign(meta, {
       users: await UserServices.getUsersCount(),
     });
@@ -90,8 +80,8 @@ export const UserControllers = {
     };
   }),
 
-  superDeleteAccount: catchAsync(async ({ params }) => {
-    const user = await UserServices.deleteAccount(params.userId);
+  superDeleteAccount: catchAsync(async ({ body }) => {
+    const user = await UserServices.deleteAccount(body);
 
     return {
       message: `${user?.name ?? 'User'} deleted successfully!`,
@@ -99,7 +89,7 @@ export const UserControllers = {
   }),
 
   deleteAccount: catchAsync(async ({ user }) => {
-    await UserServices.deleteAccount(user.id);
+    await UserServices.deleteAccount({ user_id: user.id });
 
     return {
       message: `Goodbye ${user?.name ?? enum_decode(user.role)}! Your account has been deleted successfully!`,
@@ -125,6 +115,14 @@ export const UserControllers = {
       message: 'Pending users retrieved successfully!',
       meta,
       data: users,
+    };
+  }),
+
+  pendingUserAction: catchAsync(async ({ body }) => {
+    await UserServices.pendingUserAction(body);
+
+    return {
+      message: `User has been ${body.action === 'approve' ? 'approved' : 'rejected'} successfully!`,
     };
   }),
 };

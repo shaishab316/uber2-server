@@ -8,6 +8,7 @@ export const userSearchableFields = [
 
 const selfOmit = {
   password: true,
+  otp_id: true,
   location_lng: true,
   location_lat: true,
   location_type: true,

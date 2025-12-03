@@ -19,7 +19,7 @@ const admin = Router();
   admin.get(
     '/',
     purifyRequest(QueryValidations.list, UserValidations.getAllUser),
-    UserControllers.superGetAllUser,
+    UserControllers.getAllUser,
   );
 
   admin.patch(
@@ -33,8 +33,8 @@ const admin = Router();
   );
 
   admin.delete(
-    '/:userId/delete',
-    purifyRequest(QueryValidations.exists('userId', 'user')),
+    '/',
+    purifyRequest(UserValidations.deleteUser),
     UserControllers.superDeleteAccount,
   );
 
@@ -43,8 +43,17 @@ const admin = Router();
    */
   admin.get(
     '/pending-users',
-    purifyRequest(QueryValidations.list),
+    purifyRequest(QueryValidations.list, UserValidations.getPendingUsers),
     UserControllers.getPendingUsers,
+  );
+
+  /**
+   * Pending User Action
+   */
+  admin.post(
+    '/pending-users',
+    purifyRequest(UserValidations.pendingUserAction),
+    UserControllers.pendingUserAction,
   );
 }
 

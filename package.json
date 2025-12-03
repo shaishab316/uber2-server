@@ -30,7 +30,7 @@
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
     "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma-studio": "npx prisma studio",
+    "prisma-studio": "npx prisma studio --browser none",
     "prisma-reset": "npx prisma migrate reset --force",
     "prisma-migrate": "npx prisma migrate dev",
     "prisma-generate": "npx prisma generate",
