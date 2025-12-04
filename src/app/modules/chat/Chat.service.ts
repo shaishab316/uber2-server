@@ -34,6 +34,35 @@ export const ChatServices = {
     });
   },
 
+  async newChatToAdmin(user_id: string) {
+    const adminUser = await prisma.user.findFirst({
+      where: { is_admin: true },
+      select: { id: true },
+      orderBy: { last_online_at: 'desc' },
+    });
+
+    if (!adminUser) {
+      throw new ServerError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'No admin user found',
+      );
+    }
+
+    const user_ids = Array.from(new Set([user_id, adminUser.id])).sort();
+
+    //? find or create chat between users
+    return prisma.chat.upsert({
+      where: { user_ids },
+      update: {},
+      create: {
+        user_ids,
+        users: {
+          connect: user_ids.map(id => ({ id })),
+        },
+      },
+    });
+  },
+
   /**
    * Delete chat
    */

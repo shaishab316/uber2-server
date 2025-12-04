@@ -18,6 +18,8 @@ const all = Router();
     ChatControllers.newChat,
   );
 
+  all.post('/new-chat-to-admin', ChatControllers.newChatToAdmin);
+
   all.delete(
     '/delete-chat',
     purifyRequest(ChatValidations.deleteChat),

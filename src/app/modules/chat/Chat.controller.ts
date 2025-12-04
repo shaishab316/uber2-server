@@ -21,6 +21,18 @@ export const ChatControllers = {
   }),
 
   /**
+   * Create new chat to admin
+   */
+  newChatToAdmin: catchAsync(async ({ user }) => {
+    const chat = await ChatServices.newChatToAdmin(user.id);
+
+    return {
+      message: 'Admin chat created successfully!',
+      data: chat,
+    };
+  }),
+
+  /**
    * Delete chat
    */
   deleteChat: catchAsync(async ({ body, user }) => {
