@@ -18,7 +18,7 @@
   },
   "scripts": {
     "prepare": "simple-git-hooks",
-    "new-module": "tsx ./src/modules/.builder.ts",
+    "new-module": "tsx ./src/app/modules/.builder.ts",
     "build": "tsx esbuild.mts",
     "start": "node dist/server.js",
     "dev": "tsx --watch src/server.ts",

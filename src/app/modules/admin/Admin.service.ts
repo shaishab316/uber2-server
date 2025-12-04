@@ -2,8 +2,10 @@ import chalk from 'chalk';
 import { errorLogger } from '../../../utils/logger';
 import { logger } from '../../../utils/logger';
 import config from '../../../config';
-import { prisma } from '../../../utils/db';
+import { Prisma, prisma } from '../../../utils/db';
 import { hashPassword } from '../auth/Auth.utils';
+import { TUserTripDetailsArgs } from './Admin.interface';
+import { TPagination } from '@/utils/server/serveResponse';
 
 export const AdminServices = {
   /**
@@ -61,5 +63,103 @@ export const AdminServices = {
     } finally {
       logger.info(chalk.green('🔑 admin seed completed!'));
     }
+  },
+
+  async userTripsDetails({
+    limit,
+    page,
+    user_id,
+    end_date,
+    start_date,
+  }: TUserTripDetailsArgs) {
+    const where: Prisma.TripWhereInput = { user_id };
+
+    if (start_date || end_date) {
+      where.completed_at = {};
+
+      if (start_date) {
+        where.completed_at.gte = start_date;
+      }
+
+      if (end_date) {
+        where.completed_at.lte = end_date;
+      }
+    }
+
+    const trips = await prisma.trip.findMany({
+      where,
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { completed_at: 'desc' },
+    });
+
+    const total = await prisma.trip.count({ where });
+
+    const review = await prisma.review.aggregate({
+      _avg: { rating: true },
+      where: { user_id },
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+        rating: review._avg.rating ? Number(review._avg.rating.toFixed(2)) : 0,
+      },
+      data: trips,
+    };
+  },
+
+  async userParcelsDetails({
+    limit,
+    page,
+    user_id,
+    end_date,
+    start_date,
+  }: TUserTripDetailsArgs) {
+    const where: Prisma.ParcelWhereInput = { user_id };
+
+    if (start_date || end_date) {
+      where.delivered_at = {};
+
+      if (start_date) {
+        where.delivered_at.gte = start_date;
+      }
+
+      if (end_date) {
+        where.delivered_at.lte = end_date;
+      }
+    }
+
+    const parcels = await prisma.parcel.findMany({
+      where,
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { delivered_at: 'desc' },
+    });
+
+    const total = await prisma.parcel.count({ where });
+
+    const review = await prisma.review.aggregate({
+      _avg: { rating: true },
+      where: { user_id },
+    });
+
+    return {
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+        rating: review._avg.rating ? Number(review._avg.rating.toFixed(2)) : 0,
+      },
+      data: parcels,
+    };
   },
 };
