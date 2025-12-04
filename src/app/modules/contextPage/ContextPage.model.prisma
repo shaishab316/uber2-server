@@ -1,0 +1,6 @@
+model ContextPage {
+  page_name String @id
+  content   String
+
+  @@map("context_pages")
+}

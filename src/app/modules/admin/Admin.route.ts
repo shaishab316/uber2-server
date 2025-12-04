@@ -6,10 +6,12 @@ import { AdminControllers } from './Admin.controller';
 import purifyRequest from '@/app/middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
 import { AdminValidations } from './Admin.validation';
+import { ContextPageRoutes } from '../contextPage/ContextPage.route';
 
 const adminRouter = injectRoutes(Router(), {
   '/users': [UserRoutes.admin],
   '/transactions': [TransactionRoutes.admin],
+  '/context-pages': [ContextPageRoutes.admin],
 });
 
 adminRouter.get(

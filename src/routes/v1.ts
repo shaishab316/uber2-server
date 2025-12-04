@@ -15,6 +15,7 @@ import { MessageRoutes } from '../app/modules/message/Message.route';
 import { ChatRoutes } from '../app/modules/chat/Chat.route';
 import { NotificationRoutes } from '../app/modules/notification/Notification.route';
 import { TripRoutes } from '@/app/modules/trip/Trip.route';
+import { ContextPageRoutes } from '@/app/modules/contextPage/ContextPage.route';
 
 const appRouter = Router();
 
@@ -32,6 +33,7 @@ export default injectRoutes(appRouter, {
   // No auth
   '/auth': [AuthRoutes.free],
   '/payments': [PaymentRoutes.free],
+  '/context-pages': [ContextPageRoutes.user],
 
   // Free auth
   '/profile': [auth.all, UserRoutes.all],
