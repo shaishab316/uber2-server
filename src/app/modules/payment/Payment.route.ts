@@ -6,14 +6,35 @@ import auth from '../../middlewares/auth';
 
 const free = Router();
 {
+  /**
+   * Stripe Webhook for event listening
+   */
   free.all('/stripe/webhook', PaymentControllers.stripeWebhook);
 
-  free.get(
-    '/topup',
+  /**
+   * Stripe account connect
+   */
+  free.all('/stripe/connect', PaymentControllers.stripConnect);
+
+  /**
+   * Withdraw
+   */
+  free.post(
+    '/withdraw',
     auth.all,
-    purifyRequest(PaymentValidations.topup),
-    PaymentControllers.topup,
+    purifyRequest(PaymentValidations.withdraw),
+    PaymentControllers.withdraw,
   );
 }
 
-export const PaymentRoutes = { free };
+/**
+ * Payment routes
+ */
+export const PaymentRoutes = {
+  /**
+   * Everyone can access
+   *
+   * @url : (base_url)/payments/
+   */
+  free,
+};

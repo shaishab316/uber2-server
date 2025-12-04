@@ -1,41 +1,59 @@
+/* eslint-disable no-unused-vars */
 import Stripe from 'stripe';
-import config from '@/config';
-import { ETransactionType, prisma } from '@/utils/db';
+import config from '../../../config';
+import { prisma } from '../../../utils/db';
+import { PaymentServices } from './Payment.service';
 
 /**
  * Stripe instance
  */
-export const stripe = new Stripe(config.payment.stripe.secret_key);
+export const stripe = new Stripe(config.payment.stripe.secret_key, {
+  apiVersion: '2025-09-30.clover',
+});
 
+/**
+ * Stripe webhook event map
+ */
+type TStripWebhookEventMap = Partial<
+  Record<Stripe.Event.Type, (event: any) => Promise<void>>
+>;
+
+/**
+ * Stripe webhook event map
+ */
 export const stripWebhookEventMap = {
-  'checkout.session.completed': async (session: Stripe.Checkout.Session) => {
-    const paymentIntent = await stripe.paymentIntents.retrieve(
-      session.payment_intent as string,
-    );
-
-    const { type: payment_method } = await stripe.paymentMethods.retrieve(
-      paymentIntent.payment_method as string,
-    );
-
-    await prisma.transaction.create({
-      data: {
-        user_id: session.metadata?.user_id as string,
-        amount: Number(session.metadata?.amount ?? 0),
-        stripe_transaction_id: session.payment_intent as string,
-        payment_method,
-        type: ETransactionType.TOPUP,
-      },
-    });
-
-    await prisma.wallet.update({
+  /**
+   * for stripe account connect
+   *
+   * @deprecated not working
+   */
+  'account.updated': async (account: Stripe.Account) => {
+    await prisma.user.updateMany({
       where: {
-        user_id: session.metadata?.user_id as string,
+        stripe_account_id: account.id,
       },
       data: {
-        balance: {
-          increment: Number(session.metadata?.amount ?? 0),
-        },
+        is_stripe_connected: true,
       },
     });
   },
-};
+
+  /**
+   * for stripe checkout session
+   */
+  'checkout.session.completed': async (session: Stripe.Checkout.Session) => {
+    //? ensure session has a purpose
+    if (!session?.metadata?.purpose) return;
+
+    const purposeFn =
+      PaymentServices[
+        session?.metadata?.purpose as keyof typeof PaymentServices
+      ];
+
+    if (purposeFn) await purposeFn(session as any);
+
+    /**
+     * Todo: save transaction info in db
+     */
+  },
+} satisfies TStripWebhookEventMap;

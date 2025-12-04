@@ -5,10 +5,16 @@ import { stripe, stripWebhookEventMap } from './Payment.utils';
 import { StatusCodes } from 'http-status-codes';
 import { errorLogger } from '../../../utils/logger';
 import { TStripWebhookEvent } from './Payment.interface';
+import { prisma } from '../../../utils/db';
 import { PaymentServices } from './Payment.service';
-import Stripe from 'stripe';
 
+/**
+ * Payment controllers
+ */
 export const PaymentControllers = {
+  /**
+   * Stripe Webhook
+   */
   stripeWebhook: catchAsync(
     async ({ body, headers }, res) => {
       const sig = headers['stripe-signature'] as string;
@@ -25,7 +31,7 @@ export const PaymentControllers = {
       if (!eventHandler)
         return res.status(StatusCodes.NOT_FOUND).json({ received: true });
 
-      await eventHandler(event.data.object as Stripe.Checkout.Session);
+      await eventHandler(event.data.object as any);
 
       res.json({ received: true });
     },
@@ -40,16 +46,27 @@ export const PaymentControllers = {
     },
   ),
 
-  topup: catchAsync(async ({ body, user }) => {
-    const url = await PaymentServices.topup({
-      ...body,
-      user_id: user.id,
+  /**
+   * Stripe Connect
+   */
+  stripConnect: catchAsync(async ({ query }) => {
+    await prisma.user.update({
+      where: { id: query.user_id as string },
+      data: { is_stripe_connected: true },
+    });
+
+    return { message: 'Stripe connected successfully' };
+  }),
+
+  withdraw: catchAsync(async ({ body, user }) => {
+    const data = await PaymentServices.withdraw({
+      amount: body.amount,
+      user,
     });
 
     return {
-      track_activity: user.id,
-      message: 'Topup payment link created successfully',
-      data: { url },
+      message: 'Withdraw request sent successfully',
+      data,
     };
   }),
 };

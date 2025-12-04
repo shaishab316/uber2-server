@@ -40,6 +40,11 @@ model User {
   trip_received_count Int @default(0) // for users
   //! end
 
+  //! payment
+  stripe_account_id   String?
+  is_stripe_connected Boolean @default(false)
+  //! end
+
   //! rating
   rating       Float @default(5.0)
   rating_count Int   @default(0)

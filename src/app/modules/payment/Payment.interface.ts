@@ -1,8 +1,18 @@
 import type z from 'zod';
-import { stripWebhookEventMap } from './Payment.utils';
-import { PaymentValidations } from './Payment.validation';
+import type { stripWebhookEventMap } from './Payment.utils';
+import type { PaymentValidations } from './Payment.validation';
+import { User as TUser } from '../../../utils/db';
 
+/**
+ * Stripe webhook event
+ */
 export type TStripWebhookEvent = keyof typeof stripWebhookEventMap;
-export type TTopup = z.infer<typeof PaymentValidations.topup>['body'] & {
-  user_id: string;
+
+/**
+ * Withdraw args
+ */
+export type TWithdrawArgs = z.infer<
+  typeof PaymentValidations.withdraw
+>['body'] & {
+  user: TUser;
 };
