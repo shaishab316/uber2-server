@@ -25,6 +25,13 @@ const free = Router();
     purifyRequest(PaymentValidations.withdraw),
     PaymentControllers.withdraw,
   );
+
+  free.get(
+    '/topup',
+    auth.all,
+    purifyRequest(PaymentValidations.topup),
+    PaymentControllers.topup,
+  );
 }
 
 /**

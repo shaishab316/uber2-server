@@ -16,3 +16,7 @@ export type TWithdrawArgs = z.infer<
 >['body'] & {
   user: TUser;
 };
+
+export type TTopup = z.infer<typeof PaymentValidations.topup>['body'] & {
+  user_id: string;
+};

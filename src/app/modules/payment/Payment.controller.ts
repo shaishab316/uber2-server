@@ -69,4 +69,17 @@ export const PaymentControllers = {
       data,
     };
   }),
+
+  topup: catchAsync(async ({ body, user }) => {
+    const url = await PaymentServices.topup({
+      ...body,
+      user_id: user.id,
+    });
+
+    return {
+      track_activity: user.id,
+      message: 'Topup payment link created successfully',
+      data: { url },
+    };
+  }),
 };

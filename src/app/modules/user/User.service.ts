@@ -24,6 +24,7 @@ import { generateOTP } from '@/utils/crypto/otp';
 import { emailTemplate } from '@/templates';
 import emailQueue from '@/utils/mq/emailQueue';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
+import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {
@@ -53,6 +54,10 @@ export const UserServices = {
         ...userSelfOmit[role],
         otp_id: false,
       },
+    });
+
+    await stripeAccountConnectQueue.add({
+      user_id: user.id,
     });
 
     try {

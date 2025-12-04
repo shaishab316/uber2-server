@@ -18,4 +18,13 @@ export const PaymentValidations = {
         .transform(val => Math.floor(val * 100) / 100),
     }),
   }),
+
+  topup: z.object({
+    body: z.object({
+      amount: z.coerce
+        .number()
+        .min(1, 'Amount must be greater than 0')
+        .max(10000, 'Amount must be less than 10000'),
+    }),
+  }),
 };

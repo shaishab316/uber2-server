@@ -1,9 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import { prisma } from '../../../utils/db';
 import ServerError from '../../../errors/ServerError';
-import { TWithdrawArgs } from './Payment.interface';
+import { TTopup, TWithdrawArgs } from './Payment.interface';
 import stripeAccountConnectQueue from '../../../utils/mq/stripeAccountConnectQueue';
 import withdrawQueue from '../../../utils/mq/withdrawQueue';
+import config from '@/config';
+import { stripe } from './Payment.utils';
 
 /**
  * Payment Services
@@ -54,5 +56,43 @@ export const PaymentServices = {
     return {
       available_balance: wallet.balance - amount,
     };
+  },
+
+  async topup({ amount, user_id }: TTopup) {
+    const { url } = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: config.payment.currency,
+            product_data: {
+              name: `${config.server.name} Wallet Top-up of $${amount}`,
+              description: 'Add funds to your wallet balance.',
+              metadata: {
+                type: 'wallet_topup',
+              },
+            },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      payment_method_types: config.payment.stripe.methods,
+      success_url: `${config.server.name.toLowerCase()}://topup-success?amount=${amount}`,
+      cancel_url: `${config.server.name.toLowerCase()}://topup-failure?amount=${amount}`,
+      metadata: {
+        purpose: 'wallet_topup',
+        amount: amount.toString(),
+        user_id,
+      },
+    });
+
+    if (!url)
+      throw new ServerError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'Failed to create checkout session',
+      );
+
+    return url;
   },
 };

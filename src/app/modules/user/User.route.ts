@@ -76,6 +76,11 @@ const all = Router();
     AuthControllers.changePassword,
   );
 
+  /**
+   * Connect stripe account
+   */
+  all.get('/connect-stripe', UserControllers.connectStripeAccount);
+
   all.post(
     '/setup-user-profile',
     capture({

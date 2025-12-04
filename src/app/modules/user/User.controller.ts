@@ -6,6 +6,10 @@ import { prisma, User as TUser } from '@/utils/db';
 import { enum_decode } from '@/utils/transform/enum';
 import { capitalize } from '@/utils/transform/capitalize';
 import { userSelfOmit } from './User.constant';
+import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
+import ServerError from '@/errors/ServerError';
+import { stripe } from '../payment/Payment.utils';
+import config from '@/config';
 
 export const UserControllers = {
   register: catchAsync(async ({ body }, res) => {
@@ -127,6 +131,41 @@ export const UserControllers = {
 
     return {
       message: `User has been ${body.action === 'approve' ? 'approved' : 'rejected'} successfully!`,
+    };
+  }),
+
+  /**
+   *
+   */
+  connectStripeAccount: catchAsync(async ({ user }) => {
+    if (!user.stripe_account_id) {
+      await stripeAccountConnectQueue.add({ user_id: user.id });
+
+      return {
+        statusCode: StatusCodes.ACCEPTED,
+        message: 'Stripe account connecting. Try again later!',
+      };
+    }
+
+    if (user.is_stripe_connected) {
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Stripe account already connected',
+      );
+    }
+
+    const { url } = await stripe.accountLinks.create({
+      account: user.stripe_account_id,
+      refresh_url: `${config.url.href}/not-found`,
+      return_url: `${config.url.href}/payments/stripe/connect?user_id=${user.id}`,
+      type: 'account_onboarding',
+    });
+
+    return {
+      message: 'Stripe connect link created successfully!',
+      data: {
+        url,
+      },
     };
   }),
 };
