@@ -9,6 +9,7 @@ export type TPagination = {
 };
 
 export type TServeResponse<T> = {
+  track_activity?: string;
   success: boolean;
   statusCode: number;
   message: string;

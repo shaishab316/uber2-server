@@ -17,6 +17,7 @@ export const AuthControllers = {
     AuthServices.setTokens(res, { access_token, refresh_token });
 
     return {
+      track_activity: user!.id,
       message: 'Login successfully!',
       data: { access_token, refresh_token, user },
     };
@@ -43,6 +44,7 @@ export const AuthControllers = {
     AuthServices.setTokens(res, { access_token, refresh_token });
 
     return {
+      track_activity: user.id,
       message: 'Account verified successfully!',
       data: { user, access_token, refresh_token },
     };
@@ -97,6 +99,7 @@ export const AuthControllers = {
       AuthServices.destroyTokens(res, 'reset_token');
 
       return {
+        track_activity: user.id,
         message: 'Password reset successfully!',
         data: { access_token, refresh_token, user: updatedUser },
       };
@@ -121,6 +124,7 @@ export const AuthControllers = {
     });
 
     return {
+      track_activity: user.id,
       message: 'Password changed successfully!',
     };
   }),

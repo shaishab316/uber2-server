@@ -1,0 +1,12 @@
+model UserActivity {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+
+  user_id String
+  path    String
+  content String
+
+  unread Boolean @default(true)
+
+  @@map("user_activities")
+}

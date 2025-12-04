@@ -47,6 +47,7 @@ export const PaymentControllers = {
     });
 
     return {
+      track_activity: user.id,
       message: 'Topup payment link created successfully',
       data: { url },
     };

@@ -7,11 +7,13 @@ import purifyRequest from '@/app/middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
 import { AdminValidations } from './Admin.validation';
 import { ContextPageRoutes } from '../contextPage/ContextPage.route';
+import { UserActivityRoutes } from '../userActivity/UserActivity.route';
 
 const adminRouter = injectRoutes(Router(), {
   '/users': [UserRoutes.admin],
   '/transactions': [TransactionRoutes.admin],
   '/context-pages': [ContextPageRoutes.admin],
+  '/user-activities': [UserActivityRoutes.admin],
 });
 
 adminRouter.get(

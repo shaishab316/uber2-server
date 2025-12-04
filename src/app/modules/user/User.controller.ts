@@ -20,6 +20,7 @@ export const UserControllers = {
     AuthServices.setTokens(res, { access_token, refresh_token });
 
     return {
+      track_activity: user.id,
       statusCode: StatusCodes.CREATED,
       message: `${capitalize(user.role) ?? 'Unknown'} registered successfully!`,
       data: {
@@ -34,6 +35,7 @@ export const UserControllers = {
     const data = await UserServices.updateUser(req);
 
     return {
+      track_activity: req.user.id,
       message: 'Profile updated successfully!',
       data,
     };
@@ -84,6 +86,7 @@ export const UserControllers = {
     const user = await UserServices.deleteAccount(body);
 
     return {
+      track_activity: user.id,
       message: `${user?.name ?? 'User'} deleted successfully!`,
     };
   }),
@@ -92,6 +95,7 @@ export const UserControllers = {
     await UserServices.deleteAccount({ user_id: user.id });
 
     return {
+      track_activity: user.id,
       message: `Goodbye ${user?.name ?? enum_decode(user.role)}! Your account has been deleted successfully!`,
     };
   }),
