@@ -4,7 +4,6 @@ import { QueryValidations } from '../query/Query.validation';
 import { DriverControllers } from './Driver.controller';
 import { injectRoutes } from '../../../utils/router/injectRouter';
 import { TransactionRoutes } from '../transaction/Transaction.route';
-import { ParcelRoutes } from '../parcel/Parcel.route';
 import capture from '../../middlewares/capture';
 import { DriverValidations } from './Driver.validation';
 
@@ -30,7 +29,6 @@ const admin = Router();
 }
 
 const driver = injectRoutes(Router(), {
-  '/parcels': [ParcelRoutes.driver],
   '/transactions': [TransactionRoutes.driver],
 });
 {

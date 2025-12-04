@@ -10,8 +10,23 @@ import {
   generateParcelSlug,
   getNearestDriver,
 } from './Parcel.utils';
+import { userOmit } from '../user/User.constant';
 
 export const ParcelServices = {
+  async getParcelDetails(parcel_id: string) {
+    return prisma.parcel.findUnique({
+      where: { id: parcel_id },
+      include: {
+        user: {
+          omit: userOmit.USER,
+        },
+        driver: {
+          omit: userOmit.DRIVER,
+        },
+      },
+    });
+  },
+
   //! Socket
   async requestForParcel(payload: TRequestForParcel) {
     const driver_ids = await getNearestDriver(payload);

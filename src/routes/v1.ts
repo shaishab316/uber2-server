@@ -14,6 +14,7 @@ import { ReviewRoutes } from '../app/modules/review/Review.route';
 import { MessageRoutes } from '../app/modules/message/Message.route';
 import { ChatRoutes } from '../app/modules/chat/Chat.route';
 import { NotificationRoutes } from '../app/modules/notification/Notification.route';
+import { TripRoutes } from '@/app/modules/trip/Trip.route';
 
 const appRouter = Router();
 
@@ -39,9 +40,8 @@ export default injectRoutes(appRouter, {
   '/inbox': [auth.all, ChatRoutes.all],
   '/messages': [auth.all, MessageRoutes.all],
   '/notifications': [auth.all, NotificationRoutes.all],
-
-  // User auth
-  '/parcels': [auth.user, ParcelRoutes.user],
+  '/trips': [auth.all, TripRoutes.all],
+  '/parcels': [auth.all, ParcelRoutes.all],
 
   // Driver auth
   '/drivers': [auth.driver, DriverRoutes.driver],

@@ -4,8 +4,23 @@ import { ETripStatus, prisma } from '../../../utils/db';
 import type { TRequestForTrip, TTripRefreshLocation } from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
+import { userOmit } from '../user/User.constant';
 
 export const TripServices = {
+  async getTripDetails(trip_id: string) {
+    return prisma.trip.findUnique({
+      where: { id: trip_id },
+      include: {
+        user: {
+          omit: userOmit.USER,
+        },
+        driver: {
+          omit: userOmit.DRIVER,
+        },
+      },
+    });
+  },
+
   //! Socket
   async requestForTrip(payload: TRequestForTrip) {
     const driver_ids = await getNearestDriver(payload);

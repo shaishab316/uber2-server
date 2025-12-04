@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { UserRoutes } from '../user/User.route';
 import { injectRoutes } from '../../../utils/router/injectRouter';
 import { TransactionRoutes } from '../transaction/Transaction.route';
-import { ParcelRoutes } from '../parcel/Parcel.route';
 import { AdminControllers } from './Admin.controller';
 import purifyRequest from '@/app/middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
@@ -10,7 +9,6 @@ import { AdminValidations } from './Admin.validation';
 
 const adminRouter = injectRoutes(Router(), {
   '/users': [UserRoutes.admin],
-  '/parcels': [ParcelRoutes.admin],
   '/transactions': [TransactionRoutes.admin],
 });
 

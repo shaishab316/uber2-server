@@ -1,18 +1,16 @@
+import purifyRequest from '@/app/middlewares/purifyRequest';
 import { Router } from 'express';
+import { QueryValidations } from '../query/Query.validation';
+import { ParcelControllers } from './Parcel.controller';
 
-const user = Router();
+const all = Router();
 {
-  // user routes ...
+  //? Get parcel details
+  all.get(
+    '/:parcel_id',
+    purifyRequest(QueryValidations.exists('parcel_id', 'parcel')),
+    ParcelControllers.getParcelDetails,
+  );
 }
 
-const driver = Router();
-{
-  // driver routes ...
-}
-
-const admin = Router();
-{
-  // admin routes ...
-}
-
-export const ParcelRoutes = { user, driver, admin };
+export const ParcelRoutes = { all };
