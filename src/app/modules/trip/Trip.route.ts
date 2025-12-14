@@ -2,9 +2,17 @@ import { Router } from 'express';
 import { TripControllers } from './Trip.controller';
 import purifyRequest from '@/app/middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
+import { TripValidations } from './Trip.validation';
 
 const all = Router();
 {
+  //? Calculate estimated fare
+  all.get(
+    '/estimate-fare',
+    purifyRequest(TripValidations.calculateEstimatedFare),
+    TripControllers.calculateEstimatedFare,
+  );
+
   //? Get trip details
   all.get(
     '/:trip_id',
