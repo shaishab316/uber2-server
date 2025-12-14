@@ -1,11 +1,10 @@
 model Wallet {
-  id           String @id @default(uuid())
-  user_id      String @unique
-  balance      Float  @default(100000)
+  id           String @id // User id
+  balance      Float  @default(100000) //TODO: Remove default value in production
   total_expend Float  @default(0)
   total_income Float  @default(0)
 
-  user User @relation("UserWallet", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation("UserWallet", fields: [id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("wallets")
 }

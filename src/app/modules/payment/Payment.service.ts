@@ -18,7 +18,7 @@ export const PaymentServices = {
    */
   async withdraw({ amount, user }: TWithdrawArgs) {
     const wallet = await prisma.wallet.findUnique({
-      where: { user_id: user.id },
+      where: { id: user.id },
     });
 
     if (!wallet) {

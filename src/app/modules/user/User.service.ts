@@ -48,12 +48,16 @@ export const UserServices = {
         phone,
         password: await hashPassword(password),
         role,
-        wallet: { create: {} },
       },
       omit: {
         ...userSelfOmit[role],
         otp_id: false,
       },
+    });
+
+    //? create wallet for user
+    await prisma.wallet.create({
+      data: { id: user.id },
     });
 
     await stripeAccountConnectQueue.add({

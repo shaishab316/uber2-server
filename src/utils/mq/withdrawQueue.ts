@@ -72,7 +72,7 @@ withdrawQueue.process(async ({ data }) => {
     spinner.text = `Updating balance for ${data.user.email}`;
 
     await prisma.wallet.updateMany({
-      where: { user_id: data.user.id },
+      where: { id: data.user.id },
       data: { balance: { decrement: data.amount } },
     });
 

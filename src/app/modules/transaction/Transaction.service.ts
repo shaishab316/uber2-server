@@ -60,7 +60,7 @@ export const TransactionServices = {
 
     const wallet = await prisma.wallet.findFirst({
       where: {
-        user_id,
+        id: user_id,
       },
     });
 
@@ -120,7 +120,7 @@ export const TransactionServices = {
 
     const wallet = await prisma.wallet.findFirst({
       where: {
-        user_id: driver_id,
+        id: driver_id,
       },
     });
 
