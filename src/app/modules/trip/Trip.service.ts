@@ -58,13 +58,14 @@ export const TripServices = {
       },
     });
 
-    if (trip?.driver?.id && trip?.driver?.id !== driver_id)
+    if (trip?.driver?.id && trip?.driver?.id !== driver_id) {
       throw new ServerError(
         StatusCodes.CONFLICT,
         `${trip?.driver?.name?.split(' ')[0]} is already accepted this trip`,
       );
+    }
 
-    return prisma.trip.update({
+    const updatedTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: {
         status: ETripStatus.ACCEPTED,
@@ -72,6 +73,27 @@ export const TripServices = {
         accepted_at: new Date(),
       },
     });
+
+    //? sort for consistent chat user_ids
+    const user_ids = [updatedTrip.user_id, driver_id].sort();
+
+    //? Create chat for trip
+    const chat = await prisma.chat.upsert({
+      where: { id: trip_id },
+      create: { user_ids },
+      update: { user_ids },
+    });
+
+    //? Initial message
+    await prisma.message.create({
+      data: {
+        chat_id: chat.id,
+        user_id: driver_id,
+        text: "Hi! I'am your driver. I'm here to assist you with your trip.",
+      },
+    });
+
+    return updatedTrip;
   },
 
   async cancelTrip({ trip_id, user_id }: { trip_id: string; user_id: string }) {
