@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { Socket } from 'socket.io';
 import { decodeToken } from '../auth/Auth.utils';
-import { prisma } from '../../../utils/db';
+import { prisma, User as TUser } from '../../../utils/db';
 import ServerError from '../../../errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { userSelfOmit } from '../user/User.constant';
+import { commonValidator as commonAuthValidator } from '@/app/middlewares/auth';
 
 const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   const token =
@@ -22,6 +23,9 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 
     if (!user)
       throw new ServerError(StatusCodes.NOT_FOUND, 'Your account is not found');
+
+    //? Run common auth validators
+    commonAuthValidator(user as TUser);
 
     Object.assign(socket.data, { user });
 

@@ -198,4 +198,28 @@ export const TripServices = {
       },
     });
   },
+
+  async startTrip({
+    trip_id,
+    driver_id,
+  }: {
+    trip_id: string;
+    driver_id: string;
+  }) {
+    const trip = await prisma.trip.findUnique({
+      where: { id: trip_id },
+    });
+
+    if (trip?.driver_id !== driver_id) {
+      throw new Error('You are not assigned to this trip');
+    }
+
+    return prisma.trip.update({
+      where: { id: trip_id },
+      data: {
+        status: ETripStatus.STARTED,
+        started_at: new Date(),
+      },
+    });
+  },
 };

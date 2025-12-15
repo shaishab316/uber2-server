@@ -59,4 +59,20 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       return payload;
     }, TripValidations.refreshLocation),
   );
+
+  socket.on(
+    'trip:start',
+    catchAsyncSocket(async ({ trip_id }) => {
+      const trip = await TripServices.startTrip({
+        driver_id: driver.id,
+        trip_id,
+      });
+
+      SocketServices.emitToUser(trip.user_id, 'trip:started', {
+        trip_id,
+      });
+
+      return trip;
+    }, QueryValidations.exists('trip_id', 'trip').shape.params),
+  );
 };

@@ -90,7 +90,7 @@ auth.reset_token = auth({ token_type: 'reset_token' });
 
 export default auth;
 
-function commonValidator({ is_admin, is_verified, is_active }: TUser) {
+export function commonValidator({ is_admin, is_verified, is_active }: TUser) {
   if (is_admin) return;
 
   if (!is_verified) {
