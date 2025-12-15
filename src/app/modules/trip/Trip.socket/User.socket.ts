@@ -3,6 +3,7 @@ import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { TripServices } from '../Trip.service';
 import { TripValidations } from '../Trip.validation';
 import { QueryValidations } from '../../query/Query.validation';
+import { SocketServices } from '../../socket/Socket.service';
 
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
@@ -37,6 +38,27 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
       });
 
       return data;
+    }, QueryValidations.exists('trip_id', 'trip').shape.params),
+  );
+
+  socket.on(
+    'trip:pay',
+    catchAsyncSocket(async ({ trip_id }) => {
+      const { transaction, trip, wallet } = await TripServices.payForTrip({
+        trip_id,
+        user_id: user.id,
+      });
+
+      SocketServices.emitToUser(trip.driver_id!, 'trip:paid', {
+        trip_id: trip.id,
+        transaction,
+      });
+
+      return {
+        current_balance: wallet?.balance,
+        transaction,
+        trip_id: trip.id,
+      };
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
   );
 };

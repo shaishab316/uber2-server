@@ -9,7 +9,12 @@ model Transaction {
   type                  ETransactionType @default(TOPUP)
   payment_method        String           @default("unknown")
 
-  user User @relation(fields: [user_id], references: [id])
+  ref_trip_id   String?
+  ref_parcel_id String?
+
+  user   User    @relation(fields: [user_id], references: [id])
+  trip   Trip?   @relation(fields: [ref_trip_id], references: [id])
+  parcel Parcel? @relation(fields: [ref_parcel_id], references: [id])
 
   @@map("transactions")
 }

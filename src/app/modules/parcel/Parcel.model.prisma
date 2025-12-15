@@ -43,7 +43,8 @@ model Parcel {
   is_processing        Boolean   @default(false)
   //! end
 
-  helper ParcelHelper? @relation("ParcelHelper")
+  helper       ParcelHelper? @relation("ParcelHelper")
+  transactions Transaction[]
 
   @@index([pickup_lat, pickup_lng])
   @@index([dropoff_lat, dropoff_lng])

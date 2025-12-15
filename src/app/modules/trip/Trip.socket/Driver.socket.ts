@@ -89,7 +89,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         fare: trip.total_cost,
       });
 
-      return { fare: trip.total_cost, trip_id };
+      return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
   );
 };

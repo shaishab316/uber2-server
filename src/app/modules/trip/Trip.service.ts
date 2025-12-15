@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import ServerError from '../../../errors/ServerError';
-import { ETripStatus, prisma } from '../../../utils/db';
+import { ETransactionType, ETripStatus, prisma } from '../../../utils/db';
 import type { TRequestForTrip, TTripRefreshLocation } from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
@@ -247,6 +247,72 @@ export const TripServices = {
         //? Recalculate total cost in case of any changes during the trip
         total_cost: await calculateTripCost(trip as any),
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            rating: true,
+            avatar: true,
+            rating_count: true,
+          },
+        },
+      },
+    });
+  },
+
+  async payForTrip({ user_id, trip_id }: { user_id: string; trip_id: string }) {
+    const trip = await prisma.trip.findUnique({
+      where: { id: trip_id },
+    });
+
+    if (trip?.user_id !== user_id) {
+      throw new Error('You are not authorized to pay for this trip');
+    }
+
+    if (trip.payment_at) {
+      return {
+        trip,
+        wallet: await prisma.wallet.findUnique({ where: { id: user_id } }),
+        transaction: await prisma.transaction.findFirst({
+          where: { ref_trip_id: trip_id },
+        }),
+      };
+    }
+
+    return prisma.$transaction(async tx => {
+      //? Mark trip as paid
+      const trip = await tx.trip.update({
+        where: { id: trip_id },
+        data: { payment_at: new Date() },
+      });
+
+      //? Deduct from wallet
+      const wallet = await tx.wallet.update({
+        where: { id: user_id },
+        data: {
+          balance: {
+            decrement: trip.total_cost,
+          },
+        },
+      });
+
+      //? Check for sufficient balance
+      if (wallet.balance < 0) {
+        throw new Error('Insufficient balance in wallet');
+      }
+
+      //? Record transaction
+      const transaction = await tx.transaction.create({
+        data: {
+          user_id,
+          amount: trip.total_cost,
+          type: ETransactionType.EXPENSE,
+          ref_trip_id: trip_id,
+          payment_method: 'WALLET',
+        },
+      });
+
+      return { trip, wallet, transaction };
     });
   },
 };

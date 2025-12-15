@@ -7,6 +7,7 @@ model Trip {
   delivered_at DateTime?
   completed_at DateTime?
   cancelled_at DateTime?
+  payment_at   DateTime?
 
   user_id   String
   user      User    @relation("UserTrip", fields: [user_id], references: [id])
@@ -40,7 +41,8 @@ model Trip {
   is_processing        Boolean   @default(false)
   //! end
 
-  helper TripHelper? @relation("TripHelper")
+  helper       TripHelper?   @relation("TripHelper")
+  transactions Transaction[]
 
   @@index([pickup_lat, pickup_lng])
   @@index([dropoff_lat, dropoff_lng])
