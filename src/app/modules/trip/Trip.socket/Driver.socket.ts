@@ -75,4 +75,21 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
   );
+
+  socket.on(
+    'trip:end',
+    catchAsyncSocket(async ({ trip_id }) => {
+      const trip = await TripServices.endTrip({
+        driver_id: driver.id,
+        trip_id,
+      });
+
+      SocketServices.emitToUser(trip.user_id, 'trip:ended', {
+        trip_id,
+        fare: trip.total_cost,
+      });
+
+      return { fare: trip.total_cost, trip_id };
+    }, QueryValidations.exists('trip_id', 'trip').shape.params),
+  );
 };

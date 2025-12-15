@@ -222,4 +222,31 @@ export const TripServices = {
       },
     });
   },
+
+  async endTrip({
+    trip_id,
+    driver_id,
+  }: {
+    trip_id: string;
+    driver_id: string;
+  }) {
+    const trip = await prisma.trip.findUnique({
+      where: { id: trip_id },
+    });
+
+    if (trip?.driver_id !== driver_id) {
+      throw new Error('You are not assigned to this trip');
+    }
+
+    return prisma.trip.update({
+      where: { id: trip_id },
+      data: {
+        status: ETripStatus.COMPLETED,
+        completed_at: new Date(),
+
+        //? Recalculate total cost in case of any changes during the trip
+        total_cost: await calculateTripCost(trip as any),
+      },
+    });
+  },
 };
