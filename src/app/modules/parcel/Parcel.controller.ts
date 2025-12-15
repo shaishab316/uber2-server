@@ -1,5 +1,6 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
+import { calculateParcelCost } from './Parcel.utils';
 
 export const ParcelControllers = {
   getParcelDetails: catchAsync(async ({ params }) => {
@@ -8,6 +9,18 @@ export const ParcelControllers = {
     return {
       message: 'Parcel details fetched successfully',
       data: parcel,
+    };
+  }),
+
+  /**
+   * Calculate estimated fare for a parcel
+   */
+  calculateEstimatedFare: catchAsync(async ({ body }) => {
+    const estimatedFare = await calculateParcelCost(body);
+
+    return {
+      message: 'Estimated fare calculated successfully',
+      data: { estimated_fare: estimatedFare },
     };
   }),
 };
