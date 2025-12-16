@@ -7,12 +7,15 @@ import {
 } from '../user/User.constant';
 import { TPagination } from '../../../utils/server/serveResponse';
 import {
+  TGetEarningsArgs,
   TRefreshLocation,
   TSetupDriverProfile,
   TSetupVehicle,
   TToggleOnline,
 } from './Driver.interface';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
+import { ZodError } from 'zod';
+import { dateRange } from '../datetime/Datetime.utils';
 
 export const DriverServices = {
   async superGetPendingDriver({ page, limit, search }: TList) {
@@ -120,4 +123,73 @@ export const DriverServices = {
       data: payload,
     });
   },
+
+  async tripEarnings({
+    driver_id,
+    limit,
+    page,
+    dateRange: range,
+    startDate,
+    endDate,
+  }: TGetEarningsArgs) {
+    const whereTrip: Prisma.TripWhereInput = { driver_id };
+
+    //? if has date range filter
+    if (range) {
+      if (range === 'custom') {
+        if (!startDate || !endDate) {
+          const nullArray = [];
+          if (!startDate) nullArray.push('startDate');
+          if (!endDate) nullArray.push('endDate');
+
+          //? Throw zod error for missing fields
+          throw new ZodError(
+            nullArray.map(field => ({
+              code: 'custom',
+              path: [field],
+              message: `${field} is required when dateRange is custom`,
+            })),
+          );
+        }
+
+        //? custom date range
+        whereTrip.payment_at = {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        };
+      } else {
+        whereTrip.payment_at = dateRange[range]();
+      }
+    }
+
+    const trips = await prisma.trip.findMany({
+      where: whereTrip,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const total = await prisma.trip.count({ where: whereTrip });
+
+    return {
+      trips,
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+      },
+    };
+  },
+
+  // Todo: implement parcelEarnings service
+  // async parcelEarnings({
+  //   driver_id,
+  //   limit,
+  //   page,
+  //   dateRange,
+  //   startDate,
+  //   endDate,
+  // }: TGetEarningsArgs) {},
 };

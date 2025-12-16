@@ -301,12 +301,23 @@ export const TripServices = {
         throw new Error('Insufficient balance in wallet');
       }
 
-      //? Record transaction
+      //? Record transaction for user
       const transaction = await tx.transaction.create({
         data: {
           user_id,
           amount: trip.total_cost,
           type: ETransactionType.EXPENSE,
+          ref_trip_id: trip_id,
+          payment_method: 'WALLET',
+        },
+      });
+
+      //? Record driver income transaction
+      await tx.transaction.create({
+        data: {
+          user_id: trip.driver_id!,
+          amount: trip.total_cost,
+          type: ETransactionType.INCOME,
           ref_trip_id: trip_id,
           payment_method: 'WALLET',
         },

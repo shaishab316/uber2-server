@@ -1,7 +1,8 @@
 import z from 'zod';
-import { date } from '@/utils/transform/date';
 import { enum_encode } from '@/utils/transform/enum';
 import { EGender } from '@/utils/db';
+import { TModels } from '@/types/db';
+import { dateRanges } from '../datetime/Datetime.utils';
 
 export const DriverValidations = {
   setupDriverProfile: z.object({
@@ -16,10 +17,9 @@ export const DriverValidations = {
           error: 'Name is required',
         })
         .nonempty('Name is required'),
-      date_of_birth: z.union([
-        z.string().transform(date).pipe(z.date()),
-        z.date(),
-      ]),
+      date_of_birth: z.iso.datetime({
+        error: 'Date of birth is required',
+      }),
       gender: z
         .string({
           error: 'Gender is required',
@@ -87,6 +87,19 @@ export const DriverValidations = {
             .nonempty('Vehicle photo is required'),
         )
         .nonempty('Vehicle photo is required'),
+    }),
+  }),
+
+  getEarnings: z.object({
+    query: z.object({
+      dateRange: z.enum([...dateRanges, 'custom']).optional(),
+
+      //? if custom date range then startDate and endDate are required
+      startDate: z.iso.datetime().optional(),
+      endDate: z.iso.datetime().optional(),
+
+      //? Model type: trip or parcel to get earnings from
+      tab: z.enum(['trip', 'parcel'] satisfies TModels[]).default('trip'),
     }),
   }),
 

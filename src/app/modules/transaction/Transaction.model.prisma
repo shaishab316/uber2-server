@@ -23,4 +23,6 @@ enum ETransactionType {
   TOPUP
   EXPENSE
   WITHDRAW
+  INCOME
+  BONUS
 }

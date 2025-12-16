@@ -1,5 +1,6 @@
 import z from 'zod';
 import { DriverValidations } from './Driver.validation';
+import { TList } from '../query/Query.interface';
 
 export type TSetupDriverProfile = z.infer<
   typeof DriverValidations.setupDriverProfile
@@ -16,3 +17,9 @@ export type TToggleOnline = z.infer<typeof DriverValidations.toggleOnline> & {
 export type TRefreshLocation = z.infer<
   typeof DriverValidations.refreshLocation
 > & { driver_id: string };
+
+export type TGetEarningsArgs = z.infer<
+  typeof DriverValidations.getEarnings
+>['query'] & {
+  driver_id: string;
+} & TList;
