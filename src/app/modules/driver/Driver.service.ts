@@ -14,7 +14,6 @@ import {
   TToggleOnline,
 } from './Driver.interface';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
-import { ZodError } from 'zod';
 import { dateRange } from '../datetime/Datetime.utils';
 
 export const DriverServices = {
@@ -136,30 +135,7 @@ export const DriverServices = {
 
     //? if has date range filter
     if (range) {
-      if (range === 'custom') {
-        if (!startDate || !endDate) {
-          const nullArray = [];
-          if (!startDate) nullArray.push('startDate');
-          if (!endDate) nullArray.push('endDate');
-
-          //? Throw zod error for missing fields
-          throw new ZodError(
-            nullArray.map(field => ({
-              code: 'custom',
-              path: [field],
-              message: `${field} is required when dateRange is custom`,
-            })),
-          );
-        }
-
-        //? custom date range
-        whereTrip.payment_at = {
-          gte: new Date(startDate),
-          lte: new Date(endDate),
-        };
-      } else {
-        whereTrip.payment_at = dateRange[range]();
-      }
+      whereTrip.payment_at = dateRange[range](startDate, endDate, true);
     }
 
     const trips = await prisma.trip.findMany({

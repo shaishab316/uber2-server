@@ -92,7 +92,7 @@ export const DriverValidations = {
 
   getEarnings: z.object({
     query: z.object({
-      dateRange: z.enum([...dateRanges, 'custom']).optional(),
+      dateRange: z.enum(dateRanges).optional(),
 
       //? if custom date range then startDate and endDate are required
       startDate: z.iso.datetime().optional(),

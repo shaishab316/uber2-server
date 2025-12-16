@@ -1,11 +1,27 @@
-import { Prisma } from '@/utils/db';
-import type { TDateRange } from './Datetime.interface';
+import type { TDateRange, TDatetimeFunction } from './Datetime.interface';
 import ms from 'ms';
+import ServerError from '@/errors/ServerError';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Predefined date ranges for filtering
  */
 export const dateRange = {
+  custom(start, end, nullable = true) {
+    //? if not nullable, then both start and end are required
+    if (!nullable && (!start || !end)) {
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Start and end dates are required for custom date range',
+      );
+    }
+
+    return {
+      gte: start,
+      lte: end,
+    };
+  },
+
   /**
    * return today's date range
    */
@@ -587,7 +603,7 @@ export const dateRange = {
       lte: now,
     };
   },
-} satisfies Record<PropertyKey, () => Prisma.DateTimeFilter>;
+} satisfies Record<PropertyKey, TDatetimeFunction>;
 
 /**
  * Array of available date range keys
