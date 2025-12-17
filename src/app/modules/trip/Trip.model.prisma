@@ -4,10 +4,10 @@ model Trip {
   requested_at DateTime  @default(now())
   accepted_at  DateTime?
   started_at   DateTime?
-  delivered_at DateTime?
+  arrived_at   DateTime?
+  payment_at   DateTime?
   completed_at DateTime?
   cancelled_at DateTime?
-  payment_at   DateTime?
 
   user_id   String
   user      User    @relation("UserTrip", fields: [user_id], references: [id])
@@ -53,7 +53,7 @@ enum ETripStatus {
   REQUESTED
   ACCEPTED
   STARTED
-  DELIVERED
+  ARRIVED
   COMPLETED
   CANCELLED
 }

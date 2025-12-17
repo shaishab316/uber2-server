@@ -5,7 +5,14 @@ model Notification {
 
   title   String
   message String
-  is_read Boolean @default(false)
+  is_read Boolean           @default(false)
+  type    ENotificationType @default(INFO)
 
   @@map("notifications")
+}
+
+enum ENotificationType {
+  INFO
+  WARNING
+  ERROR
 }
