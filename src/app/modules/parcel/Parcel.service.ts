@@ -11,6 +11,7 @@ import {
   getNearestDriver,
 } from './Parcel.utils';
 import { userOmit } from '../user/User.constant';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const ParcelServices = {
   async getParcelDetails(parcel_id: string) {
@@ -70,7 +71,7 @@ export const ParcelServices = {
         `${parcel?.driver?.name?.split(' ')[0]} is already accepted this parcel`,
       );
 
-    return prisma.parcel.update({
+    const acceptedParcel = await prisma.parcel.update({
       where: { id: parcel_id },
       data: {
         status: EParcelStatus.ACCEPTED,
@@ -78,6 +79,16 @@ export const ParcelServices = {
         accepted_at: new Date(),
       },
     });
+
+    //? Notify user about parcel acceptance
+    await NotificationServices.createNotification({
+      user_id: acceptedParcel.user_id,
+      title: 'Parcel Accepted',
+      message: 'A driver has accepted your parcel delivery request.',
+      type: 'INFO',
+    });
+
+    return acceptedParcel;
   },
 
   async cancelParcel({
@@ -105,10 +116,22 @@ export const ParcelServices = {
         `You can't cancel ${parcel?.user?.name?.split(' ')[0]}'s parcel`,
       );
 
-    return prisma.parcel.update({
+    const cancelledParcel = await prisma.parcel.update({
       where: { id: parcel_id },
       data: { status: EParcelStatus.CANCELLED, cancelled_at: new Date() },
     });
+
+    //? Notify driver if assigned
+    if (cancelledParcel.driver_id) {
+      await NotificationServices.createNotification({
+        user_id: cancelledParcel.driver_id,
+        title: 'Parcel Cancelled',
+        message: 'The user has cancelled the parcel delivery.',
+        type: 'WARNING',
+      });
+    }
+
+    return cancelledParcel;
   },
 
   async getProcessingDriverParcel({ driver_id }: { driver_id: string }) {

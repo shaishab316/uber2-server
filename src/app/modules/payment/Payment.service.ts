@@ -6,6 +6,7 @@ import stripeAccountConnectQueue from '../../../utils/mq/stripeAccountConnectQue
 import withdrawQueue from '../../../utils/mq/withdrawQueue';
 import config from '@/config';
 import { stripe } from './Payment.utils';
+import { NotificationServices } from '../notification/Notification.service';
 
 /**
  * Payment Services
@@ -52,6 +53,14 @@ export const PaymentServices = {
     }
 
     await withdrawQueue.add({ amount, user });
+
+    //? Notify user about withdrawal request
+    await NotificationServices.createNotification({
+      user_id: user.id,
+      title: 'Withdrawal Request Submitted',
+      message: `Your withdrawal request of $${amount} is being processed.`,
+      type: 'INFO',
+    });
 
     return {
       available_balance: wallet.balance - amount,

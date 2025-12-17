@@ -5,6 +5,7 @@ import type { TRequestForTrip, TTripRefreshLocation } from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
 import { userOmit } from '../user/User.constant';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -93,6 +94,14 @@ export const TripServices = {
       },
     });
 
+    //? Notify user about trip acceptance
+    await NotificationServices.createNotification({
+      user_id: updatedTrip.user_id,
+      title: 'Trip Accepted',
+      message: 'A driver has accepted your trip request.',
+      type: 'INFO',
+    });
+
     return updatedTrip;
   },
 
@@ -115,10 +124,22 @@ export const TripServices = {
         `You can't cancel ${trip?.user?.name?.split(' ')[0]}'s trip`,
       );
 
-    return prisma.trip.update({
+    const cancelledTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: { status: ETripStatus.CANCELLED, cancelled_at: new Date() },
     });
+
+    //? Notify driver if assigned
+    if (cancelledTrip.driver_id) {
+      await NotificationServices.createNotification({
+        user_id: cancelledTrip.driver_id,
+        title: 'Trip Cancelled',
+        message: 'The user has cancelled the trip.',
+        type: 'WARNING',
+      });
+    }
+
+    return cancelledTrip;
   },
 
   async getProcessingDriverTrip({ driver_id }: { driver_id: string }) {
@@ -214,13 +235,23 @@ export const TripServices = {
       throw new Error('You are not assigned to this trip');
     }
 
-    return prisma.trip.update({
+    const startedTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: {
         status: ETripStatus.STARTED,
         started_at: new Date(),
       },
     });
+
+    //? Notify user that trip has started
+    await NotificationServices.createNotification({
+      user_id: startedTrip.user_id,
+      title: 'Trip Started',
+      message: 'Your trip has started. Enjoy your ride!',
+      type: 'INFO',
+    });
+
+    return startedTrip;
   },
 
   async endTrip({
@@ -238,7 +269,7 @@ export const TripServices = {
       throw new Error('You are not assigned to this trip');
     }
 
-    return prisma.trip.update({
+    const completedTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: {
         status: ETripStatus.COMPLETED,
@@ -258,6 +289,16 @@ export const TripServices = {
         },
       },
     });
+
+    //? Notify user that trip has ended
+    await NotificationServices.createNotification({
+      user_id: completedTrip.user_id,
+      title: 'Trip Completed',
+      message: `Your trip has been completed. Total cost: $${completedTrip.total_cost}`,
+      type: 'INFO',
+    });
+
+    return completedTrip;
   },
 
   async payForTrip({ user_id, trip_id }: { user_id: string; trip_id: string }) {
@@ -321,6 +362,22 @@ export const TripServices = {
           ref_trip_id: trip_id,
           payment_method: 'WALLET',
         },
+      });
+
+      //? Notify user about payment
+      await NotificationServices.createNotification({
+        user_id,
+        title: 'Payment Successful',
+        message: `Payment of $${trip.total_cost} for trip completed successfully.`,
+        type: 'INFO',
+      });
+
+      //? Notify driver about payment received
+      await NotificationServices.createNotification({
+        user_id: trip.driver_id!,
+        title: 'Payment Received',
+        message: `You received $${trip.total_cost} for the completed trip.`,
+        type: 'INFO',
       });
 
       return { trip, wallet, transaction };

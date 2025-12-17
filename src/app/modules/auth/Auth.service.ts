@@ -23,6 +23,7 @@ import { generateOTP, validateOTP } from '@/utils/crypto/otp';
 import { userSelfOmit } from '../user/User.constant';
 import { emailTemplate } from '@/templates';
 import emailQueue from '@/utils/mq/emailQueue';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const AuthServices = {
   async login({ password, email, phone }: TUserLogin) {
@@ -214,7 +215,7 @@ export const AuthServices = {
     )
       throw new ServerError(StatusCodes.UNAUTHORIZED, 'Incorrect OTP');
 
-    return prisma.user.update({
+    const verifiedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
         is_verified: true,
@@ -222,6 +223,16 @@ export const AuthServices = {
       },
       omit: userSelfOmit[user.role],
     });
+
+    //? Notify user about successful account verification
+    await NotificationServices.createNotification({
+      user_id: user.id,
+      title: 'Account Verified',
+      message: 'Your account has been successfully verified. Welcome!',
+      type: 'INFO',
+    });
+
+    return verifiedUser;
   },
 
   async modifyPassword({

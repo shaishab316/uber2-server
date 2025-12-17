@@ -1,6 +1,7 @@
 import { prisma, Review } from '@/utils/db';
 import { TGiveReview } from './Review.interface';
 import { ZodError } from 'zod';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const ReviewServices = {
   async giveReview({ reviewer_id, user_id, ...payload }: TGiveReview) {
@@ -62,12 +63,20 @@ export const ReviewServices = {
     });
 
     // Update user rating
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user_id },
       data: {
         rating_count: aggregation._count.rating,
         rating: aggregation._avg.rating ?? 5,
       },
+    });
+
+    //? Notify user about new review
+    await NotificationServices.createNotification({
+      user_id,
+      title: 'New Review Received',
+      message: `You received a ${review.rating}-star review. Your average rating is now ${updatedUser.rating.toFixed(1)}.`,
+      type: 'INFO',
     });
 
     return review;
