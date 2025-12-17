@@ -25,6 +25,7 @@ import { emailTemplate } from '@/templates';
 import emailQueue from '@/utils/mq/emailQueue';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {
@@ -83,6 +84,15 @@ export const UserServices = {
     } catch (error: any) {
       errorLogger.error(error.message);
     }
+
+    //? Send welcome notification
+    await NotificationServices.createNotification({
+      user_id: user.id,
+      title: 'Welcome to Pathao!',
+      message:
+        'Thank you for registering. Please verify your account to get started.',
+      type: 'INFO',
+    });
 
     return user;
   },
@@ -251,6 +261,7 @@ export const UserServices = {
     };
   },
 
+  //?? Admin Actions
   async pendingUserAction({ action, user_id }: TPendingUserAction) {
     await prisma.user.update({
       where: { id: user_id },

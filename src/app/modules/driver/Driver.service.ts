@@ -15,6 +15,7 @@ import {
 } from './Driver.interface';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 import { dateRange } from '../datetime/Datetime.utils';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const DriverServices = {
   async superGetPendingDriver({ page, limit, search }: TList) {
@@ -51,23 +52,45 @@ export const DriverServices = {
   },
 
   async superApproveDriver(driverId: string) {
-    return prisma.user.update({
+    const approvedDriver = await prisma.user.update({
       where: { id: driverId },
       omit: userOmit.DRIVER,
       data: {
         role: EUserRole.DRIVER,
       },
     });
+
+    //? Notify driver about approval
+    await NotificationServices.createNotification({
+      user_id: driverId,
+      title: 'Driver Application Approved',
+      message:
+        'Congratulations! Your driver application has been approved. You can now start accepting trips.',
+      type: 'INFO',
+    });
+
+    return approvedDriver;
   },
 
   async superRejectDriver(driverId: string) {
-    return prisma.user.update({
+    const rejectedDriver = await prisma.user.update({
       where: { id: driverId },
       omit: userOmit.DRIVER,
       data: {
         role: EUserRole.USER,
       },
     });
+
+    //? Notify user about rejection
+    await NotificationServices.createNotification({
+      user_id: driverId,
+      title: 'Driver Application Rejected',
+      message:
+        'Your driver application has been rejected. Please contact support for more information.',
+      type: 'WARNING',
+    });
+
+    return rejectedDriver;
   },
 
   async setupDriverProfile({ driver_id, ...payload }: TSetupDriverProfile) {

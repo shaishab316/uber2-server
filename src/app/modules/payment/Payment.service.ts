@@ -104,4 +104,27 @@ export const PaymentServices = {
 
     return url;
   },
+
+  async wallet_topup(session: any) {
+    const { amount, user_id } = session.metadata;
+    const topupAmount = parseFloat(amount);
+
+    //? Update wallet balance
+    await prisma.wallet.update({
+      where: { id: user_id },
+      data: {
+        balance: {
+          increment: topupAmount,
+        },
+      },
+    });
+
+    //? Notify user about successful topup
+    await NotificationServices.createNotification({
+      user_id,
+      title: 'Wallet Top-up Successful',
+      message: `Your wallet has been topped up with $${topupAmount}. Happy riding!`,
+      type: 'INFO',
+    });
+  },
 };

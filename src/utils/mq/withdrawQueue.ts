@@ -5,6 +5,7 @@ import { prisma } from '../db';
 import ora from 'ora';
 import chalk from 'chalk';
 import { stripe } from '../../app/modules/payment/Payment.utils';
+import { NotificationServices } from '../../app/modules/notification/Notification.service';
 
 /**
  * Withdraw queue
@@ -76,6 +77,14 @@ withdrawQueue.process(async ({ data }) => {
       data: { balance: { decrement: data.amount } },
     });
 
+    //? Notify user about successful withdrawal
+    await NotificationServices.createNotification({
+      user_id: data.user.id,
+      title: 'Withdrawal Completed',
+      message: `$${data.amount} has been successfully withdrawn to your account.`,
+      type: 'INFO',
+    });
+
     spinner.succeed(
       chalk.green(
         `${data.amount} ${config.payment.currency} withdrawn successfully to ${data.user.email}`,
@@ -83,6 +92,14 @@ withdrawQueue.process(async ({ data }) => {
     );
   } catch (error) {
     if (error instanceof Error) {
+      //? Notify user about withdrawal failure
+      await NotificationServices.createNotification({
+        user_id: data.user.id,
+        title: 'Withdrawal Failed',
+        message: `Your withdrawal request of $${data.amount} failed. ${error.message}`,
+        type: 'ERROR',
+      });
+
       spinner.fail(chalk.red(`Withdrawal failed: ${error.message}`));
     }
   }
