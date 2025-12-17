@@ -342,6 +342,16 @@ export const TripServices = {
         throw new Error('Insufficient balance in wallet');
       }
 
+      //? Warn if balance is low (less than $10)
+      if (wallet.balance < 10) {
+        await NotificationServices.createNotification({
+          user_id,
+          title: 'Low Wallet Balance',
+          message: `Your wallet balance is low ($${wallet.balance.toFixed(2)}). Please top up to continue using our services.`,
+          type: 'WARNING',
+        });
+      }
+
       //? Record transaction for user
       const transaction = await tx.transaction.create({
         data: {

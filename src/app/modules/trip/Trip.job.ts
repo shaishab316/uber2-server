@@ -8,6 +8,7 @@ import {
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
 import { errorLogger } from '../../../utils/logger';
+import { NotificationServices } from '../notification/Notification.service';
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export function TripJob(server: Server): () => void {
@@ -70,6 +71,14 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
      * STEP 4: Send real-time dispatch request to driver
      */
     sendDriverDispatchNotification(processingTrip);
+
+    //? Notify driver about new trip request
+    await NotificationServices.createNotification({
+      user_id: nextDriverId,
+      title: 'New Trip Request',
+      message: 'You have a new trip request nearby. Check it out!',
+      type: 'INFO',
+    });
 
     /**
      * STEP 5: Mark driver as temporarily offline

@@ -5,6 +5,7 @@ import { prisma } from '../../../utils/db';
 import { ParcelHelper as TParcelHelper, Parcel as TParcel } from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
+import { NotificationServices } from '../notification/Notification.service';
 
 /**
  * Parcel Dispatch Job Scheduler
@@ -96,6 +97,14 @@ async function processSingleDriverDispatch(
      * STEP 4: Send real-time dispatch request to driver
      */
     sendDriverDispatchNotification(processingParcel);
+
+    //? Notify driver about new parcel delivery request
+    await NotificationServices.createNotification({
+      user_id: nextDriverId,
+      title: 'New Parcel Delivery Request',
+      message: 'You have a new parcel delivery request nearby.',
+      type: 'INFO',
+    });
 
     /**
      * STEP 5: Mark driver as temporarily offline
