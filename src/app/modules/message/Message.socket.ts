@@ -4,6 +4,8 @@ import { catchAsyncSocket } from '../socket/Socket.utils';
 import { MessageServices } from './Message.service';
 import { MessageValidations } from './Message.validation';
 import { SocketServices } from '../socket/Socket.service';
+import { prisma } from '@/utils/db';
+import { NotificationServices } from '../notification/Notification.service';
 
 export const MessageSocket: TSocketHandler = ({ socket }) => {
   const { user } = socket.data;
@@ -41,6 +43,23 @@ export const MessageSocket: TSocketHandler = ({ socket }) => {
           avatar: user.avatar,
         }),
       );
+
+      //? Send notification to offline users
+      for (const opponent_id of opponent_ids) {
+        const opponent = await prisma.user.findUnique({
+          where: { id: opponent_id },
+          select: { is_online: true },
+        });
+
+        if (!opponent?.is_online) {
+          await NotificationServices.createNotification({
+            user_id: opponent_id,
+            title: `New message from ${user.name}`,
+            message: payload.text || 'Sent you a media file',
+            type: 'INFO',
+          });
+        }
+      }
 
       return message;
     }, MessageValidations.createMessage),

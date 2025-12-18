@@ -4,6 +4,7 @@ import { TripServices } from '../Trip.service';
 import { TripValidations } from '../Trip.validation';
 import { QueryValidations } from '../../query/Query.validation';
 import { SocketServices } from '../../socket/Socket.service';
+import { NotificationServices } from '../../notification/Notification.service';
 
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
@@ -23,6 +24,14 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
       const data = await TripServices.requestForTrip({
         ...payload,
         user_id: user.id,
+      });
+
+      //? Notify user that their trip request is being processed
+      await NotificationServices.createNotification({
+        user_id: user.id,
+        title: 'Trip Request Received',
+        message: 'Searching for nearby drivers...',
+        type: 'INFO',
       });
 
       return data;

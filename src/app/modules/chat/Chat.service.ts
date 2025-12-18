@@ -3,6 +3,7 @@ import ServerError from '../../../errors/ServerError';
 import { Prisma, Chat as TChat, prisma } from '../../../utils/db';
 import { TDeleteChatArgs, TGetInboxArgs, TNewChatArgs } from './Chat.interface';
 import { TPagination } from '../../../utils/server/serveResponse';
+import { NotificationServices } from '../notification/Notification.service';
 
 /**
  * All chat related services
@@ -51,7 +52,7 @@ export const ChatServices = {
     const user_ids = Array.from(new Set([user_id, adminUser.id])).sort();
 
     //? find or create chat between users
-    return prisma.chat.upsert({
+    const chat = await prisma.chat.upsert({
       where: { user_ids },
       update: {},
       create: {
@@ -61,6 +62,16 @@ export const ChatServices = {
         },
       },
     });
+
+    //? Notify admin about new support request
+    await NotificationServices.createNotification({
+      user_id: adminUser.id,
+      title: 'New Support Request',
+      message: 'A user has started a chat with support.',
+      type: 'INFO',
+    });
+
+    return chat;
   },
 
   /**

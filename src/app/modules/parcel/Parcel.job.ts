@@ -71,6 +71,24 @@ async function processSingleDriverDispatch(
     if (!nextDriverId) {
       // No drivers remaining in queue - cleanup completed helper
       await prisma.parcelHelper.delete({ where: { id: parcelHelper.id } });
+
+      //? Get parcel details to notify user
+      const parcel = await prisma.parcel.findUnique({
+        where: { id: parcelHelper.parcel_id },
+        select: { user_id: true },
+      });
+
+      if (parcel) {
+        //? Notify user that no drivers were found
+        await NotificationServices.createNotification({
+          user_id: parcel.user_id,
+          title: 'No Drivers Available',
+          message:
+            'Unfortunately, no drivers are available in your area right now. Please try again later.',
+          type: 'WARNING',
+        });
+      }
+
       return;
     }
 

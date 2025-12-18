@@ -47,6 +47,24 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
     if (!nextDriverId) {
       // No drivers remaining in queue - cleanup completed helper
       await prisma.tripHelper.delete({ where: { id: tripHelper.id } });
+
+      //? Get trip details to notify user
+      const trip = await prisma.trip.findUnique({
+        where: { id: tripHelper.trip_id },
+        select: { user_id: true },
+      });
+
+      if (trip) {
+        //? Notify user that no drivers were found
+        await NotificationServices.createNotification({
+          user_id: trip.user_id,
+          title: 'No Drivers Available',
+          message:
+            'Unfortunately, no drivers are available in your area right now. Please try again later.',
+          type: 'WARNING',
+        });
+      }
+
       return;
     }
 

@@ -3,6 +3,7 @@ import { ParcelServices } from '../Parcel.service';
 import { ParcelValidations } from '../Parcel.validation';
 import { QueryValidations } from '../../query/Query.validation';
 import { TSocketHandler } from '../../socket/Socket.interface';
+import { NotificationServices } from '../../notification/Notification.service';
 
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
@@ -22,6 +23,14 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
       const data = await ParcelServices.requestForParcel({
         ...payload,
         user_id: user.id,
+      });
+
+      //? Notify user that their parcel request is being processed
+      await NotificationServices.createNotification({
+        user_id: user.id,
+        title: 'Parcel Request Received',
+        message: 'Searching for nearby drivers...',
+        type: 'INFO',
       });
 
       return data;
