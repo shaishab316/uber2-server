@@ -15,6 +15,8 @@ const selfOmit = {
   is_online: true,
   last_online_at: true,
   nid_photos: true,
+  capture_avatar: true,
+  stripe_account_id: true,
 } satisfies Prisma.UserOmit;
 
 export const userDefaultOmit = {

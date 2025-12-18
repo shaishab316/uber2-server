@@ -234,7 +234,10 @@ export const UserServices = {
       where,
       skip: (page - 1) * limit,
       take: limit,
-      omit: userSelfOmit[role],
+      omit: {
+        ...userSelfOmit[role],
+        capture_avatar: false, //? allow capture avatar for admin review
+      },
     });
 
     const total = await prisma.user.count({
@@ -262,6 +265,33 @@ export const UserServices = {
         is_verification_pending: false,
         is_active: action === 'approve',
       },
+    });
+  },
+
+  async uploadCaptureAvatar({
+    avatar,
+    user_id,
+  }: {
+    user_id: string;
+    avatar: string;
+  }) {
+    if (!avatar) {
+      throw new ServerError(StatusCodes.BAD_REQUEST, 'Avatar is required');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+
+    if (user?.capture_avatar) await deleteFilesQueue.add([user.capture_avatar]);
+
+    return prisma.user.update({
+      where: { id: user_id },
+      data: {
+        capture_avatar: avatar,
+        is_verification_pending: true,
+      },
+      omit: userSelfOmit[user!.role],
     });
   },
 };

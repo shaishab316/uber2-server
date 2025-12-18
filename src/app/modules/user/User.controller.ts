@@ -47,7 +47,7 @@ export const UserControllers = {
 
   superEditProfile: catchAsync(async ({ params, body }) => {
     const user = (await prisma.user.findUnique({
-      where: { id: params.userId },
+      where: { id: params.user_id },
     })) as TUser;
 
     const data = await UserServices.updateUser({
@@ -166,6 +166,19 @@ export const UserControllers = {
       data: {
         url,
       },
+    };
+  }),
+
+  uploadCaptureAvatar: catchAsync(async ({ user, body }) => {
+    const data = await UserServices.uploadCaptureAvatar({
+      user_id: user.id,
+      ...body,
+    });
+
+    return {
+      track_activity: user.id,
+      message: 'Capture avatar uploaded successfully!',
+      data,
     };
   }),
 };

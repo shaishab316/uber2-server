@@ -18,11 +18,12 @@ model User {
   //! end
 
   //! profile
-  avatar        String   @default("/images/placeholder.png")
-  name          String   @default("Pathao User")
-  date_of_birth DateTime @default(now())
-  gender        EGender  @default(OTHER)
-  nid_photos    String[]
+  avatar         String   @default("/images/placeholder.png")
+  capture_avatar String? // Not shown, just for verification
+  name           String   @default("Pathao User")
+  date_of_birth  DateTime @default(now())
+  gender         EGender  @default(OTHER)
+  nid_photos     String[]
   //! end
 
   //! driver

@@ -23,10 +23,10 @@ const admin = Router();
   );
 
   admin.patch(
-    ':userId/edit',
+    ':user_id/edit',
     avatarCapture,
     purifyRequest(
-      QueryValidations.exists('userId', 'user'),
+      QueryValidations.exists('user_id', 'user'),
       UserValidations.edit,
     ),
     UserControllers.superEditProfile,
@@ -97,6 +97,12 @@ const all = Router();
     }),
     purifyRequest(UserValidations.setupUserProfile),
     UserControllers.setupUserProfile,
+  );
+
+  all.post(
+    '/upload-capture-avatar',
+    avatarCapture,
+    UserControllers.uploadCaptureAvatar,
   );
 }
 
