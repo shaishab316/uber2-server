@@ -269,11 +269,18 @@ export const TripServices = {
       throw new Error('You are not assigned to this trip');
     }
 
+    trip.started_at ??= new Date();
+
+    const completed_at = new Date();
+
     const completedTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: {
         status: ETripStatus.COMPLETED,
-        completed_at: new Date(),
+        completed_at,
+
+        //? Calculate total time in milliseconds
+        time: completed_at.getTime() - trip.started_at.getTime(),
 
         //? Recalculate total cost in case of any changes during the trip
         total_cost: await calculateTripCost(trip as any),

@@ -1,4 +1,5 @@
 import catchAsync from '../../middlewares/catchAsync';
+import { TGetEarningsArgs } from './Driver.interface';
 import { DriverServices } from './Driver.service';
 
 export const DriverControllers = {
@@ -50,6 +51,16 @@ export const DriverControllers = {
 
     return {
       message: 'Vehicle setup successfully!',
+      data,
+    };
+  }),
+
+  getEarnings: catchAsync(async ({ query }: { query: TGetEarningsArgs }) => {
+    const { meta, data } = await DriverServices[`${query.tab}Earnings`](query);
+
+    return {
+      message: 'Driver earnings retrieved successfully!',
+      meta,
       data,
     };
   }),

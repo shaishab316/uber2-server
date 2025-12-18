@@ -32,6 +32,15 @@ const driver = injectRoutes(Router(), {
   '/transactions': [TransactionRoutes.driver],
 });
 {
+  /**
+   * get driver earnings both trip and parcel
+   */
+  driver.get(
+    '/earnings',
+    purifyRequest(DriverValidations.getEarnings),
+    DriverControllers.getEarnings,
+  );
+
   driver.post(
     '/setup-driver-profile',
     capture({

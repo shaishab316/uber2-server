@@ -158,7 +158,7 @@ export const DriverServices = {
 
     //? if has date range filter
     if (range) {
-      whereTrip.payment_at = dateRange[range](startDate, endDate, true);
+      whereTrip.payment_at = dateRange[range](startDate, endDate, false);
     }
 
     const trips = await prisma.trip.findMany({
@@ -167,10 +167,19 @@ export const DriverServices = {
       take: limit,
     });
 
-    const total = await prisma.trip.count({ where: whereTrip });
+    const aggregate = await prisma.trip.aggregate({
+      where: whereTrip,
+      _sum: {
+        total_cost: true,
+        time: true,
+      },
+      _count: { id: true },
+    });
+
+    const total = aggregate._count.id;
 
     return {
-      trips,
+      data: trips,
       meta: {
         pagination: {
           page,
@@ -178,17 +187,19 @@ export const DriverServices = {
           total,
           totalPages: Math.ceil(total / limit),
         } satisfies TPagination,
+
+        total_trips_count: aggregate._count.id,
+        total_earnings: aggregate._sum.total_cost ?? 0,
+        total_time: aggregate._sum.time ?? 0,
       },
     };
   },
 
   // Todo: implement parcelEarnings service
-  // async parcelEarnings({
-  //   driver_id,
-  //   limit,
-  //   page,
-  //   dateRange,
-  //   startDate,
-  //   endDate,
-  // }: TGetEarningsArgs) {},
+  async parcelEarnings(payload: TGetEarningsArgs) {
+    return {
+      meta: {},
+      data: [payload],
+    };
+  },
 };
