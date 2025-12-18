@@ -17,12 +17,7 @@ import {
 import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
-import { errorLogger } from '@/utils/logger';
-import config from '@/config';
 import { hashPassword } from '../auth/Auth.utils';
-import { generateOTP } from '@/utils/crypto/otp';
-import { emailTemplate } from '@/templates';
-import emailQueue from '@/utils/mq/emailQueue';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 import { NotificationServices } from '../notification/Notification.service';
@@ -43,17 +38,15 @@ export const UserServices = {
       );
 
     //! finally create user and in return omit auth fields
-    const { otp_id, ...user } = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         phone,
         password: await hashPassword(password),
         role,
+        is_verified: true,
       },
-      omit: {
-        ...userSelfOmit[role],
-        otp_id: false,
-      },
+      omit: userSelfOmit[role],
     });
 
     //? create wallet for user
@@ -65,25 +58,25 @@ export const UserServices = {
       user_id: user.id,
     });
 
-    try {
-      const otp = generateOTP({
-        tokenType: 'access_token',
-        otpId: user.id + otp_id,
-      });
+    // try {
+    //   const otp = generateOTP({
+    //     tokenType: 'access_token',
+    //     otpId: user.id + otp_id,
+    //   });
 
-      if (email)
-        await emailQueue.add({
-          to: email,
-          subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-          html: await emailTemplate({
-            userName: user.name,
-            otp,
-            template: 'account_verify',
-          }),
-        });
-    } catch (error: any) {
-      errorLogger.error(error.message);
-    }
+    //   if (email)
+    //     await emailQueue.add({
+    //       to: email,
+    //       subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
+    //       html: await emailTemplate({
+    //         userName: user.name,
+    //         otp,
+    //         template: 'account_verify',
+    //       }),
+    //     });
+    // } catch (error: any) {
+    //   errorLogger.error(error.message);
+    // }
 
     //? Send welcome notification
     await NotificationServices.createNotification({
