@@ -229,7 +229,7 @@ const fileFilter =
 
     const mime = file.mimetype.toLowerCase();
 
-    if (validator.test(mime)) {
+    if (mime === 'application/octet-stream' || validator.test(mime)) {
       return cb(null, true);
     }
 
