@@ -77,7 +77,21 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       SocketServices.emitToUser(parcel.user_id, 'parcel:started', parcel);
 
-      return { parcel_id, started_at: parcel.started_at };
+      return parcel;
     }, parcelValidator),
+  );
+
+  socket.on(
+    'parcel:deliver',
+    catchAsyncSocket(async payload => {
+      const parcel = await ParcelServices.deliverParcel({
+        ...payload,
+        driver_id: driver.id,
+      });
+
+      SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', parcel);
+
+      return parcel;
+    }, ParcelValidations.deliver_parcel),
   );
 };

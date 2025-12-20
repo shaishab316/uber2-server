@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import ServerError from '@/errors/ServerError';
 import { EParcelStatus, prisma } from '@/utils/db';
 import type {
+  TDeliverParcelArgs,
   TParcelRefreshLocation,
   TRequestForParcel,
   TStartParcelArgs,
@@ -236,6 +237,40 @@ export const ParcelServices = {
       data: {
         status: EParcelStatus.STARTED,
         started_at: new Date(),
+      },
+    });
+  },
+
+  async deliverParcel({
+    driver_id,
+    files,
+    parcel_id,
+    delivery_lat,
+    delivery_lng,
+  }: TDeliverParcelArgs) {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcel_id },
+    });
+
+    if (parcel?.driver_id !== driver_id) {
+      throw new Error('You are not assigned to this parcel');
+    }
+
+    if (
+      parcel.status !== EParcelStatus.DELIVERED &&
+      parcel.status !== EParcelStatus.STARTED
+    ) {
+      throw new Error('Parcel is not started yet');
+    }
+
+    return prisma.parcel.update({
+      where: { id: parcel_id },
+      data: {
+        status: EParcelStatus.DELIVERED,
+        delivered_at: new Date(),
+        delivery_proof_files: files,
+        delivery_lat,
+        delivery_lng,
       },
     });
   },

@@ -43,6 +43,11 @@ model Parcel {
   is_processing        Boolean   @default(false)
   //! end
 
+  //! DELIVERY PROOF
+  delivery_proof_files String[] @default([])
+  delivery_lat         Float?
+  delivery_lng         Float?
+
   helper       ParcelHelper? @relation("ParcelHelper")
   transactions Transaction[]
 
