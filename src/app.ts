@@ -16,10 +16,6 @@ import serveResponse from './utils/server/serveResponse';
  */
 const app = express();
 
-// Serve static files
-app.use(express.static('public'));
-app.use(express.static('uploads'));
-
 // Configure middleware
 app.use(
   cors({
@@ -39,6 +35,12 @@ app.use(
   express.urlencoded({ extended: true }),
   cookieParser(),
 );
+
+// Serve static files
+app.use(express.static('public'));
+app.use(express.static('uploads'));
+app.use(/^\/api\/v\d+/, express.static('public'));
+app.use(/^\/api\/v\d+/, express.static('uploads'));
 
 app.get('/', (_, res) => {
   res.redirect('/health');

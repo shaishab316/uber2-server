@@ -3,8 +3,8 @@ import auth from '../app/middlewares/auth';
 import AdminRoutes from '../app/modules/admin/Admin.route';
 import { AuthRoutes } from '../app/modules/auth/Auth.route';
 import { UserRoutes } from '../app/modules/user/User.route';
-import { StatusCodes } from 'http-status-codes';
-import { fileTypes } from '../app/middlewares/capture';
+import catchAsync from '@/app/middlewares/catchAsync';
+import capture from '../app/middlewares/capture';
 import { PaymentRoutes } from '../app/modules/payment/Payment.route';
 import { TransactionRoutes } from '../app/modules/transaction/Transaction.route';
 import { injectRoutes } from '../utils/router/injectRouter';
@@ -19,14 +19,24 @@ import { ContextPageRoutes } from '@/app/modules/contextPage/ContextPage.route';
 
 const appRouter = Router();
 
-/** Forward uploaded files requests */
-fileTypes.map((filetype: string) =>
-  appRouter.get(`/${filetype}/:filename`, (req, res) =>
-    res.redirect(
-      StatusCodes.MOVED_PERMANENTLY,
-      `/${filetype}/${encodeURIComponent(req.params.filename)}`,
-    ),
-  ),
+//? Media upload endpoint
+appRouter.post(
+  '/upload-media',
+  auth.all,
+  capture({
+    files: {
+      size: 100 * 1024 * 1024,
+      maxCount: 10,
+      fileType: 'any',
+    },
+  }),
+  catchAsync(({ body }) => {
+    return {
+      message: 'Media uploaded successfully!',
+      //? Flatten the uploaded files object
+      data: Object.values(body).flat(),
+    };
+  }),
 );
 
 export default injectRoutes(appRouter, {
