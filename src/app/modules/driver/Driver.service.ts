@@ -188,18 +188,59 @@ export const DriverServices = {
           totalPages: Math.ceil(total / limit),
         } satisfies TPagination,
 
-        total_trips_count: aggregate._count.id,
+        total_count: aggregate._count.id,
         total_earnings: aggregate._sum.total_cost ?? 0,
         total_time: aggregate._sum.time ?? 0,
       },
     };
   },
 
-  // Todo: implement parcelEarnings service
-  async parcelEarnings(payload: TGetEarningsArgs) {
+  async parcelEarnings({
+    driver_id,
+    limit,
+    page,
+    dateRange: range,
+    startDate,
+    endDate,
+  }: TGetEarningsArgs) {
+    const whereParcel: Prisma.ParcelWhereInput = { driver_id };
+
+    //? if has date range filter
+    if (range) {
+      whereParcel.payment_at = dateRange[range](startDate, endDate, false);
+    }
+
+    const parcels = await prisma.parcel.findMany({
+      where: whereParcel,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const aggregate = await prisma.parcel.aggregate({
+      where: whereParcel,
+      _sum: {
+        total_cost: true,
+        weight: true,
+      },
+      _count: { id: true },
+    });
+
+    const total = aggregate._count.id;
+
     return {
-      meta: {},
-      data: [payload],
+      data: parcels,
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+
+        total_count: aggregate._count.id,
+        total_earnings: aggregate._sum.total_cost ?? 0,
+        total_weight: aggregate._sum.weight ?? 0,
+      },
     };
   },
 };
