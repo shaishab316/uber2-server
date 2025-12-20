@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Socket } from 'socket.io';
 import { decodeToken } from '../auth/Auth.utils';
-import { prisma, User as TUser } from '../../../utils/db';
-import ServerError from '../../../errors/ServerError';
+import { prisma, User as TUser } from '@/utils/db';
+import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { userSelfOmit } from '../user/User.constant';
 import { commonValidator as commonAuthValidator } from '@/app/middlewares/auth';

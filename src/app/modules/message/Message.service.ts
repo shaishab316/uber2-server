@@ -1,13 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
-import ServerError from '../../../errors/ServerError';
-import { type Prisma, prisma } from '../../../utils/db';
+import ServerError from '@/errors/ServerError';
+import { type Prisma, prisma } from '@/utils/db';
 import type {
   TCreateMessageArgs,
   TDeleteMessageArgs,
   TGetChatMessagesArgs,
 } from './Message.interface';
 import { messageSearchableFields } from './Message.constant';
-import type { TPagination } from '../../../utils/server/serveResponse';
+import type { TPagination } from '@/utils/server/serveResponse';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 
 /**

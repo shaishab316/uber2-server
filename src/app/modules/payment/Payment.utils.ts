@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Stripe from 'stripe';
-import config from '../../../config';
-import { prisma } from '../../../utils/db';
+import config from '@/config';
+import { prisma } from '@/utils/db';
 import { PaymentServices } from './Payment.service';
 
 /**

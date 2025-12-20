@@ -1,7 +1,7 @@
 import type z from 'zod';
 import type { stripWebhookEventMap } from './Payment.utils';
 import type { PaymentValidations } from './Payment.validation';
-import { User as TUser } from '../../../utils/db';
+import { User as TUser } from '@/utils/db';
 
 /**
  * Stripe webhook event

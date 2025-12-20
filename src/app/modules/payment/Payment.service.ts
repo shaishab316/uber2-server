@@ -1,9 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
-import { prisma } from '../../../utils/db';
-import ServerError from '../../../errors/ServerError';
+import { prisma } from '@/utils/db';
+import ServerError from '@/errors/ServerError';
 import { TTopup, TWithdrawArgs } from './Payment.interface';
-import stripeAccountConnectQueue from '../../../utils/mq/stripeAccountConnectQueue';
-import withdrawQueue from '../../../utils/mq/withdrawQueue';
+import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
+import withdrawQueue from '@/utils/mq/withdrawQueue';
 import config from '@/config';
 import { stripe } from './Payment.utils';
 import { NotificationServices } from '../notification/Notification.service';

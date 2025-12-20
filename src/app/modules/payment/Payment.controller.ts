@@ -1,11 +1,11 @@
 import chalk from 'chalk';
-import config from '../../../config';
+import config from '@/config';
 import catchAsync from '../../middlewares/catchAsync';
 import { stripe, stripWebhookEventMap } from './Payment.utils';
 import { StatusCodes } from 'http-status-codes';
-import { errorLogger } from '../../../utils/logger';
+import { errorLogger } from '@/utils/logger';
 import { TStripWebhookEvent } from './Payment.interface';
-import { prisma } from '../../../utils/db';
+import { prisma } from '@/utils/db';
 import { PaymentServices } from './Payment.service';
 
 /**

@@ -1,4 +1,4 @@
-import { prisma } from '../../../utils/db';
+import { prisma } from '@/utils/db';
 import { TGetNearestDriver, TRequestForParcel } from './Parcel.interface';
 
 export async function generateParcelSlug() {

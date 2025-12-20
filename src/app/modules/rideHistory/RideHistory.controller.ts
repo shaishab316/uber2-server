@@ -1,8 +1,7 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import type { TGetRideHistoryArgs } from './RideHistory.interface';
-import { EUserRole } from 'prisma/client/enums';
 import { RideHistoryServices } from './RideHistory.service';
-import { User as TUser } from '@/utils/db';
+import { type User as TUser, EUserRole } from '@/utils/db';
 
 export const RideHistoryControllers = {
   getRideHistory: catchAsync(

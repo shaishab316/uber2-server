@@ -1,13 +1,9 @@
 import { Server } from 'http';
 import cron from 'node-cron';
-import {
-  prisma,
-  Trip as TTrip,
-  TripHelper as TTripHelper,
-} from '../../../utils/db';
+import { prisma, Trip as TTrip, TripHelper as TTripHelper } from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
-import { errorLogger } from '../../../utils/logger';
+import { errorLogger } from '@/utils/logger';
 import { NotificationServices } from '../notification/Notification.service';
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars

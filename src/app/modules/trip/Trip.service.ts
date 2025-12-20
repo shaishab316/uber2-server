@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
-import ServerError from '../../../errors/ServerError';
-import { ETransactionType, ETripStatus, prisma } from '../../../utils/db';
+import ServerError from '@/errors/ServerError';
+import { ETransactionType, ETripStatus, prisma } from '@/utils/db';
 import type { TRequestForTrip, TTripRefreshLocation } from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';

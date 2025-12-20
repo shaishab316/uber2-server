@@ -1,4 +1,4 @@
-import { prisma } from '../../../utils/db';
+import { prisma } from '@/utils/db';
 import { TRequestForTrip } from './Trip.interface';
 
 export async function generateTripSlug() {
