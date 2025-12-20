@@ -1,9 +1,10 @@
 import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { ParcelServices } from '../Parcel.service';
 import { ParcelValidations } from '../Parcel.validation';
-import { QueryValidations } from '../../query/Query.validation';
+import { parcelValidator } from './Driver.socket';
 import { TSocketHandler } from '../../socket/Socket.interface';
 import { NotificationServices } from '../../notification/Notification.service';
+import { SocketServices } from '../../socket/Socket.service';
 
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
@@ -46,6 +47,30 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
       });
 
       return data;
-    }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
+    }, parcelValidator),
+  );
+
+  socket.on(
+    'parcel:pay',
+    catchAsyncSocket(async ({ parcel_id }) => {
+      const { transaction, parcel, wallet } = await ParcelServices.payForParcel(
+        {
+          parcel_id,
+          user_id: user.id,
+        },
+      );
+
+      //? Notify driver that parcel has been paid
+      SocketServices.emitToUser(parcel.driver_id!, 'parcel:paid', {
+        parcel_id: parcel.id,
+        transaction,
+      });
+
+      return {
+        current_balance: wallet?.balance,
+        transaction,
+        parcel_id: parcel.id,
+      };
+    }, parcelValidator),
   );
 };

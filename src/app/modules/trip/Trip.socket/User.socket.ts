@@ -58,6 +58,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
         user_id: user.id,
       });
 
+      //? Notify driver that trip has been paid
       SocketServices.emitToUser(trip.driver_id!, 'trip:paid', {
         trip_id: trip.id,
         transaction,

@@ -7,6 +7,7 @@ model Parcel {
   delivered_at DateTime?
   completed_at DateTime?
   cancelled_at DateTime?
+  payment_at   DateTime?
 
   user_id   String
   user      User    @relation("UserParcel", fields: [user_id], references: [id])

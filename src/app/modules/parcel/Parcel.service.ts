@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import ServerError from '@/errors/ServerError';
-import { EParcelStatus, prisma } from '@/utils/db';
+import { EParcelStatus, ETransactionType, prisma } from '@/utils/db';
 import type {
   TDeliverParcelArgs,
   TParcelRefreshLocation,
@@ -272,6 +272,105 @@ export const ParcelServices = {
         delivery_lat,
         delivery_lng,
       },
+    });
+  },
+
+  async payForParcel({
+    user_id,
+    parcel_id,
+  }: {
+    user_id: string;
+    parcel_id: string;
+  }) {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcel_id },
+    });
+
+    if (parcel?.user_id !== user_id) {
+      throw new Error('You are not authorized to pay for this parcel');
+    }
+
+    if (parcel.payment_at) {
+      return {
+        parcel,
+        wallet: await prisma.wallet.findUnique({ where: { id: user_id } }),
+        transaction: await prisma.transaction.findFirst({
+          where: { ref_parcel_id: parcel_id },
+        }),
+      };
+    }
+
+    return prisma.$transaction(async tx => {
+      //? Mark parcel as paid
+      const parcel = await tx.parcel.update({
+        where: { id: parcel_id },
+        data: { payment_at: new Date() },
+      });
+
+      //? Deduct from wallet
+      const wallet = await tx.wallet.update({
+        where: { id: user_id },
+        data: {
+          balance: {
+            decrement: parcel.total_cost,
+          },
+        },
+      });
+
+      //? Check for sufficient balance
+      if (wallet.balance < 0) {
+        throw new Error('Insufficient balance in wallet');
+      }
+
+      //? Warn if balance is low (less than $10)
+      if (wallet.balance < 10) {
+        await NotificationServices.createNotification({
+          user_id,
+          title: 'Low Wallet Balance',
+          message: `Your wallet balance is low ($${wallet.balance.toFixed(2)}). Please top up to continue using our services.`,
+          type: 'WARNING',
+        });
+      }
+
+      //? Record transaction for user
+      const transaction = await tx.transaction.create({
+        data: {
+          user_id,
+          amount: parcel.total_cost,
+          type: ETransactionType.EXPENSE,
+          ref_parcel_id: parcel_id,
+          payment_method: 'WALLET',
+        },
+      });
+
+      //? Record driver income transaction
+      await tx.transaction.create({
+        data: {
+          user_id: parcel.driver_id!,
+          amount: parcel.total_cost,
+          type: ETransactionType.INCOME,
+          ref_parcel_id: parcel_id,
+          payment_method: 'WALLET',
+        },
+      });
+
+      //? Notify user about payment
+      await NotificationServices.createNotification({
+        user_id,
+        title: 'Payment Successful',
+        message: `Payment of $${parcel.total_cost} for parcel delivery completed successfully.`,
+        type: 'INFO',
+      });
+
+      //? Notify driver about payment received
+      await NotificationServices.createNotification({
+        user_id: parcel.driver_id!,
+        title: 'Payment Received',
+        message: `You received $${parcel.total_cost} for the completed parcel delivery.`,
+        type: 'INFO',
+      });
+
+      return { parcel, wallet, transaction };
     });
   },
 };

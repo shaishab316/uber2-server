@@ -5,8 +5,8 @@ import { TSocketHandler } from '../../socket/Socket.interface';
 import { ParcelValidations } from '../Parcel.validation';
 import { SocketServices } from '../../socket/Socket.service';
 
-const parcelValidator = QueryValidations.exists('parcel_id', 'parcel').shape
-  .params;
+export const parcelValidator = QueryValidations.exists('parcel_id', 'parcel')
+  .shape.params;
 
 export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
