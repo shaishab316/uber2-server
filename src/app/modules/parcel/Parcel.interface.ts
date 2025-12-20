@@ -13,3 +13,8 @@ export type TGetNearestDriver = {
 export type TParcelRefreshLocation = z.infer<
   typeof ParcelValidations.refreshLocation
 >;
+
+export type TStartParcelArgs = {
+  driver_id: string;
+  parcel_id: string;
+};

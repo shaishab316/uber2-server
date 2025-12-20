@@ -4,6 +4,7 @@ import { EParcelStatus, prisma } from '@/utils/db';
 import type {
   TParcelRefreshLocation,
   TRequestForParcel,
+  TStartParcelArgs,
 } from './Parcel.interface';
 import {
   calculateParcelCost,
@@ -208,6 +209,33 @@ export const ParcelServices = {
         processing_driver_id: null,
         is_processing: false,
         processing_at: new Date(), //? invoke time
+      },
+    });
+  },
+
+  //? New method to start parcel
+  async startParcel({ driver_id, parcel_id }: TStartParcelArgs) {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcel_id },
+    });
+
+    if (parcel?.driver_id !== driver_id) {
+      throw new Error('You are not assigned to this parcel');
+    }
+
+    if (parcel.status === EParcelStatus.STARTED) {
+      return parcel; //? already started
+    }
+
+    if (parcel.status !== EParcelStatus.ACCEPTED) {
+      throw new Error('Parcel is not accepted yet');
+    }
+
+    return prisma.parcel.update({
+      where: { id: parcel_id },
+      data: {
+        status: EParcelStatus.STARTED,
+        started_at: new Date(),
       },
     });
   },

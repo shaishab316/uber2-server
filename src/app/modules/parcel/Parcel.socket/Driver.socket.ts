@@ -5,6 +5,9 @@ import { TSocketHandler } from '../../socket/Socket.interface';
 import { ParcelValidations } from '../Parcel.validation';
 import { SocketServices } from '../../socket/Socket.service';
 
+const parcelValidator = QueryValidations.exists('parcel_id', 'parcel').shape
+  .params;
+
 export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
 
@@ -34,7 +37,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       });
 
       return parcel;
-    }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
+    }, parcelValidator),
   );
 
   socket.on(
@@ -46,7 +49,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       });
 
       return { parcel_id };
-    }, QueryValidations.exists('parcel_id', 'parcel').shape.params),
+    }, parcelValidator),
   );
 
   socket.on(
@@ -62,5 +65,19 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       return payload;
     }, ParcelValidations.refreshLocation),
+  );
+
+  socket.on(
+    'parcel:start',
+    catchAsyncSocket(async ({ parcel_id }) => {
+      const parcel = await ParcelServices.startParcel({
+        driver_id: driver.id,
+        parcel_id,
+      });
+
+      SocketServices.emitToUser(parcel.user_id, 'parcel:started', parcel);
+
+      return { parcel_id, started_at: parcel.started_at };
+    }, parcelValidator),
   );
 };

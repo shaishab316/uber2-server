@@ -37,7 +37,7 @@ const driver = injectRoutes(Router(), {
    */
   driver.get(
     '/earnings',
-    purifyRequest(DriverValidations.getEarnings),
+    purifyRequest(QueryValidations.list, DriverValidations.getEarnings),
     DriverControllers.getEarnings,
   );
 
