@@ -1,21 +1,22 @@
 import { Router } from 'express';
-import auth from '../app/middlewares/auth';
-import AdminRoutes from '../app/modules/admin/Admin.route';
-import { AuthRoutes } from '../app/modules/auth/Auth.route';
-import { UserRoutes } from '../app/modules/user/User.route';
+import auth from '@/app/middlewares/auth';
+import AdminRoutes from '@/app/modules/admin/Admin.route';
+import { AuthRoutes } from '@/app/modules/auth/Auth.route';
+import { UserRoutes } from '@/app/modules/user/User.route';
 import catchAsync from '@/app/middlewares/catchAsync';
-import capture from '../app/middlewares/capture';
-import { PaymentRoutes } from '../app/modules/payment/Payment.route';
-import { TransactionRoutes } from '../app/modules/transaction/Transaction.route';
-import { injectRoutes } from '../utils/router/injectRouter';
-import { ParcelRoutes } from '../app/modules/parcel/Parcel.route';
-import { DriverRoutes } from '../app/modules/driver/Driver.route';
-import { ReviewRoutes } from '../app/modules/review/Review.route';
-import { MessageRoutes } from '../app/modules/message/Message.route';
-import { ChatRoutes } from '../app/modules/chat/Chat.route';
-import { NotificationRoutes } from '../app/modules/notification/Notification.route';
+import capture from '@/app/middlewares/capture';
+import { PaymentRoutes } from '@/app/modules/payment/Payment.route';
+import { TransactionRoutes } from '@/app/modules/transaction/Transaction.route';
+import { injectRoutes } from '@/utils/router/injectRouter';
+import { ParcelRoutes } from '@/app/modules/parcel/Parcel.route';
+import { DriverRoutes } from '@/app/modules/driver/Driver.route';
+import { ReviewRoutes } from '@/app/modules/review/Review.route';
+import { MessageRoutes } from '@/app/modules/message/Message.route';
+import { ChatRoutes } from '@/app/modules/chat/Chat.route';
+import { NotificationRoutes } from '@/app/modules/notification/Notification.route';
 import { TripRoutes } from '@/app/modules/trip/Trip.route';
 import { ContextPageRoutes } from '@/app/modules/contextPage/ContextPage.route';
+import { RideHistoryRoutes } from '@/app/modules/rideHistory/RideHistory.route';
 
 const appRouter = Router();
 
@@ -54,6 +55,7 @@ export default injectRoutes(appRouter, {
   '/notifications': [auth.all, NotificationRoutes.all],
   '/trips': [auth.all, TripRoutes.all],
   '/parcels': [auth.all, ParcelRoutes.all],
+  '/ride-history': [auth.all, RideHistoryRoutes.all],
 
   // Driver auth
   '/drivers': [auth.driver, DriverRoutes.driver],

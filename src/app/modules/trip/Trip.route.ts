@@ -7,7 +7,7 @@ import { TripValidations } from './Trip.validation';
 const all = Router();
 {
   //? Calculate estimated fare
-  all.get(
+  all.post(
     '/estimate-fare',
     purifyRequest(TripValidations.calculateEstimatedFare),
     TripControllers.calculateEstimatedFare,

@@ -165,6 +165,7 @@ export const DriverServices = {
       where: whereTrip,
       skip: (page - 1) * limit,
       take: limit,
+      orderBy: { payment_at: 'desc' },
     });
 
     const aggregate = await prisma.trip.aggregate({
@@ -214,6 +215,7 @@ export const DriverServices = {
       where: whereParcel,
       skip: (page - 1) * limit,
       take: limit,
+      orderBy: { payment_at: 'desc' },
     });
 
     const aggregate = await prisma.parcel.aggregate({

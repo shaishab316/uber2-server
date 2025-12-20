@@ -7,7 +7,7 @@ import { ParcelValidations } from './Parcel.validation';
 const all = Router();
 {
   //? Get parcel details
-  all.get(
+  all.post(
     '/:parcel_id',
     purifyRequest(QueryValidations.exists('parcel_id', 'parcel')),
     ParcelControllers.getParcelDetails,
