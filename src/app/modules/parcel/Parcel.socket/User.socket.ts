@@ -62,7 +62,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
 
       //? Notify driver that parcel has been paid
       SocketServices.emitToUser(parcel.driver_id!, 'parcel:paid', {
-        parcel_id: parcel.id,
+        parcel,
         transaction,
       });
 

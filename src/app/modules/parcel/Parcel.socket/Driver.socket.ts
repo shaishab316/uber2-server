@@ -94,4 +94,22 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       return parcel;
     }, ParcelValidations.deliver_parcel),
   );
+
+  socket.on(
+    'parcel:complete_delivery',
+    catchAsyncSocket(async ({ parcel_id }) => {
+      const parcel = await ParcelServices.completeParcelDelivery({
+        driver_id: driver.id,
+        parcel_id,
+      });
+
+      SocketServices.emitToUser(
+        parcel.user_id,
+        'parcel:delivery_completed',
+        parcel,
+      );
+
+      return parcel;
+    }, parcelValidator),
+  );
 };

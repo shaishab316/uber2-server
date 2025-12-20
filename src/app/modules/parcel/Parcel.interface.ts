@@ -19,6 +19,11 @@ export type TStartParcelArgs = {
   parcel_id: string;
 };
 
+export type TCompleteParcelDeliveryArgs = {
+  driver_id: string;
+  parcel_id: string;
+};
+
 export type TDeliverParcelArgs = z.infer<
   typeof ParcelValidations.deliver_parcel
 > & { driver_id: string };

@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import ServerError from '@/errors/ServerError';
 import { EParcelStatus, ETransactionType, prisma } from '@/utils/db';
 import type {
+  TCompleteParcelDeliveryArgs,
   TDeliverParcelArgs,
   TParcelRefreshLocation,
   TRequestForParcel,
@@ -371,6 +372,35 @@ export const ParcelServices = {
       });
 
       return { parcel, wallet, transaction };
+    });
+  },
+
+  async completeParcelDelivery({
+    driver_id,
+    parcel_id,
+  }: TCompleteParcelDeliveryArgs) {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcel_id },
+    });
+
+    if (parcel?.driver_id !== driver_id) {
+      throw new Error('You are not assigned to this parcel');
+    }
+
+    if (parcel.status === EParcelStatus.COMPLETED) {
+      return parcel; //? already completed
+    }
+
+    if (parcel.status !== EParcelStatus.DELIVERED) {
+      throw new Error('Parcel is not delivered yet');
+    }
+
+    return prisma.parcel.update({
+      where: { id: parcel_id },
+      data: {
+        status: EParcelStatus.COMPLETED,
+        completed_at: new Date(),
+      },
     });
   },
 };
