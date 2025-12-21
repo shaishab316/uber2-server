@@ -4,6 +4,8 @@ import { ParcelServices } from '../Parcel.service';
 import { TSocketHandler } from '../../socket/Socket.interface';
 import { ParcelValidations } from '../Parcel.validation';
 import { SocketServices } from '../../socket/Socket.service';
+import { prisma } from '@/utils/db';
+import { userOmit } from '../../user/User.constant';
 
 export const parcelValidator = QueryValidations.exists('parcel_id', 'parcel')
   .shape.params;
@@ -30,12 +32,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       //? Notify user that their parcel has been accepted
       SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
         parcel,
       });
 
@@ -80,12 +82,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       //? Notify user that their parcel delivery has started
       SocketServices.emitToUser(parcel.user_id, 'parcel:started', {
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
         parcel,
       });
 
@@ -104,12 +106,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       //? Notify user that their parcel is being delivered
       SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', {
         parcel,
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
       });
 
       return parcel;
@@ -127,12 +129,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       //? Notify user that their parcel delivery is completed
       SocketServices.emitToUser(parcel.user_id, 'parcel:delivery_completed', {
         parcel,
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
       });
 
       return parcel;

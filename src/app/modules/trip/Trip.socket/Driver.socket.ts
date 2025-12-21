@@ -4,6 +4,8 @@ import { catchAsyncSocket } from '../../socket/Socket.utils';
 import { TripServices } from '../Trip.service';
 import { TripValidations } from '../Trip.validation';
 import { SocketServices } from '../../socket/Socket.service';
+import { prisma } from '@/utils/db';
+import { userOmit } from '../../user/User.constant';
 
 export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
@@ -28,12 +30,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       //? Notify user that driver accepted the trip
       SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
         trip,
       });
 
@@ -74,12 +76,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
 
       //? Notify user that driver started the trip
       SocketServices.emitToUser(trip.user_id, 'trip:started', {
-        driver: {
-          name: driver.name,
-          avatar: driver.avatar,
-          location_lat: driver.location_lat,
-          location_lng: driver.location_lng,
-        },
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
         trip,
       });
 
@@ -98,6 +100,12 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
       //? Notify user that driver ended the trip
       SocketServices.emitToUser(trip.user_id, 'trip:ended', {
         trip,
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
         fare: trip.total_cost,
       });
 
