@@ -79,11 +79,17 @@ export const TripServices = {
     const user_ids = [updatedTrip.user_id, driver_id].sort();
 
     //? Create chat for trip
-    const chat = await prisma.chat.upsert({
-      where: { id: trip_id },
-      create: { user_ids },
-      update: { user_ids },
+    let chat = await prisma.chat.findFirst({
+      where: { user_ids: { equals: user_ids } },
     });
+
+    if (!chat) {
+      chat = await prisma.chat.create({
+        data: {
+          user_ids,
+        },
+      });
+    }
 
     //? Initial message
     await prisma.message.create({
