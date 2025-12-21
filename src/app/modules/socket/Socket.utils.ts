@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import type z from 'zod';
 import { formatError } from '../../middlewares/globalErrorHandler';
+import config from '@/config';
 
 export const catchAsyncSocket = <S extends z.ZodType>(
   fn: (data: z.infer<S>) => Promise<any>,
@@ -19,6 +20,11 @@ export const catchAsyncSocket = <S extends z.ZodType>(
       response = await fn(parsed);
     } catch (error: any) {
       response = formatError(error).errorMessages;
+
+      //? In development mode, include stack trace in the response
+      if (config.server.isDevelopment) {
+        Object.assign(response?.[0] ?? {}, { stack: error.stack });
+      }
     } finally {
       ack?.(response);
     }
