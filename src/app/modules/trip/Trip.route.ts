@@ -6,18 +6,18 @@ import { TripValidations } from './Trip.validation';
 
 const all = Router();
 {
-  //? Calculate estimated fare
-  all.post(
-    '/estimate-fare',
-    purifyRequest(TripValidations.calculateEstimatedFare),
-    TripControllers.calculateEstimatedFare,
-  );
-
   //? Get trip details
   all.get(
     '/:trip_id',
     purifyRequest(QueryValidations.exists('trip_id', 'trip')),
     TripControllers.getTripDetails,
+  );
+
+  //? Calculate estimated fare
+  all.post(
+    '/estimate-fare',
+    purifyRequest(TripValidations.calculateEstimatedFare),
+    TripControllers.calculateEstimatedFare,
   );
 }
 

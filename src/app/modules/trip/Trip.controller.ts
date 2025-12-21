@@ -20,7 +20,7 @@ export const TripControllers = {
 
     return {
       message: 'Estimated fare calculated successfully',
-      data: { estimated_fare: estimatedFare },
+      data: { estimated_fare: estimatedFare, query: body },
     };
   }),
 };
