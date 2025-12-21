@@ -28,12 +28,15 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
+      //? Notify user that their parcel has been accepted
       SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
-        name: driver.name,
-        avatar: driver.avatar,
-        parcel_id,
-        location_lat: driver.location_lat,
-        location_lng: driver.location_lng,
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+        parcel,
       });
 
       return parcel;
@@ -75,7 +78,16 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
-      SocketServices.emitToUser(parcel.user_id, 'parcel:started', parcel);
+      //? Notify user that their parcel delivery has started
+      SocketServices.emitToUser(parcel.user_id, 'parcel:started', {
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+        parcel,
+      });
 
       return parcel;
     }, parcelValidator),
@@ -89,7 +101,16 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         driver_id: driver.id,
       });
 
-      SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', parcel);
+      //? Notify user that their parcel is being delivered
+      SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', {
+        parcel,
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+      });
 
       return parcel;
     }, ParcelValidations.deliver_parcel),
@@ -103,11 +124,16 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
-      SocketServices.emitToUser(
-        parcel.user_id,
-        'parcel:delivery_completed',
+      //? Notify user that their parcel delivery is completed
+      SocketServices.emitToUser(parcel.user_id, 'parcel:delivery_completed', {
         parcel,
-      );
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+      });
 
       return parcel;
     }, parcelValidator),

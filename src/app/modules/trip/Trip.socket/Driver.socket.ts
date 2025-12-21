@@ -13,6 +13,7 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     driver_id: driver.id,
   });
 
+  //? If there's an ongoing trip, recover it
   if (lastTrip) {
     socket.emit('trip:recover', lastTrip);
   }
@@ -25,12 +26,15 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
+      //? Notify user that driver accepted the trip
       SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
-        name: driver.name,
-        avatar: driver.avatar,
-        trip_id,
-        location_lat: driver.location_lat,
-        location_lng: driver.location_lng,
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+        trip,
       });
 
       return trip;
@@ -68,8 +72,15 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
+      //? Notify user that driver started the trip
       SocketServices.emitToUser(trip.user_id, 'trip:started', {
-        trip_id,
+        driver: {
+          name: driver.name,
+          avatar: driver.avatar,
+          location_lat: driver.location_lat,
+          location_lng: driver.location_lng,
+        },
+        trip,
       });
 
       return trip;
@@ -84,8 +95,9 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
+      //? Notify user that driver ended the trip
       SocketServices.emitToUser(trip.user_id, 'trip:ended', {
-        trip_id,
+        trip,
         fare: trip.total_cost,
       });
 
