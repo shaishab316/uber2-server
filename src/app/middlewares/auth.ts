@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { StatusCodes } from 'http-status-codes';
-import ServerError from '../../errors/ServerError';
+import ServerError from '@/errors/ServerError';
 import { decodeToken, TToken } from '../modules/auth/Auth.utils';
 import catchAsync from './catchAsync';
-import { prisma } from '../../utils/db';
-import { EUserRole, User as TUser } from '@/utils/db';
+import { EUserRole, prisma, User as TUser } from '@/utils/db';
+import config from '@/config';
 
 /**
  * Middleware to authenticate and authorize requests based on user roles
@@ -18,87 +18,125 @@ const auth = ({
   token_type?: TToken;
   validators?: ((user: TUser) => void)[];
 } = {}) =>
-  catchAsync(
-    async (req, _, next) => {
-      const token = req.headers.authorization; //Todo: || req.cookies[token_type];
+  catchAsync(async (req, _, next) => {
+    const token = req.headers.authorization; //Todo: || req.cookies[token_type];
 
-      const id = decodeToken(token, token_type)?.uid;
+    const id = decodeToken(token, token_type)?.uid;
 
-      const user = await prisma.user.update({
-        where: { id },
-        data: { last_online_at: new Date() },
-        include: {
-          wallet: {
-            select: {
-              balance: true,
-            },
-          },
-        },
-      });
-
-      await Promise.all(validators.map(fn => fn(user)));
-
-      Object.assign(req, { user });
-
-      next();
-    },
-    (_err, _req, _res, next) => {
-      next(
-        new ServerError(
-          StatusCodes.UNAUTHORIZED,
-          'Your session has expired. Login again.',
-        ),
+    if (!id) {
+      throw new ServerError(
+        StatusCodes.UNAUTHORIZED,
+        'Your session has expired. Login again.',
       );
-    },
-  );
+    }
 
-auth.all = auth();
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
 
-auth.admin = auth({
-  validators: [
-    commonValidator,
-    ({ is_admin }) => {
-      if (!is_admin)
-        throw new ServerError(StatusCodes.FORBIDDEN, 'You are not an admin');
-    },
-  ],
-});
+    if (!user) {
+      throw new ServerError(
+        StatusCodes.UNAUTHORIZED,
+        'Maybe your account has been deleted. Register again.',
+      );
+    }
 
-auth.user = auth({
-  validators: [
-    commonValidator,
-    ({ role }) => {
-      if (role !== EUserRole.USER)
-        throw new ServerError(StatusCodes.FORBIDDEN, 'You are not a user');
-    },
-  ],
-});
+    await Promise.all(validators.map(fn => fn(user)));
 
-auth.driver = auth({
-  validators: [
-    commonValidator,
-    ({ role }) => {
-      if (role !== EUserRole.DRIVER)
-        throw new ServerError(StatusCodes.FORBIDDEN, 'You are not a driver');
-    },
-  ],
-});
+    req.user = user;
 
-//! Token Verification
-auth.refresh_token = auth({ token_type: 'refresh_token' });
-auth.reset_token = auth({ token_type: 'reset_token' });
+    next();
+  });
 
-export default auth;
-
+/**
+ * Common validator function
+ */
 export function commonValidator({ is_admin, is_verified, is_active }: TUser) {
   if (is_admin) return;
 
   if (!is_verified) {
     throw new ServerError(
       StatusCodes.FORBIDDEN,
-      'Your account are not verified',
+      'Your account is not verified',
     );
   } else if (!is_active) {
-    throw new ServerError(StatusCodes.FORBIDDEN, 'Your account are not active');
+    throw new ServerError(StatusCodes.FORBIDDEN, 'Your account is not active');
   }
 }
+
+// Default auth
+auth.default = auth();
+
+// Base auth without role restrictions
+auth.all = auth({ validators: [commonValidator] });
+
+//? Auth without "user" role restrictions
+auth.allOmitUser = auth({
+  validators: [
+    commonValidator,
+    ({ role }) => {
+      if (role === EUserRole.USER) {
+        throw new ServerError(
+          StatusCodes.FORBIDDEN,
+          'You do not have permissions to access this resource',
+        );
+      }
+    },
+  ],
+});
+
+// Admin auth
+auth.admin = auth({
+  validators: [
+    commonValidator,
+    ({ is_admin }) => {
+      if (!is_admin) {
+        throw new ServerError(StatusCodes.FORBIDDEN, 'You are not an admin');
+      }
+    },
+  ],
+});
+
+// Role based auth
+Object.values(EUserRole).forEach(role => {
+  Object.defineProperty(auth, role.toLowerCase(), {
+    value: auth({
+      validators: [
+        commonValidator,
+        user => {
+          if (user.role !== role) {
+            throw new ServerError(
+              StatusCodes.FORBIDDEN,
+              `You do not have ${role} permissions`,
+            );
+          }
+        },
+      ],
+    }),
+    enumerable: true,
+    configurable: true,
+  });
+});
+
+// Token based auth
+Object.keys(config.jwt).forEach(token_type => {
+  Object.defineProperty(auth, token_type, {
+    value: auth({ token_type: token_type as TToken }),
+    enumerable: true,
+    configurable: true,
+  });
+});
+
+export type TAuth = typeof auth & {
+  [K in Lowercase<keyof typeof EUserRole>]: ReturnType<typeof auth>;
+} & {
+  [K in TToken]: ReturnType<typeof auth>;
+};
+
+/**
+ * Middleware to authenticate and authorize requests based on user roles
+ *
+ * @param token_type - The type of token to validate
+ * @param validators - Array of validator functions to run on the user
+ */
+export default auth as TAuth;

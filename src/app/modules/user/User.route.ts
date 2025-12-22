@@ -5,6 +5,8 @@ import { QueryValidations } from '../query/Query.validation';
 import { UserValidations } from './User.validation';
 import capture from '../../middlewares/capture';
 import { AuthControllers } from '../auth/Auth.controller';
+import { DriverValidations } from '../driver/Driver.validation';
+import { DriverControllers } from '../driver/Driver.controller';
 
 const avatarCapture = capture({
   avatar: {
@@ -97,6 +99,29 @@ const all = Router();
     }),
     purifyRequest(UserValidations.setupUserProfile),
     UserControllers.setupUserProfile,
+  );
+
+  all.post(
+    '/setup-driver-profile',
+    capture({
+      nid_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      driving_license_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      avatar: {
+        size: 5 * 1024 * 1024,
+        maxCount: 1,
+        fileType: 'images',
+      },
+    }),
+    purifyRequest(DriverValidations.setupDriverProfile),
+    DriverControllers.setupDriverProfile,
   );
 
   all.post(

@@ -47,15 +47,15 @@ export default injectRoutes(appRouter, {
   '/context-pages': [ContextPageRoutes.user],
 
   // Free auth
-  '/profile': [auth.all, UserRoutes.all],
-  '/transactions': [auth.all, TransactionRoutes.all],
+  '/profile': [auth.default, UserRoutes.all],
+  '/transactions': [auth.default, TransactionRoutes.all],
   '/reviews': [auth.all, ReviewRoutes.all],
-  '/inbox': [auth.all, ChatRoutes.all],
-  '/messages': [auth.all, MessageRoutes.all],
-  '/notifications': [auth.all, NotificationRoutes.all],
+  '/inbox': [auth.default, ChatRoutes.all],
+  '/messages': [auth.default, MessageRoutes.all],
+  '/notifications': [auth.default, NotificationRoutes.all],
   '/trips': [auth.all, TripRoutes.all],
   '/parcels': [auth.all, ParcelRoutes.all],
-  '/ride-history': [auth.all, RideHistoryRoutes.all],
+  '/ride-history': [auth.default, RideHistoryRoutes.all],
 
   // Driver auth
   '/drivers': [auth.driver, DriverRoutes.driver],
