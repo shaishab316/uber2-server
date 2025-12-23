@@ -19,7 +19,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   }
 
   socket.on(
-    'parcel:request',
+    'parcel:new_request',
     catchAsyncSocket(async payload => {
       const data = await ParcelServices.requestForParcel({
         ...payload,

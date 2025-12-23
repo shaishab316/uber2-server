@@ -17,7 +17,7 @@ export const DriverValidations = {
           error: 'Name is required',
         })
         .nonempty('Name is required'),
-      date_of_birth: z.iso.datetime({
+      date_of_birth: z.iso.date({
         error: 'Date of birth is required',
       }),
       gender: z

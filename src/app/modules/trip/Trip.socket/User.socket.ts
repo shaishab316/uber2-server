@@ -19,7 +19,7 @@ export const UserSocket: TSocketHandler = async ({ socket }) => {
   }
 
   socket.on(
-    'trip:request',
+    'trip:new_request',
     catchAsyncSocket(async payload => {
       const data = await TripServices.requestForTrip({
         ...payload,

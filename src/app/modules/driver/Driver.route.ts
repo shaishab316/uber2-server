@@ -4,7 +4,6 @@ import { QueryValidations } from '../query/Query.validation';
 import { DriverControllers } from './Driver.controller';
 import { injectRoutes } from '../../../utils/router/injectRouter';
 import { TransactionRoutes } from '../transaction/Transaction.route';
-import capture from '../../middlewares/capture';
 import { DriverValidations } from './Driver.validation';
 
 const admin = Router();
@@ -39,47 +38,6 @@ const driver = injectRoutes(Router(), {
     '/earnings',
     purifyRequest(QueryValidations.list, DriverValidations.getEarnings),
     DriverControllers.getEarnings,
-  );
-
-  driver.post(
-    '/setup-driver-profile',
-    capture({
-      nid_photos: {
-        size: 5 * 1024 * 1024,
-        maxCount: 10,
-        fileType: 'images',
-      },
-      driving_license_photos: {
-        size: 5 * 1024 * 1024,
-        maxCount: 10,
-        fileType: 'images',
-      },
-      avatar: {
-        size: 5 * 1024 * 1024,
-        maxCount: 1,
-        fileType: 'images',
-      },
-    }),
-    purifyRequest(DriverValidations.setupDriverProfile),
-    DriverControllers.setupDriverProfile,
-  );
-
-  driver.post(
-    '/setup-vehicle',
-    capture({
-      vehicle_registration_photos: {
-        size: 5 * 1024 * 1024,
-        maxCount: 10,
-        fileType: 'images',
-      },
-      vehicle_photos: {
-        size: 5 * 1024 * 1024,
-        maxCount: 10,
-        fileType: 'images',
-      },
-    }),
-    purifyRequest(DriverValidations.setupVehicle),
-    DriverControllers.setupVehicle,
   );
 }
 

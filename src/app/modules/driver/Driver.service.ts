@@ -110,6 +110,7 @@ export const DriverServices = {
       data: {
         ...payload,
         is_verification_pending: true,
+        date_of_birth: new Date(payload.date_of_birth),
       },
     });
   },

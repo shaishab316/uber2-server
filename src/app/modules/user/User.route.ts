@@ -125,6 +125,24 @@ const all = Router();
   );
 
   all.post(
+    '/setup-vehicle',
+    capture({
+      vehicle_registration_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+      vehicle_photos: {
+        size: 5 * 1024 * 1024,
+        maxCount: 10,
+        fileType: 'images',
+      },
+    }),
+    purifyRequest(DriverValidations.setupVehicle),
+    DriverControllers.setupVehicle,
+  );
+
+  all.post(
     '/upload-capture-avatar',
     avatarCapture,
     UserControllers.uploadCaptureAvatar,
