@@ -15,6 +15,8 @@ export type TTokenPayload = {
   iat?: number;
 };
 
+const ALGORITHM = 'HS256' satisfies jwt.Algorithm;
+
 /**
  * Create a token
  * @param payload - The payload to sign
@@ -27,6 +29,7 @@ export const encodeToken = (payload: TTokenPayload, token_type: TToken) => {
   try {
     return jwt.sign(payload, config.jwt[token_type].secret, {
       expiresIn: config.jwt[token_type].expire_in,
+      algorithm: ALGORITHM,
     });
   } catch (error: any) {
     errorLogger.error(chalk.red('🔑 Failed to create token'), error);
@@ -44,16 +47,23 @@ export const encodeToken = (payload: TTokenPayload, token_type: TToken) => {
  * @returns The decoded token
  */
 export const decodeToken = (token: string | undefined, token_type: TToken) => {
-  token = token?.trim()?.match(/[\w-]+\.[\w-]+\.[\w-]+/)?.[0];
   const error = new ServerError(
     StatusCodes.UNAUTHORIZED,
     `Please provide a valid ${enum_decode(token_type)}.`,
   );
 
+  if (!token || token.length > 400) {
+    throw error;
+  }
+
+  token = token?.trim()?.match(/[\w-]+\.[\w-]+\.[\w-]+/)?.[0];
+
   if (!token) throw error;
 
   try {
-    return jwt.verify(token, config.jwt[token_type].secret) as TTokenPayload;
+    return jwt.verify(token, config.jwt[token_type].secret, {
+      algorithms: [ALGORITHM],
+    }) as TTokenPayload;
   } catch {
     throw error;
   }

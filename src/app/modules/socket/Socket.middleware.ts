@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { Socket } from 'socket.io';
 import { decodeToken } from '../auth/Auth.utils';
-import { prisma, User as TUser } from '@/utils/db';
-import ServerError from '@/errors/ServerError';
-import { StatusCodes } from 'http-status-codes';
+import { prisma } from '@/utils/db';
 import { userSelfOmit } from '../user/User.constant';
 import { commonValidator as commonAuthValidator } from '@/app/middlewares/auth';
+import { formatError } from '@/app/middlewares/globalErrorHandler';
 
 const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   const token =
@@ -14,24 +13,25 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
   try {
     const { uid } = decodeToken(token, 'access_token');
 
-    const user = await prisma.user.update({
-      where: { id: uid },
-      //? Set user as online on every socket connection
-      data: { is_online: true, last_online_at: new Date() },
-      omit: userSelfOmit.USER,
-    });
-
-    if (!user)
-      throw new ServerError(StatusCodes.NOT_FOUND, 'Your account is not found');
+    try {
+      socket.data.user = await prisma.user.update({
+        where: { id: uid },
+        //? Set user as online on every socket connection
+        data: { is_online: true, last_online_at: new Date() },
+        omit: userSelfOmit.USER,
+      });
+    } catch {
+      next(new Error('Your account is not found'));
+    }
 
     //? Run common auth validators
-    commonAuthValidator(user as TUser);
-
-    Object.assign(socket.data, { user });
+    commonAuthValidator(socket.data.user);
 
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (error) {
+    if (error instanceof Error) {
+      next(new Error(formatError(error).message));
+    }
   }
 };
 
