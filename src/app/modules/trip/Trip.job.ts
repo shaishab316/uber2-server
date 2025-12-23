@@ -1,6 +1,11 @@
 import { Server } from 'http';
 import cron from 'node-cron';
-import { prisma, Trip as TTrip, TripHelper as TTripHelper } from '@/utils/db';
+import {
+  prisma,
+  Trip as TTrip,
+  TripHelper as TTripHelper,
+  User as TUser,
+} from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
 import { errorLogger } from '@/utils/logger';
@@ -79,12 +84,23 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         processing_driver_id: nextDriverId,
         processing_at: new Date(),
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            trip_received_count: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+          },
+        },
+      },
     });
 
     /**
      * STEP 4: Send real-time dispatch request to driver
      */
-    sendDriverDispatchNotification(processingTrip);
+    sendDriverDispatchNotification(processingTrip as TTrip & { user: TUser });
 
     //? Notify driver about new trip request
     await NotificationServices.createNotification({
@@ -132,11 +148,13 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
  *
  * @param processingTrip - The trip data to send to the driver
  */
-function sendDriverDispatchNotification(processingTrip: TTrip): void {
-  if (!processingTrip.processing_driver_id) return;
-  SocketServices.emitToUser(
-    processingTrip.processing_driver_id,
-    'trip:request',
-    processingTrip,
-  );
+function sendDriverDispatchNotification({
+  user,
+  ...trip
+}: TTrip & { user: TUser }): void {
+  if (!trip.processing_driver_id) return;
+  SocketServices.emitToUser(trip.processing_driver_id, 'trip:request', {
+    trip,
+    user,
+  });
 }

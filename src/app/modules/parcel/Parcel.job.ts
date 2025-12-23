@@ -1,8 +1,12 @@
 /* eslint-disable no-console */
 import { Server } from 'http';
 import cron from 'node-cron';
-import { prisma } from '../../../utils/db';
-import { ParcelHelper as TParcelHelper, Parcel as TParcel } from '@/utils/db';
+import {
+  ParcelHelper as TParcelHelper,
+  Parcel as TParcel,
+  prisma,
+  User as TUser,
+} from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
 import { NotificationServices } from '../notification/Notification.service';
@@ -109,12 +113,25 @@ async function processSingleDriverDispatch(
         processing_driver_id: nextDriverId,
         processing_at: new Date(),
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            trip_received_count: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+          },
+        },
+      },
     });
 
     /**
      * STEP 4: Send real-time dispatch request to driver
      */
-    sendDriverDispatchNotification(processingParcel);
+    sendDriverDispatchNotification(
+      processingParcel as TParcel & { user: TUser },
+    );
 
     //? Notify driver about new parcel delivery request
     await NotificationServices.createNotification({
@@ -162,11 +179,13 @@ async function processSingleDriverDispatch(
  *
  * @param processingParcel - The parcel data to send to the driver
  */
-function sendDriverDispatchNotification(processingParcel: TParcel): void {
-  if (!processingParcel.processing_driver_id) return;
-  SocketServices.emitToUser(
-    processingParcel.processing_driver_id,
-    'parcel:request',
-    processingParcel,
-  );
+function sendDriverDispatchNotification({
+  user,
+  ...parcel
+}: TParcel & { user: TUser }): void {
+  if (!parcel.processing_driver_id) return;
+  SocketServices.emitToUser(parcel.processing_driver_id, 'parcel:request', {
+    parcel,
+    user,
+  });
 }
