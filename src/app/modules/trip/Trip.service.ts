@@ -181,17 +181,34 @@ export const TripServices = {
   },
 
   async getLastDriverTrip({ driver_id }: { driver_id: string }) {
-    return prisma.trip.findFirst({
+    const data = await prisma.trip.findFirst({
       where: {
         driver_id,
         status: {
           notIn: [ETripStatus.COMPLETED, ETripStatus.CANCELLED],
         },
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            trip_received_count: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+          },
+        },
+      },
       orderBy: {
         accepted_at: 'desc',
       },
     });
+
+    if (!data) return null;
+
+    const { user, ...trip } = data;
+
+    return { trip, user };
   },
 
   async refreshLocation({ trip_id, ...payload }: TTripRefreshLocation) {

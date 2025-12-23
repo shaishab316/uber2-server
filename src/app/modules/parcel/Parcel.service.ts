@@ -138,10 +138,32 @@ export const ParcelServices = {
   },
 
   async getProcessingDriverParcel({ driver_id }: { driver_id: string }) {
-    return prisma.parcel.findFirst({
+    const data = await prisma.parcel.findFirst({
       where: { processing_driver_id: driver_id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            trip_received_count: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+          },
+        },
+      },
       orderBy: { processing_at: 'desc' },
     });
+
+    if (!data) {
+      return null;
+    }
+
+    const { user, ...parcel } = data;
+
+    return {
+      parcel,
+      user,
+    };
   },
 
   async getLastUserParcel({ user_id }: { user_id: string }) {
@@ -170,7 +192,7 @@ export const ParcelServices = {
   },
 
   async getLastDriverParcel({ driver_id }: { driver_id: string }) {
-    return prisma.parcel.findFirst({
+    const data = await prisma.parcel.findFirst({
       where: {
         driver_id,
         status: {
@@ -180,7 +202,24 @@ export const ParcelServices = {
       orderBy: {
         accepted_at: 'desc',
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            trip_received_count: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+          },
+        },
+      },
     });
+
+    if (!data) return null;
+
+    const { user, ...parcel } = data;
+
+    return { parcel, user };
   },
 
   async refreshLocation({ parcel_id, ...payload }: TParcelRefreshLocation) {
