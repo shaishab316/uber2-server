@@ -181,7 +181,11 @@ export const UserServices = {
 
     if (user?.avatar) await deleteFilesQueue.add([user.avatar]);
 
-    return prisma.user.delete({ where: { id: user_id } });
+    return prisma.user.update({
+      where: { id: user_id },
+      data: { is_deleted: true },
+      omit: userSelfOmit[user!.role],
+    });
   },
 
   async setupUserProfile({

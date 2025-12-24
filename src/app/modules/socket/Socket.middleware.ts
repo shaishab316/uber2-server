@@ -15,7 +15,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 
     try {
       socket.data.user = await prisma.user.update({
-        where: { id: uid },
+        where: { id: uid, is_deleted: false },
         //? Set user as online on every socket connection
         data: { is_online: true, last_online_at: new Date() },
         omit: userSelfOmit.USER,

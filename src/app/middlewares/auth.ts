@@ -31,7 +31,7 @@ const auth = ({
     }
 
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id, is_deleted: false },
     });
 
     if (!user) {
