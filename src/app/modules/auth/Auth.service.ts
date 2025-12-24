@@ -30,7 +30,7 @@ export const AuthServices = {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { OR: [{ email }, { phone }], is_deleted: false },
     });
 
     if (!user)
@@ -126,7 +126,7 @@ export const AuthServices = {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { OR: [{ email }, { phone }], is_deleted: false },
     });
 
     if (!user)
@@ -163,7 +163,7 @@ export const AuthServices = {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { OR: [{ email }, { phone }], is_deleted: false },
     });
 
     if (!user)
@@ -199,7 +199,7 @@ export const AuthServices = {
     this.validEmailORPhone({ email, phone });
 
     const user = await prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { OR: [{ email }, { phone }], is_deleted: false },
       select: { role: true, id: true, otp_id: true },
     });
 
@@ -243,7 +243,7 @@ export const AuthServices = {
     password: string;
   }) {
     return prisma.user.update({
-      where: { id: user.id },
+      where: { id: user.id, is_deleted: false },
       data: { password: await hashPassword(password) },
       omit: userSelfOmit[user.role],
     });
