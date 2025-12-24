@@ -80,13 +80,13 @@ export const TripServices = {
 
     //? Create chat for trip
     let chat = await prisma.chat.findFirst({
-      where: { user_ids: { equals: user_ids } },
+      where: { user_ids: { equals: user_ids.filter(id => id !== null) } },
     });
 
     if (!chat) {
       chat = await prisma.chat.create({
         data: {
-          user_ids,
+          user_ids: user_ids.filter(id => id !== null),
         },
       });
     }
@@ -100,13 +100,15 @@ export const TripServices = {
       },
     });
 
-    //? Notify user about trip acceptance
-    await NotificationServices.createNotification({
-      user_id: updatedTrip.user_id,
-      title: 'Trip Accepted',
-      message: 'A driver has accepted your trip request.',
-      type: 'INFO',
-    });
+    if (updatedTrip.user_id) {
+      //? Notify user about trip acceptance
+      await NotificationServices.createNotification({
+        user_id: updatedTrip.user_id,
+        title: 'Trip Accepted',
+        message: 'A driver has accepted your trip request.',
+        type: 'INFO',
+      });
+    }
 
     return updatedTrip;
   },
@@ -124,7 +126,7 @@ export const TripServices = {
       },
     });
 
-    if (trip?.user.id !== user_id)
+    if (trip?.user?.id !== user_id)
       throw new ServerError(
         StatusCodes.CONFLICT,
         `You can't cancel ${trip?.user?.name?.split(' ')[0]}'s trip`,
@@ -266,13 +268,15 @@ export const TripServices = {
       },
     });
 
-    //? Notify user that trip has started
-    await NotificationServices.createNotification({
-      user_id: startedTrip.user_id,
-      title: 'Trip Started',
-      message: 'Your trip has started. Enjoy your ride!',
-      type: 'INFO',
-    });
+    if (startedTrip.user_id) {
+      //? Notify user that trip has started
+      await NotificationServices.createNotification({
+        user_id: startedTrip.user_id,
+        title: 'Trip Started',
+        message: 'Your trip has started. Enjoy your ride!',
+        type: 'INFO',
+      });
+    }
 
     return startedTrip;
   },
@@ -320,13 +324,15 @@ export const TripServices = {
       },
     });
 
-    //? Notify user that trip has ended
-    await NotificationServices.createNotification({
-      user_id: completedTrip.user_id,
-      title: 'Trip Completed',
-      message: `Your trip has been completed. Total cost: $${completedTrip.total_cost}`,
-      type: 'INFO',
-    });
+    if (completedTrip.user_id) {
+      //? Notify user that trip has ended
+      await NotificationServices.createNotification({
+        user_id: completedTrip.user_id,
+        title: 'Trip Completed',
+        message: `Your trip has been completed. Total cost: $${completedTrip.total_cost}`,
+        type: 'INFO',
+      });
+    }
 
     return completedTrip;
   },

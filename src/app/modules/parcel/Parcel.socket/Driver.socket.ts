@@ -30,16 +30,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
-      //? Notify user that their parcel has been accepted
-      SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        parcel,
-      });
+      if (parcel.user_id) {
+        //? Notify user that their parcel has been accepted
+        SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          parcel,
+        });
+      }
 
       return parcel;
     }, parcelValidator),
@@ -62,11 +64,13 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     catchAsyncSocket(async payload => {
       const parcel = await ParcelServices.refreshLocation(payload);
 
-      SocketServices.emitToUser(
-        parcel.user_id,
-        'parcel:refresh_location',
-        payload,
-      );
+      if (parcel.user_id) {
+        SocketServices.emitToUser(
+          parcel.user_id,
+          'parcel:refresh_location',
+          payload,
+        );
+      }
 
       return payload;
     }, ParcelValidations.refreshLocation),
@@ -80,16 +84,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
-      //? Notify user that their parcel delivery has started
-      SocketServices.emitToUser(parcel.user_id, 'parcel:started', {
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        parcel,
-      });
+      if (parcel.user_id) {
+        //? Notify user that their parcel delivery has started
+        SocketServices.emitToUser(parcel.user_id, 'parcel:started', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          parcel,
+        });
+      }
 
       return parcel;
     }, parcelValidator),
@@ -103,16 +109,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         driver_id: driver.id,
       });
 
-      //? Notify user that their parcel is being delivered
-      SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', {
-        parcel,
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-      });
+      if (parcel.user_id) {
+        //? Notify user that their parcel is being delivered
+        SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', {
+          parcel,
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+        });
+      }
 
       return parcel;
     }, ParcelValidations.deliver_parcel),
@@ -126,16 +134,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         parcel_id,
       });
 
-      //? Notify user that their parcel delivery is completed
-      SocketServices.emitToUser(parcel.user_id, 'parcel:delivery_completed', {
-        parcel,
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-      });
+      if (parcel.user_id) {
+        //? Notify user that their parcel delivery is completed
+        SocketServices.emitToUser(parcel.user_id, 'parcel:delivery_completed', {
+          parcel,
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+        });
+      }
 
       return parcel;
     }, parcelValidator),

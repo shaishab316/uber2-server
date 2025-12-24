@@ -83,13 +83,15 @@ export const ParcelServices = {
       },
     });
 
-    //? Notify user about parcel acceptance
-    await NotificationServices.createNotification({
-      user_id: acceptedParcel.user_id,
-      title: 'Parcel Accepted',
-      message: 'A driver has accepted your parcel delivery request.',
-      type: 'INFO',
-    });
+    if (acceptedParcel.user_id) {
+      //? Notify user about parcel acceptance
+      await NotificationServices.createNotification({
+        user_id: acceptedParcel.user_id,
+        title: 'Parcel Accepted',
+        message: 'A driver has accepted your parcel delivery request.',
+        type: 'INFO',
+      });
+    }
 
     return acceptedParcel;
   },
@@ -113,7 +115,7 @@ export const ParcelServices = {
       },
     });
 
-    if (parcel?.user.id !== user_id)
+    if (parcel?.user?.id !== user_id)
       throw new ServerError(
         StatusCodes.CONFLICT,
         `You can't cancel ${parcel?.user?.name?.split(' ')[0]}'s parcel`,

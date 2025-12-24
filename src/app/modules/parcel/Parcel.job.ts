@@ -82,7 +82,7 @@ async function processSingleDriverDispatch(
         select: { user_id: true },
       });
 
-      if (parcel) {
+      if (parcel && parcel.user_id) {
         //? Notify user that no drivers were found
         await NotificationServices.createNotification({
           user_id: parcel.user_id,

@@ -28,16 +28,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
-      //? Notify user that driver accepted the trip
-      SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        trip,
-      });
+      if (trip.user_id) {
+        //? Notify user that driver accepted the trip
+        SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          trip,
+        });
+      }
 
       return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
@@ -60,7 +62,13 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     catchAsyncSocket(async payload => {
       const trip = await TripServices.refreshLocation(payload);
 
-      SocketServices.emitToUser(trip.user_id, 'trip:refresh_location', payload);
+      if (trip.user_id) {
+        SocketServices.emitToUser(
+          trip.user_id,
+          'trip:refresh_location',
+          payload,
+        );
+      }
 
       return payload;
     }, TripValidations.refreshLocation),
@@ -74,16 +82,18 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
-      //? Notify user that driver started the trip
-      SocketServices.emitToUser(trip.user_id, 'trip:started', {
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        trip,
-      });
+      if (trip.user_id) {
+        //? Notify user that driver started the trip
+        SocketServices.emitToUser(trip.user_id, 'trip:started', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          trip,
+        });
+      }
 
       return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),
@@ -97,17 +107,19 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         trip_id,
       });
 
-      //? Notify user that driver ended the trip
-      SocketServices.emitToUser(trip.user_id, 'trip:ended', {
-        trip,
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        fare: trip.total_cost,
-      });
+      if (trip.user_id) {
+        //? Notify user that driver ended the trip
+        SocketServices.emitToUser(trip.user_id, 'trip:ended', {
+          trip,
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          fare: trip.total_cost,
+        });
+      }
 
       return trip;
     }, QueryValidations.exists('trip_id', 'trip').shape.params),

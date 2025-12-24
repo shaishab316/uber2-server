@@ -9,10 +9,10 @@ model Parcel {
   cancelled_at DateTime?
   payment_at   DateTime?
 
-  user_id   String
-  user      User    @relation("UserParcel", fields: [user_id], references: [id])
+  user_id   String?
+  user      User?   @relation("UserParcel", fields: [user_id], references: [id], onDelete: SetNull)
   driver_id String?
-  driver    User?   @relation("DriverParcel", fields: [driver_id], references: [id])
+  driver    User?   @relation("DriverParcel", fields: [driver_id], references: [id], onDelete: SetNull)
 
   // Pickup location fields
   pickup_type    String  @default("Point")

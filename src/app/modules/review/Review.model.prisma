@@ -1,7 +1,7 @@
 model Review {
-  id          String @id @default(uuid())
-  reviewer_id String
-  user_id     String
+  id          String  @id @default(uuid())
+  reviewer_id String?
+  user_id     String?
 
   rating      Float    @default(5.0)
   comment     String   @default("")
@@ -12,8 +12,8 @@ model Review {
   ref_parcel_id String?
   ref_trip_id   String?
 
-  reviewer User @relation("ReviewerReviews", fields: [reviewer_id], references: [id])
-  user     User @relation("UserReviews", fields: [user_id], references: [id])
+  reviewer User? @relation("ReviewerReviews", fields: [reviewer_id], references: [id], onDelete: SetNull)
+  user     User? @relation("UserReviews", fields: [user_id], references: [id], onDelete: SetNull)
 
   @@index([user_id])
   @@index([reviewer_id])

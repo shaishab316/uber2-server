@@ -3,7 +3,7 @@ model Transaction {
   created_at            DateTime         @default(now())
   updated_at            DateTime         @updatedAt
   stripe_transaction_id String?
-  user_id               String
+  user_id               String?
   driver_id             String?
   amount                Float
   type                  ETransactionType @default(TOPUP)
@@ -12,9 +12,9 @@ model Transaction {
   ref_trip_id   String?
   ref_parcel_id String?
 
-  user   User    @relation(fields: [user_id], references: [id])
-  trip   Trip?   @relation(fields: [ref_trip_id], references: [id])
-  parcel Parcel? @relation(fields: [ref_parcel_id], references: [id])
+  user   User?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  trip   Trip?   @relation(fields: [ref_trip_id], references: [id], onDelete: SetNull)
+  parcel Parcel? @relation(fields: [ref_parcel_id], references: [id], onDelete: SetNull)
 
   @@map("transactions")
 }

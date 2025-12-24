@@ -55,7 +55,7 @@ async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         select: { user_id: true },
       });
 
-      if (trip) {
+      if (trip && trip.user_id) {
         //? Notify user that no drivers were found
         await NotificationServices.createNotification({
           user_id: trip.user_id,
