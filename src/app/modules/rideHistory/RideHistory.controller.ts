@@ -17,13 +17,35 @@ export const RideHistoryControllers = {
         payload.user_id = user.id;
       }
 
-      const { data, meta } =
-        await RideHistoryServices[`${query.tab}History`](payload);
+      const tripHistory = await RideHistoryServices.tripHistory(payload);
+      const parcelHistory = await RideHistoryServices.parcelHistory(payload);
 
       return {
         message: 'Ride history fetched successfully!',
-        meta,
-        data,
+        meta: {
+          pagination: {
+            page: query.page,
+            limit: query.limit,
+            total:
+              tripHistory.meta.pagination.total +
+              parcelHistory.meta.pagination.total,
+            totalPages: Math.max(
+              tripHistory.meta.pagination.totalPages,
+              parcelHistory.meta.pagination.totalPages,
+            ),
+          },
+        },
+        data: [
+          ...tripHistory.data.map(trip => ({
+            ...trip,
+            is_parcel: false,
+          })),
+          ...parcelHistory.data.map(parcel => ({
+            ...parcel,
+            is_parcel: true,
+          })),
+          ...parcelHistory.data,
+        ].sort((a, b) => b.requested_at.getTime() - a.requested_at.getTime()),
       };
     },
   ),
