@@ -223,7 +223,7 @@ export const DriverServices = {
       where: whereParcel,
       _sum: {
         total_cost: true,
-        weight: true,
+        time: true,
       },
       _count: { id: true },
     });
@@ -242,7 +242,7 @@ export const DriverServices = {
 
         total_count: aggregate._count.id,
         total_earnings: aggregate._sum.total_cost ?? 0,
-        total_weight: aggregate._sum.weight ?? 0,
+        total_time: aggregate._sum.time ?? 0,
       },
     };
   },

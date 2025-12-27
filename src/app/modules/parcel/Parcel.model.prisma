@@ -9,6 +9,8 @@ model Parcel {
   cancelled_at DateTime?
   payment_at   DateTime?
 
+  time Int?
+
   user_id   String?
   user      User?   @relation("UserParcel", fields: [user_id], references: [id], onDelete: SetNull)
   driver_id String?

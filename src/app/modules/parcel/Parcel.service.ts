@@ -436,11 +436,17 @@ export const ParcelServices = {
       throw new Error('Parcel is not delivered yet');
     }
 
+    parcel.started_at ??= new Date(); //? fallback
+    const completed_at = new Date();
+
     return prisma.parcel.update({
       where: { id: parcel_id },
       data: {
         status: EParcelStatus.COMPLETED,
-        completed_at: new Date(),
+        completed_at,
+
+        //? Calculate total time in milliseconds
+        time: completed_at.getTime() - parcel.started_at.getTime(),
       },
     });
   },
