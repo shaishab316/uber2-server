@@ -21,8 +21,7 @@ export const ReviewServices = {
           where: { id: existingReview.id },
           data: payload,
         });
-    }
-    if (payload.ref_trip_id) {
+    } else if (payload.ref_trip_id) {
       const existingReview = await prisma.review.findFirst({
         where: {
           reviewer_id,
