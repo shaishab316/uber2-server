@@ -13,15 +13,10 @@ export const RideHistoryServices = {
     startDate,
     endDate,
   }: TGetRideHistoryArgs) {
-    const whereTrip: Prisma.TripWhereInput = {};
-
-    if (user_id) {
-      whereTrip.user_id = user_id;
-    }
-
-    if (driver_id) {
-      whereTrip.driver_id = driver_id;
-    }
+    const whereTrip: Prisma.TripWhereInput = {
+      user_id,
+      driver_id,
+    };
 
     //? if has date range filter
     if (range) {
@@ -30,6 +25,20 @@ export const RideHistoryServices = {
 
     const trips = await prisma.trip.findMany({
       where: whereTrip,
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+        driver: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { requested_at: 'desc' },
@@ -59,15 +68,10 @@ export const RideHistoryServices = {
     startDate,
     endDate,
   }: TGetRideHistoryArgs) {
-    const whereParcel: Prisma.ParcelWhereInput = {};
-
-    if (user_id) {
-      whereParcel.user_id = user_id;
-    }
-
-    if (driver_id) {
-      whereParcel.driver_id = driver_id;
-    }
+    const whereParcel: Prisma.ParcelWhereInput = {
+      user_id,
+      driver_id,
+    };
 
     //? if has date range filter
     if (range) {
@@ -76,6 +80,20 @@ export const RideHistoryServices = {
 
     const parcels = await prisma.parcel.findMany({
       where: whereParcel,
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+        driver: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { requested_at: 'desc' },
