@@ -31,6 +31,7 @@ export const TripServices = {
         ...payload,
         slug: await generateTripSlug(),
         total_cost: await calculateTripCost(payload),
+        date: new Date().toISOString().split('T')[0], // "YYYY-MM-DD"
         helper: {
           create: {
             driver_ids,

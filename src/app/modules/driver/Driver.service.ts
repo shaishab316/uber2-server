@@ -157,16 +157,25 @@ export const DriverServices = {
   }: TGetEarningsArgs) {
     const whereTrip: Prisma.TripWhereInput = { driver_id };
 
-    //? if has date range filter
     if (range) {
       whereTrip.payment_at = dateRange[range](startDate, endDate, false);
     }
 
-    const trips = await prisma.trip.findMany({
+    const trips = await prisma.trip.groupBy({
+      by: ['date'],
       where: whereTrip,
+      _sum: {
+        total_cost: true,
+        time: true,
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        date: 'desc',
+      },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { payment_at: 'desc' },
     });
 
     const aggregate = await prisma.trip.aggregate({
@@ -181,7 +190,12 @@ export const DriverServices = {
     const total = aggregate._count.id;
 
     return {
-      data: trips,
+      data: trips.map(group => ({
+        date: new Date(group.date ?? new Date()).toISOString().split('T')[0],
+        total_cost: group._sum.total_cost ?? 0,
+        total_time: group._sum.time ?? 0,
+        total_count: group._count.id,
+      })),
       meta: {
         pagination: {
           page,
@@ -189,7 +203,6 @@ export const DriverServices = {
           total,
           totalPages: Math.ceil(total / limit),
         } satisfies TPagination,
-
         total_count: aggregate._count.id,
         total_earnings: aggregate._sum.total_cost ?? 0,
         total_time: aggregate._sum.time ?? 0,
@@ -207,16 +220,25 @@ export const DriverServices = {
   }: TGetEarningsArgs) {
     const whereParcel: Prisma.ParcelWhereInput = { driver_id };
 
-    //? if has date range filter
     if (range) {
       whereParcel.payment_at = dateRange[range](startDate, endDate, false);
     }
 
-    const parcels = await prisma.parcel.findMany({
+    const parcels = await prisma.parcel.groupBy({
+      by: ['date'],
       where: whereParcel,
+      _sum: {
+        total_cost: true,
+        time: true,
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        date: 'desc',
+      },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { payment_at: 'desc' },
     });
 
     const aggregate = await prisma.parcel.aggregate({
@@ -231,7 +253,12 @@ export const DriverServices = {
     const total = aggregate._count.id;
 
     return {
-      data: parcels,
+      data: parcels.map(group => ({
+        date: new Date(group.date ?? new Date()).toISOString().split('T')[0],
+        total_cost: group._sum.total_cost ?? 0,
+        total_time: group._sum.time ?? 0,
+        total_count: group._count.id,
+      })),
       meta: {
         pagination: {
           page,
@@ -239,7 +266,6 @@ export const DriverServices = {
           total,
           totalPages: Math.ceil(total / limit),
         } satisfies TPagination,
-
         total_count: aggregate._count.id,
         total_earnings: aggregate._sum.total_cost ?? 0,
         total_time: aggregate._sum.time ?? 0,

@@ -10,6 +10,7 @@ model Parcel {
   payment_at   DateTime?
 
   time Int?
+  date String? // use for grouping by date
 
   user_id   String?
   user      User?   @relation("UserParcel", fields: [user_id], references: [id], onDelete: SetNull)

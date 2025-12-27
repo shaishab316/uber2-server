@@ -40,6 +40,7 @@ export const ParcelServices = {
         ...payload,
         slug: await generateParcelSlug(),
         total_cost: await calculateParcelCost(payload),
+        date: new Date().toISOString().split('T')[0], // "YYYY-MM-DD"
         helper: {
           create: {
             driver_ids,
