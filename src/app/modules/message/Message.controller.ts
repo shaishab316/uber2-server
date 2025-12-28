@@ -8,13 +8,16 @@ export const MessageControllers = {
   /**
    * Get chat messages
    */
-  getChatMessages: catchAsync(async ({ query }) => {
+  getChatMessages: catchAsync(async ({ query, user }) => {
     const { messages, meta } = await MessageServices.getChatMessages(query);
 
     return {
       message: 'Messages retrieved successfully!',
       meta,
-      data: messages.reverse(),
+      data: messages.reverse().map(msg => ({
+        ...msg,
+        is_mine: msg.user_id === user.id,
+      })),
     };
   }),
 

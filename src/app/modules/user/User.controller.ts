@@ -82,6 +82,13 @@ export const UserControllers = {
       data: await prisma.user.findUnique({
         where: { id: user.id },
         omit: userSelfOmit[user.role],
+        include: {
+          wallet: {
+            omit: {
+              id: true,
+            },
+          },
+        },
       }),
     };
   }),
