@@ -64,4 +64,13 @@ export const DriverControllers = {
       data,
     };
   }),
+
+  home: catchAsync(async ({ user: driver }) => {
+    const data = await DriverServices.home({ driver_id: driver.id });
+
+    return {
+      message: 'Driver home data retrieved successfully!',
+      data,
+    };
+  }),
 };

@@ -26,7 +26,7 @@ const free = Router();
     PaymentControllers.withdraw,
   );
 
-  free.get(
+  free.post(
     '/topup',
     auth.all,
     purifyRequest(PaymentValidations.topup),

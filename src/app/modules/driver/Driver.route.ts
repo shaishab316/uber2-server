@@ -31,6 +31,8 @@ const driver = injectRoutes(Router(), {
   '/transactions': [TransactionRoutes.driver],
 });
 {
+  driver.get('/', DriverControllers.home);
+
   /**
    * get driver earnings both trip and parcel
    */

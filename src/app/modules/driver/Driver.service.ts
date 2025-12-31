@@ -272,4 +272,33 @@ export const DriverServices = {
       },
     };
   },
+
+  async home({ driver_id }: { driver_id: string }) {
+    const aggregateTrip = await prisma.trip.aggregate({
+      where: { driver_id },
+      _sum: {
+        total_cost: true,
+        time: true,
+      },
+      _count: { id: true },
+    });
+
+    const aggregateParcel = await prisma.parcel.aggregate({
+      where: { driver_id },
+      _sum: {
+        total_cost: true,
+        time: true,
+      },
+      _count: { id: true },
+    });
+
+    return {
+      total_count: aggregateTrip._count.id + aggregateParcel._count.id,
+      total_earnings:
+        (aggregateTrip._sum.total_cost ?? 0) +
+        (aggregateParcel._sum.total_cost ?? 0),
+      total_time:
+        (aggregateTrip._sum.time ?? 0) + (aggregateParcel._sum.time ?? 0),
+    };
+  },
 };
