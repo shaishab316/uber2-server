@@ -7,6 +7,7 @@ import {
 import { TPagination } from '@/utils/server/serveResponse';
 import { TList } from '../query/Query.interface';
 import { transactionSearchableFields as searchableFields } from './Transaction.constant';
+import { userDriverOmit, userUserOmit } from '../user/User.constant';
 
 export const TransactionServices = {
   async create(transactionData: TTransaction) {
@@ -42,6 +43,28 @@ export const TransactionServices = {
       skip: (page - 1) * limit,
       take: limit,
       omit,
+      include: {
+        parcel: {
+          include: {
+            user: {
+              omit: userUserOmit,
+            },
+            driver: {
+              omit: userDriverOmit,
+            },
+          },
+        },
+        trip: {
+          include: {
+            user: {
+              omit: userUserOmit,
+            },
+            driver: {
+              omit: userDriverOmit,
+            },
+          },
+        },
+      },
     });
 
     const total = await prisma.transaction.count({

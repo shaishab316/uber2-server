@@ -12,4 +12,10 @@ export const AdminValidations = {
       end_date: z.iso.date().optional(),
     }),
   }),
+
+  getOverview: z.object({
+    query: z.object({
+      dateRange: z.enum(['month', 'year']).default('month'),
+    }),
+  }),
 };

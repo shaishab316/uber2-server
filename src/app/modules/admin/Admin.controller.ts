@@ -1,6 +1,6 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { AdminServices } from './Admin.service';
-import { TUserTripDetailsArgs } from './Admin.interface';
+import { TGetOverview, TUserTripDetailsArgs } from './Admin.interface';
 
 export const AdminControllers = {
   userTripDetails: catchAsync(async req => {
@@ -13,6 +13,18 @@ export const AdminControllers = {
       message: `${query.tab} details fetched successfully.`,
       data,
       meta,
+    };
+  }),
+
+  /**
+   * get whole app overview
+   */
+  getOverview: catchAsync<TGetOverview>(async ({ query }) => {
+    const data = await AdminServices.getOverview(query);
+
+    return {
+      message: 'Overview fetched successfully.',
+      data,
     };
   }),
 };

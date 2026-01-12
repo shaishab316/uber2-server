@@ -9,10 +9,11 @@ export const UserActivityControllers = {
    * Toggle the read status of a user activity
    */
   toggleReadStatus: catchAsync(async ({ body }) => {
-    await UserActivityServices.toggleReadStatus(body);
+    const data = await UserActivityServices.toggleReadStatus(body);
 
     return {
       message: `Activity ${body?.unread ? 'marked as unread' : 'marked as read'} successfully`,
+      data,
     };
   }),
 
@@ -20,10 +21,11 @@ export const UserActivityControllers = {
    * Delete a user activity
    */
   deleteActivity: catchAsync(async ({ body }) => {
-    await UserActivityServices.deleteActivity(body);
+    const data = await UserActivityServices.deleteActivity(body);
 
     return {
       message: 'Activity deleted successfully',
+      data,
     };
   }),
 

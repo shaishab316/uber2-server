@@ -17,7 +17,6 @@ export const AuthControllers = {
     AuthServices.setTokens(res, { access_token, refresh_token });
 
     return {
-      track_activity: user!.id,
       message: 'Login successfully!',
       data: { access_token, refresh_token, user },
     };

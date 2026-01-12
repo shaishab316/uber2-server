@@ -118,6 +118,7 @@ export const UserServices = {
   async getAllUser({ page, limit, search, role }: TGetAllUser) {
     const where: Prisma.UserWhereInput = {
       role,
+      is_deleted: false,
     };
 
     if (search)

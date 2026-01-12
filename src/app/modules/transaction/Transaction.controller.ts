@@ -37,7 +37,11 @@ export const TransactionControllers = {
     return {
       message: 'Transactions retrieved successfully!',
       meta,
-      data: transactions,
+      data: transactions.map(({ parcel, trip, ...transaction }) => ({
+        ...transaction,
+        //? Include either parcel or trip data
+        data: parcel ?? trip,
+      })),
     };
   }),
 };

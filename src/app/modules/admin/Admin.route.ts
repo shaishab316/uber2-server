@@ -17,6 +17,12 @@ const adminRouter = injectRoutes(Router(), {
 });
 
 adminRouter.get(
+  '/overview',
+  purifyRequest(AdminValidations.getOverview),
+  AdminControllers.getOverview,
+);
+
+adminRouter.get(
   '/user-trip-details',
   purifyRequest(QueryValidations.list, AdminValidations.userTripDetails),
   AdminControllers.userTripDetails,

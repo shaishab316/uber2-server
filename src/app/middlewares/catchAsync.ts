@@ -1,16 +1,28 @@
 /* eslint-disable no-unused-vars */
-import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import serveResponse, { TServeResponse } from '@/utils/server/serveResponse';
-import { UserActivityServices } from '../modules/userActivity/UserActivity.service';
 
-type AsyncHandler<T = any> = (
-  req: Request<any, any, any, any>,
+/**
+ * Type for request body and query
+ */
+export type ReqProps = {
+  body?: any;
+  query?: any;
+  params?: any;
+};
+
+/**
+ * AsyncHandler type
+ * Wraps an Express request handler with typed request body and query
+ */
+export type AsyncHandler<T extends ReqProps = ReqProps> = (
+  req: Request<T['params'], any, T['body'], T['query']>,
   res: Response,
   next: NextFunction,
 ) =>
   | void
-  | Partial<TServeResponse<T>>
-  | Promise<void | Partial<TServeResponse<T>>>;
+  | Partial<TServeResponse<any>>
+  | Promise<void | Partial<TServeResponse<any>>>;
 
 /**
  * Wraps an Express request handler to catch and handle async errors
@@ -19,24 +31,18 @@ type AsyncHandler<T = any> = (
  * @returns A wrapped request handler that catches async errors
  */
 const catchAsync =
-  <T = any>(fn: AsyncHandler<T>, errFn: ErrorRequestHandler | null = null) =>
+  <T extends ReqProps = ReqProps>(fn: AsyncHandler<T>) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await fn(req, res, next);
-
-      //? Log user activity if track_activity is set
-      if (result?.track_activity) {
-        await UserActivityServices.createActivity({
-          user_id: result.track_activity,
-          path: req.originalUrl,
-          content: result.message ?? 'Unavailable',
-        });
-      }
-
-      //? Send response if result is returned
+      const result = await fn(
+        req as Request<T['params'], any, T['body'], T['query']> & {
+          params: T['params'];
+        },
+        res,
+        next,
+      );
       if (result) serveResponse(res, result);
     } catch (error) {
-      if (errFn) return errFn(error, req, res, next);
       next(error);
     }
   };

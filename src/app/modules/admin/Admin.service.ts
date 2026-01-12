@@ -4,8 +4,23 @@ import { logger } from '../../../utils/logger';
 import config from '../../../config';
 import { Prisma, prisma } from '../../../utils/db';
 import { hashPassword } from '../auth/Auth.utils';
-import { TUserTripDetailsArgs } from './Admin.interface';
+import { TGetOverviewArgs, TUserTripDetailsArgs } from './Admin.interface';
 import { TPagination } from '@/utils/server/serveResponse';
+
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 export const AdminServices = {
   /**
@@ -161,5 +176,95 @@ export const AdminServices = {
       },
       data: parcels,
     };
+  },
+
+  async getOverview({ dateRange }: TGetOverviewArgs) {
+    const now = new Date();
+    const startDate =
+      dateRange === 'month'
+        ? new Date(now.getFullYear(), now.getMonth(), 1)
+        : new Date(now.getFullYear(), 0, 1);
+
+    // Run all queries in parallel
+    const [
+      totalExpenses,
+      totalUsers,
+      newUsers,
+      pendingUserRequests,
+      graphData,
+    ] = await Promise.all([
+      prisma.transaction.aggregate({
+        _sum: { amount: true },
+        where: { type: 'EXPENSE' },
+      }),
+      prisma.user.count({
+        where: { is_admin: false, is_deleted: false },
+      }),
+      prisma.user.count({
+        where: {
+          is_admin: false,
+          is_deleted: false,
+          created_at: { gte: startDate },
+        },
+      }),
+      prisma.user.count({
+        where: { is_verification_pending: true, is_deleted: false },
+      }),
+      this.getGraphData(dateRange, now),
+    ]);
+
+    const totalEarnings = Math.max(0, (totalExpenses._sum.amount ?? 0) * 0.1);
+
+    return {
+      totalEarnings: Number(totalEarnings.toFixed(2)),
+      totalUsers,
+      newUsers,
+      pendingUserRequests,
+      graph: graphData,
+    };
+  },
+
+  async getGraphData(dateRange: string, now: Date) {
+    const isMonthly = dateRange === 'month';
+
+    const data = isMonthly
+      ? await prisma.$queryRaw<Array<{ period: number; count: bigint }>>`
+        SELECT 
+          EXTRACT(MONTH FROM created_at)::int as period,
+          COUNT(*)::int as count
+        FROM users
+        WHERE is_admin = false 
+          AND is_deleted = false
+          AND EXTRACT(YEAR FROM created_at) = ${now.getFullYear()}
+        GROUP BY period
+        ORDER BY period
+      `
+      : await prisma.$queryRaw<Array<{ period: number; count: bigint }>>`
+        SELECT 
+          EXTRACT(YEAR FROM created_at)::int as period,
+          COUNT(*)::int as count
+        FROM users
+        WHERE is_admin = false AND is_deleted = false
+        GROUP BY period
+        ORDER BY period
+      `;
+
+    const labels = isMonthly
+      ? months
+      : Array.from({ length: now.getFullYear() - 2020 + 1 }, (_, i) =>
+          (2020 + i).toString(),
+        );
+
+    const counts = new Map(
+      data.map(({ period, count }) => [
+        isMonthly ? period - 1 : period,
+        Number(count),
+      ]),
+    );
+
+    return labels.map((label, index) => ({
+      label,
+      newUsers: counts.get(isMonthly ? index : 2020 + index) ?? 0,
+    }));
   },
 };
