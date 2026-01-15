@@ -188,4 +188,15 @@ export const UserControllers = {
       data,
     };
   }),
+
+  onesignalIdUpdate: catchAsync(async ({ body, user }) => {
+    await UserServices.onesignalIdUpdate({
+      ...body,
+      user_id: user.id,
+    });
+
+    return {
+      message: 'OneSignal ID updated successfully!',
+    };
+  }),
 };

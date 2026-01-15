@@ -3,14 +3,15 @@ import {
   userOmit,
   userSelfOmit,
 } from './User.constant';
-import { Prisma, prisma, User as TUser } from '@/utils/db';
-import { TPagination } from '@/utils/server/serveResponse';
-import {
+import { type Prisma, prisma, User as TUser } from '@/utils/db';
+import type { TPagination } from '@/utils/server/serveResponse';
+import type {
   TDeleteUser,
   TGetAllUser,
   TGetPendingUsers,
   TPendingUserAction,
   TSetupUserProfile,
+  TUpdateOneSignalId,
   TUserEdit,
   TUserRegister,
 } from './User.interface';
@@ -297,6 +298,15 @@ export const UserServices = {
         is_verification_pending: true,
       },
       omit: userSelfOmit[user!.role],
+    });
+  },
+
+  async onesignalIdUpdate({ onesignal_id, user_id }: TUpdateOneSignalId) {
+    await prisma.user.update({
+      where: { id: user_id },
+      data: {
+        onesignal_id,
+      },
     });
   },
 };

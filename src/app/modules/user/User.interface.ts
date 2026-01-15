@@ -21,3 +21,7 @@ export type TGetAllUser = z.infer<typeof UserValidations.getAllUser>['query'] &
   TList;
 
 export type TDeleteUser = z.infer<typeof UserValidations.deleteUser>['body'];
+
+export type TUpdateOneSignalId = z.infer<
+  typeof UserValidations.onesignalId
+>['body'] & { user_id: string };

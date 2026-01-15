@@ -14,6 +14,8 @@ model User {
   is_admin    Boolean   @default(false)
   otp_id      Int       @default(0)
 
+  onesignal_id String? // For push notifications
+
   // only for admin verification
   is_verification_pending Boolean?
   //! end

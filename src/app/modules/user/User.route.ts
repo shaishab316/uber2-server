@@ -78,6 +78,12 @@ const all = Router();
     AuthControllers.changePassword,
   );
 
+  all.post(
+    '/onesignal-id',
+    purifyRequest(UserValidations.onesignalId),
+    UserControllers.onesignalIdUpdate,
+  );
+
   /**
    * Connect stripe account
    */
