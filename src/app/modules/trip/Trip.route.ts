@@ -21,4 +21,14 @@ const all = Router();
   );
 }
 
-export const TripRoutes = { all };
+const admin = Router();
+{
+  //? Get super trip details
+  admin.get(
+    '/:trip_id',
+    purifyRequest(QueryValidations.exists('trip_id', 'trip')),
+    TripControllers.getSuperTripDetails,
+  );
+}
+
+export const TripRoutes = { all, admin };

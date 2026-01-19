@@ -106,6 +106,18 @@ export const AdminServices = {
       take: limit,
       skip: (page - 1) * limit,
       orderBy: { completed_at: 'desc' },
+      include: {
+        driver: {
+          select: {
+            name: true,
+            phone: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+            trip_given_count: true,
+          },
+        },
+      },
     });
 
     const total = await prisma.trip.count({ where });
@@ -155,6 +167,18 @@ export const AdminServices = {
       take: limit,
       skip: (page - 1) * limit,
       orderBy: { delivered_at: 'desc' },
+      include: {
+        driver: {
+          select: {
+            name: true,
+            phone: true,
+            avatar: true,
+            rating: true,
+            rating_count: true,
+            trip_given_count: true,
+          },
+        },
+      },
     });
 
     const total = await prisma.parcel.count({ where });

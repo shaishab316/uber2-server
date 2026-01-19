@@ -1,7 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import ServerError from '@/errors/ServerError';
 import { ETransactionType, ETripStatus, prisma } from '@/utils/db';
-import type { TRequestForTrip, TTripRefreshLocation } from './Trip.interface';
+import type {
+  TGetSuperTripDetailsPayload,
+  TRequestForTrip,
+  TTripRefreshLocation,
+} from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
 import { userOmit } from '../user/User.constant';
@@ -428,6 +432,23 @@ export const TripServices = {
       });
 
       return { trip, wallet, transaction };
+    });
+  },
+
+  /**
+   * Get super detailed trip info for admin
+   */
+  async getSuperTripDetails({ trip_id }: TGetSuperTripDetailsPayload) {
+    return prisma.trip.findUnique({
+      where: { id: trip_id },
+      include: {
+        user: {
+          omit: userOmit.USER,
+        },
+        driver: {
+          omit: userOmit.DRIVER,
+        },
+      },
     });
   },
 };

@@ -11,3 +11,13 @@ export type TRequestForTrip = z.infer<typeof TripValidations.requestForTrip> & {
 export type TTripRefreshLocation = z.infer<
   typeof TripValidations.refreshLocation
 >;
+
+export type TGetSuperTripDetailsParams = {
+  trip_id: string;
+};
+
+export type TGetSuperTripDetailsPayload = TGetSuperTripDetailsParams;
+
+export type TGetSuperTripDetails = {
+  params: TGetSuperTripDetailsParams;
+};

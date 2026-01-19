@@ -8,12 +8,14 @@ import { QueryValidations } from '../query/Query.validation';
 import { AdminValidations } from './Admin.validation';
 import { ContextPageRoutes } from '../contextPage/ContextPage.route';
 import { UserActivityRoutes } from '../userActivity/UserActivity.route';
+import { TripRoutes } from '../trip/Trip.route';
 
 const adminRouter = injectRoutes(Router(), {
   '/users': [UserRoutes.admin],
   '/transactions': [TransactionRoutes.admin],
   '/context-pages': [ContextPageRoutes.admin],
   '/user-activities': [UserActivityRoutes.admin],
+  '/trips': [TripRoutes.admin],
 });
 
 adminRouter.get(
