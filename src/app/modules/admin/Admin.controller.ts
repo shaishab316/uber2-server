@@ -2,15 +2,14 @@ import catchAsync from '@/app/middlewares/catchAsync';
 import { AdminServices } from './Admin.service';
 import { TGetOverview, TUserTripDetailsArgs } from './Admin.interface';
 import { prisma } from '@/utils/db';
-import { userOmit } from '../user/User.constant';
 
 export const AdminControllers = {
   userTripDetails: catchAsync(async req => {
     const query = req.query as TUserTripDetailsArgs;
 
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      omit: userOmit.USER,
+      where: { id: query.user_id },
+      omit: { password: true, otp_id: true },
     });
 
     const { data, meta } =

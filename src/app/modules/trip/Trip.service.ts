@@ -443,10 +443,16 @@ export const TripServices = {
       where: { id: trip_id },
       include: {
         user: {
-          omit: userOmit.USER,
+          omit: {
+            ...userOmit.USER,
+            email: false,
+          },
         },
         driver: {
-          omit: userOmit.DRIVER,
+          omit: {
+            ...userOmit.DRIVER,
+            email: false,
+          },
         },
       },
     });

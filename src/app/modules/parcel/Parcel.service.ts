@@ -4,6 +4,7 @@ import { EParcelStatus, ETransactionType, prisma } from '@/utils/db';
 import type {
   TCompleteParcelDeliveryArgs,
   TDeliverParcelArgs,
+  TGetSuperParcelDetailsPayload,
   TParcelRefreshLocation,
   TRequestForParcel,
   TStartParcelArgs,
@@ -448,6 +449,29 @@ export const ParcelServices = {
 
         //? Calculate total time in milliseconds
         time: completed_at.getTime() - parcel.started_at.getTime(),
+      },
+    });
+  },
+
+  /**
+   * Get super detailed parcel info for admin
+   */
+  async getSuperParcelDetails({ parcel_id }: TGetSuperParcelDetailsPayload) {
+    return prisma.parcel.findUnique({
+      where: { id: parcel_id },
+      include: {
+        user: {
+          omit: {
+            ...userOmit.USER,
+            email: false,
+          },
+        },
+        driver: {
+          omit: {
+            ...userOmit.DRIVER,
+            email: false,
+          },
+        },
       },
     });
   },

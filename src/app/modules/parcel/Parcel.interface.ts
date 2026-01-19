@@ -27,3 +27,13 @@ export type TCompleteParcelDeliveryArgs = {
 export type TDeliverParcelArgs = z.infer<
   typeof ParcelValidations.deliver_parcel
 > & { driver_id: string };
+
+export type TGetSuperParcelDetailsParams = {
+  parcel_id: string;
+};
+
+export type TGetSuperParcelDetailsPayload = TGetSuperParcelDetailsParams;
+
+export type TGetSuperParcelDetails = {
+  params: TGetSuperParcelDetailsParams;
+};

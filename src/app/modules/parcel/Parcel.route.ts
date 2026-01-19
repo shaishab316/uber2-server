@@ -21,4 +21,14 @@ const all = Router();
   );
 }
 
-export const ParcelRoutes = { all };
+const admin = Router();
+{
+  //? Get super detailed parcel info for admin
+  admin.get(
+    '/:parcel_id',
+    purifyRequest(QueryValidations.exists('parcel_id', 'parcel')),
+    ParcelControllers.getSuperParcelDetails,
+  );
+}
+
+export const ParcelRoutes = { all, admin };
