@@ -27,6 +27,15 @@ const all = Router();
   );
 }
 
+const admin = Router();
+{
+  admin.get(
+    '/',
+    purifyRequest(QueryValidations.list, ChatValidations.getInbox),
+    ChatControllers.getSuperInbox,
+  );
+}
+
 /**
  * All chat related routes
  */
@@ -37,4 +46,11 @@ export const ChatRoutes = {
    * @url : (base_url)/inbox
    */
   all,
+
+  /**
+   * Only admin can access
+   *
+   * @url : (base_url)/admin/inbox
+   */
+  admin,
 };

@@ -10,6 +10,7 @@ import { ContextPageRoutes } from '../contextPage/ContextPage.route';
 import { UserActivityRoutes } from '../userActivity/UserActivity.route';
 import { TripRoutes } from '../trip/Trip.route';
 import { ParcelRoutes } from '../parcel/Parcel.route';
+import { ChatRoutes } from '../chat/Chat.route';
 
 const adminRouter = injectRoutes(Router(), {
   '/users': [UserRoutes.admin],
@@ -18,6 +19,7 @@ const adminRouter = injectRoutes(Router(), {
   '/user-activities': [UserActivityRoutes.admin],
   '/trips': [TripRoutes.admin],
   '/parcels': [ParcelRoutes.admin],
+  '/inbox': [ChatRoutes.admin],
 });
 
 adminRouter.get(

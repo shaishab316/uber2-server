@@ -4,6 +4,7 @@ import { Prisma, Chat as TChat, prisma } from '../../../utils/db';
 import { TDeleteChatArgs, TGetInboxArgs, TNewChatArgs } from './Chat.interface';
 import { TPagination } from '../../../utils/server/serveResponse';
 import { NotificationServices } from '../notification/Notification.service';
+import { userSearchableFields } from '../user/User.constant';
 
 /**
  * All chat related services
@@ -176,6 +177,86 @@ export const ChatServices = {
             : false,
         };
       }),
+    };
+  },
+
+  /**
+   * Get super admin inbox
+   */
+  async getSuperInbox({ limit, page, search, unread }: TGetInboxArgs) {
+    const whereUser: Prisma.UserWhereInput = {
+      is_admin: false, //? exclude admin from results
+    };
+
+    if (search) {
+      whereUser.OR = userSearchableFields.map(field => ({
+        [field]: { contains: search, mode: 'insensitive' },
+      }));
+    }
+
+    //? get all users with their latest chat/message info
+    const users = await prisma.user.findMany({
+      where: whereUser,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { created_at: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        avatar: true,
+        chats: {
+          select: {
+            messages: {
+              take: 1,
+              orderBy: { updated_at: 'desc' },
+              select: {
+                text: true,
+                updated_at: true,
+                seen_by: { select: { is_admin: true } },
+                user_id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const total = await prisma.user.count({ where: whereUser });
+
+    return {
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        } satisfies TPagination,
+      },
+      chats: users
+        .map(({ id, name, avatar, chats }) => {
+          const allMessages = chats.flatMap(chat => chat.messages);
+          const lastMessage = allMessages[0];
+
+          //? check if message is unread by admin
+          const isUnread = lastMessage
+            ? !lastMessage.seen_by.some(sb => sb.is_admin)
+            : false;
+
+          //? if unread filter is applied, only return unread messages
+          if (unread && !isUnread) {
+            return null;
+          }
+
+          return {
+            user_id: id,
+            name: name ?? null,
+            avatar: avatar ?? null,
+            last_message: lastMessage?.text ?? null,
+            timestamp: lastMessage?.updated_at ?? null,
+            unread: isUnread,
+          };
+        })
+        .filter(Boolean),
     };
   },
 };
