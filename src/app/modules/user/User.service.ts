@@ -265,12 +265,13 @@ export const UserServices = {
 
   //?? Admin Actions
   async pendingUserAction({ action, user_id }: TPendingUserAction) {
-    await prisma.user.update({
+    return prisma.user.update({
       where: { id: user_id },
       data: {
         is_verification_pending: false,
         is_active: action === 'approve',
       },
+      omit: userSelfOmit.USER,
     });
   },
 

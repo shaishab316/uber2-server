@@ -134,10 +134,11 @@ export const UserControllers = {
   }),
 
   pendingUserAction: catchAsync(async ({ body }) => {
-    await UserServices.pendingUserAction(body);
+    const data = await UserServices.pendingUserAction(body);
 
     return {
       message: `User has been ${body.action === 'approve' ? 'approved' : 'rejected'} successfully!`,
+      data,
     };
   }),
 
