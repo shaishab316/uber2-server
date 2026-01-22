@@ -6,7 +6,10 @@ import { sendEmail } from '../sendMail';
 /**
  * Email Queue used to send emails to users in the background
  */
-const emailQueue = new Queue<TSendMail>('emails', config.url.redis);
+const emailQueue = new Queue<TSendMail>(
+  `${config.server.name}:emails`,
+  config.url.redis,
+);
 
 emailQueue.process(async ({ data }) => sendEmail(data));
 

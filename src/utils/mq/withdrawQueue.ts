@@ -10,7 +10,10 @@ import { NotificationServices } from '../../app/modules/notification/Notificatio
 /**
  * Withdraw queue
  */
-const withdrawQueue = new Queue<TWithdrawArgs>('withdraw', config.url.redis);
+const withdrawQueue = new Queue<TWithdrawArgs>(
+  `${config.server.name}:withdraws`,
+  config.url.redis,
+);
 
 withdrawQueue.process(async ({ data }) => {
   const spinner = ora({

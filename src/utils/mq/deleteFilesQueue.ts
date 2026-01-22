@@ -5,7 +5,10 @@ import { deleteFiles } from '@/app/middlewares/capture';
 /**
  * Delete files queue
  */
-const deleteFilesQueue = new Queue<string[]>('delete-files', config.url.redis);
+const deleteFilesQueue = new Queue<string[]>(
+  `${config.server.name}:delete-files`,
+  config.url.redis,
+);
 
 deleteFilesQueue.process(async ({ data }) => {
   await deleteFiles(data);

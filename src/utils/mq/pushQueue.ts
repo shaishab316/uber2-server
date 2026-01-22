@@ -9,7 +9,7 @@ import {
  * Push Notification Queue used to send push notifications to users in the background
  */
 const pushQueue = new Queue<TSendPushNotificationPayload>(
-  'push-notifications',
+  `${config.server.name}:push-notifications`,
   config.url.redis,
 );
 
