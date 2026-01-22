@@ -4,7 +4,7 @@ import { ReviewServices } from './Review.service';
 
 export const ReviewControllers = {
   giveReview: catchAsync(async ({ body, user }) => {
-    const data = await ReviewServices.giveReview({
+    await ReviewServices.giveReview({
       ...body,
       reviewer_id: user.id,
     });
@@ -12,7 +12,7 @@ export const ReviewControllers = {
     return {
       statusCode: StatusCodes.CREATED,
       message: 'Review given successfully!',
-      data,
+      data: body,
     };
   }),
 };

@@ -213,6 +213,17 @@ const config = {
       }),
     },
   },
+
+  onesignal: {
+    onesignal_app_id: env('onesignal app id', genSecret(8), {
+      regex: '^.{10,}$',
+      up: 'OneSignal info - start',
+    }),
+    onesignal_api_key: env('onesignal api key', genSecret(16), {
+      regex: '^.{16,}$',
+      down: 'OneSignal info - end',
+    }),
+  },
 };
 
 export default config;
