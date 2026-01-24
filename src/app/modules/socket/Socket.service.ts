@@ -1,16 +1,18 @@
 import { Server } from 'http';
-import { Server as IOServer, Namespace } from 'socket.io';
+import { Server as IOServer } from 'socket.io';
 import config from '../../../config';
-import { SocketRoutes } from './Socket.route';
 import auth from './Socket.middleware';
 import { TAuthenticatedSocket } from './Socket.interface';
 import { logger } from '../../../utils/logger';
 import chalk from 'chalk';
 import { prisma } from '../../../utils/db';
+import { TripSocket } from '../trip/Trip.socket';
+import { ParcelSocket } from '../parcel/Parcel.socket';
+import { DriverSocket } from '../driver/Driver.socket';
+import { MessageSocket } from '../message/Message.socket';
 
 let io: IOServer | null = null;
 const onlineUsers = new Set<string>();
-const userSockets = new Map<string, Set<string>>();
 
 export const SocketServices = {
   init(server: Server): () => void {
@@ -23,31 +25,33 @@ export const SocketServices = {
     logger.info(chalk.green('🚀 Socket services initialized successfully'));
 
     // Single root namespace only
-    const nsp = io.of('/');
-    nsp.use(auth);
+    io.use(auth);
 
-    // Attach all feature handlers on root namespace
-    const rootHandler = SocketRoutes.get('/')!;
-
-    nsp.on('connection', (socket: TAuthenticatedSocket) => {
+    io.on('connection', (socket: TAuthenticatedSocket) => {
       const { user } = socket.data;
 
-      this._trackConnection(user.id, socket.id);
+      socket.join(user.id); // join personal room
+
       this._markOnline(user.id);
       logger.info(`👤 User (${user.name}) connected on /`);
 
       // errors
       socket.on('error', logger.error);
 
+      if (!io) return;
+
       // wire up feature handlers
       try {
-        rootHandler({ io: nsp as unknown as Namespace, socket });
+        TripSocket({ io, socket });
+        ParcelSocket({ io, socket });
+        DriverSocket({ io, socket });
+        MessageSocket({ io, socket });
       } catch (err) {
         logger.error('Root namespace handler error:', err);
       }
 
       socket.on('disconnect', async () => {
-        await this._trackDisconnection(user.id, socket.id);
+        await this._markOffline(user.id);
         logger.info(`👤 User (${user.name}) disconnected from /`);
       });
     });
@@ -56,43 +60,22 @@ export const SocketServices = {
   },
 
   emitToUser(userId: string, event: string, payload: any) {
-    const sockets = userSockets.get(userId);
-    if (!io || !sockets || sockets.size === 0) return;
-    for (const sid of sockets) {
-      io.of('/').to(sid).emit(event, payload);
-    }
+    io?.to(userId).emit(event, payload);
   },
 
   broadcast(event: string, payload: any) {
-    io?.of('/').emit(event, payload);
+    io?.emit(event, payload);
   },
 
-  getIO(): Namespace | undefined {
-    return io?.of('/');
+  getIO() {
+    return io;
   },
 
   cleanup() {
     if (!io) return;
     onlineUsers.clear();
-    userSockets.clear();
     io.close(() => logger.info('Socket.IO server closed.'));
     io = null;
-  },
-
-  _trackConnection(userId: string, socketId: string) {
-    if (!userSockets.has(userId)) userSockets.set(userId, new Set());
-    userSockets.get(userId)!.add(socketId);
-  },
-
-  async _trackDisconnection(userId: string, socketId: string) {
-    const set = userSockets.get(userId);
-    if (set) {
-      set.delete(socketId);
-      if (set.size === 0) {
-        userSockets.delete(userId);
-        await this._markOffline(userId);
-      }
-    }
   },
 
   _markOnline(userId: string) {
@@ -112,6 +95,6 @@ export const SocketServices = {
   },
 
   _emitOnline() {
-    io?.of('/').emit('online_users', Array.from(onlineUsers));
+    io?.emit('online_users', Array.from(onlineUsers));
   },
 };

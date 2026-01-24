@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { Namespace, Socket } from 'socket.io';
+import { Server as IOServer, Socket } from 'socket.io';
 import { User as TUser } from '@/utils/db';
 
 export type TSocketHandler = ({
   io,
   socket,
 }: {
-  io: Namespace;
+  io: IOServer;
   socket: TAuthenticatedSocket;
 }) => void;
 
