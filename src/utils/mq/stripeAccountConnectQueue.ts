@@ -5,10 +5,11 @@ import chalk from 'chalk';
 import { stripe } from '../../app/modules/payment/Payment.utils';
 import { errorLogger } from '../logger';
 import ora from 'ora';
+import { queueOptions } from '.';
 
 const stripeAccountConnectQueue = new Queue<{ user_id: string }>(
   `${config.server.name}:stripe-account-connect`,
-  config.url.redis,
+  queueOptions,
 );
 
 stripeAccountConnectQueue.process(async ({ data }) => {

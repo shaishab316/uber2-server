@@ -224,6 +224,20 @@ const config = {
       down: 'OneSignal info - end',
     }),
   },
+
+  redis: {
+    host: env('redis host', 'localhost', {
+      regex: '^.+$',
+      up: 'Redis info - start',
+    }),
+    port: env('redis port', 6379, {
+      regex: '^\\d{2,5}$',
+    }),
+    password: env('redis password', '', {
+      regex: '^.*$',
+      down: 'Redis info - end',
+    }),
+  },
 };
 
 export default config;

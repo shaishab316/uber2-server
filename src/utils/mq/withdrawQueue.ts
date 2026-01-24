@@ -6,13 +6,14 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { stripe } from '../../app/modules/payment/Payment.utils';
 import { NotificationServices } from '../../app/modules/notification/Notification.service';
+import { queueOptions } from '.';
 
 /**
  * Withdraw queue
  */
 const withdrawQueue = new Queue<TWithdrawArgs>(
   `${config.server.name}:withdraws`,
-  config.url.redis,
+  queueOptions,
 );
 
 withdrawQueue.process(async ({ data }) => {

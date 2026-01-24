@@ -4,13 +4,14 @@ import {
   sendPushNotification,
   type TSendPushNotificationPayload,
 } from '@/app/modules/notification/Notification.utils';
+import { queueOptions } from '.';
 
 /**
  * Push Notification Queue used to send push notifications to users in the background
  */
 const pushQueue = new Queue<TSendPushNotificationPayload>(
   `${config.server.name}:push-notifications`,
-  config.url.redis,
+  queueOptions,
 );
 
 pushQueue.process(async ({ data }) => {
