@@ -49,14 +49,7 @@ export const TripServices = {
     });
 
     if (trip.helper) {
-      await tripDispatchQueue.add(
-        { helper_id: trip.helper.id },
-        {
-          delay: 0,
-          jobId: `trip-${trip.helper.id}`, // Prevent duplicate jobs
-          removeOnComplete: true,
-        },
-      );
+      await tripDispatchQueue.add({ helper_id: trip.helper.id });
     }
 
     return trip;
@@ -168,11 +161,6 @@ export const TripServices = {
         message: 'The user has cancelled the trip.',
         type: 'WARNING',
       });
-    }
-
-    if (trip?.helper?.driver_ids.length) {
-      //? Remove pending trip dispatch jobs
-      await tripDispatchQueue.removeJobs(`trip-${trip.helper.id}`);
     }
 
     return cancelledTrip;

@@ -1,6 +1,5 @@
 import Queue from 'bull';
 import config from '@/config';
-import { queueOptions } from '@/utils/mq';
 import { prisma } from '@/utils/db';
 import { processSingleDriverDispatch } from './Parcel.job';
 import { errorLogger } from '@/utils/logger';
@@ -11,7 +10,7 @@ export type TParcelDispatchQueueData = {
 
 export const parcelDispatchQueue = new Queue<TParcelDispatchQueueData>(
   `${config.server.name}:parcel-dispatch`,
-  queueOptions,
+  config.url.redis,
 );
 
 parcelDispatchQueue.process(async ({ data }) => {

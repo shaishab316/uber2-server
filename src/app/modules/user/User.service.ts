@@ -22,6 +22,11 @@ import { hashPassword } from '../auth/Auth.utils';
 import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
 import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 import { NotificationServices } from '../notification/Notification.service';
+import { generateOTP } from '@/utils/crypto/otp';
+import emailQueue from '@/utils/mq/emailQueue';
+import config from '@/config';
+import { emailTemplate } from '@/templates';
+import { errorLogger } from '@/utils/logger';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {
@@ -59,25 +64,25 @@ export const UserServices = {
       user_id: user.id,
     });
 
-    // try {
-    //   const otp = generateOTP({
-    //     tokenType: 'access_token',
-    //     otpId: user.id + otp_id,
-    //   });
+    try {
+      const otp = generateOTP({
+        tokenType: 'access_token',
+        otpId: user.id + 1,
+      });
 
-    //   if (email)
-    //     await emailQueue.add({
-    //       to: email,
-    //       subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-    //       html: await emailTemplate({
-    //         userName: user.name,
-    //         otp,
-    //         template: 'account_verify',
-    //       }),
-    //     });
-    // } catch (error: any) {
-    //   errorLogger.error(error.message);
-    // }
+      if (email)
+        await emailQueue.add({
+          to: email,
+          subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
+          html: emailTemplate({
+            userName: user.name,
+            otp,
+            template: 'account_verify',
+          }),
+        });
+    } catch (error: any) {
+      errorLogger.error(error.message);
+    }
 
     //? Send welcome notification
     await NotificationServices.createNotification({
