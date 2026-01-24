@@ -1,5 +1,3 @@
-import { Server } from 'http';
-import cron from 'node-cron';
 import {
   prisma,
   Trip as TTrip,
@@ -11,34 +9,7 @@ import ms from 'ms';
 import { errorLogger } from '@/utils/logger';
 import { NotificationServices } from '../notification/Notification.service';
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-export function TripJob(server: Server): () => void {
-  //? every 1 minute
-  const tripDispatchJob = cron.schedule('*/1 * * * *', async () => {
-    /**
-     * STEP 1: Find eligible trips for processing
-     * - Trips with search_at time reached
-     * - Associated trip not currently being processed
-     * - Limited to 100 trips per batch for performance
-     */
-    const eligibleHelpers = await prisma.tripHelper.findMany({
-      where: {
-        search_at: { lte: new Date() },
-        trip: {
-          is_processing: false,
-        },
-      },
-      take: 100,
-      orderBy: { search_at: 'asc' }, // Process oldest requests first
-    });
-
-    await Promise.all(eligibleHelpers.map(processSingleDriverDispatch));
-  });
-
-  return () => tripDispatchJob.destroy();
-}
-
-async function processSingleDriverDispatch(tripHelper: TTripHelper) {
+export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
   try {
     /**
      * STEP 1: Extract next driver from the queue (FIFO)

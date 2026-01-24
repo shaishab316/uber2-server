@@ -10,6 +10,7 @@ import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
+import { tripDispatchQueue } from './Trip.queue';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -30,7 +31,7 @@ export const TripServices = {
   async requestForTrip(payload: TRequestForTrip) {
     const driver_ids = await getNearestDriver(payload);
 
-    return prisma.trip.create({
+    const trip = await prisma.trip.create({
       data: {
         ...payload,
         slug: await generateTripSlug(),
@@ -42,7 +43,23 @@ export const TripServices = {
           },
         },
       },
+      include: {
+        helper: true,
+      },
     });
+
+    if (trip.helper) {
+      await tripDispatchQueue.add(
+        { helper_id: trip.helper.id },
+        {
+          delay: 0,
+          jobId: `trip-${trip.helper.id}`, // Prevent duplicate jobs
+          removeOnComplete: true,
+        },
+      );
+    }
+
+    return trip;
   },
 
   async acceptTrip({
@@ -128,6 +145,7 @@ export const TripServices = {
             id: true,
           },
         },
+        helper: true,
       },
     });
 
@@ -150,6 +168,11 @@ export const TripServices = {
         message: 'The user has cancelled the trip.',
         type: 'WARNING',
       });
+    }
+
+    if (trip?.helper?.driver_ids.length) {
+      //? Remove pending trip dispatch jobs
+      await tripDispatchQueue.removeJobs(`trip-${trip.helper.id}`);
     }
 
     return cancelledTrip;

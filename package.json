@@ -21,7 +21,7 @@
     "new-module": "tsx ./src/app/modules/.builder.ts",
     "build": "tsx esbuild.mts",
     "start": "node dist/server.js",
-    "dev": "tsx --watch src/server.ts",
+    "dev": "set DEBUG=socket.io* && tsx --watch src/server.ts",
     "dev-f5": "npm run type-check && set DEBUG=socket.io* && tsx --watch --inspect src/server.ts",
     "seed-env": "tsx src/config",
     "seed-admin": "tsx scripts/seedAdmin.ts",

@@ -112,6 +112,6 @@ export const SocketServices = {
   },
 
   _emitOnline() {
-    io?.of('/').emit('presence:online', Array.from(onlineUsers));
+    io?.of('/').emit('online_users', Array.from(onlineUsers));
   },
 };

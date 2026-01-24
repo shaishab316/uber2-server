@@ -60,8 +60,6 @@ export const ChatControllers = {
   }),
 
   getSuperInbox: catchAsync(async ({ query }) => {
-    console.log('hit');
-
     const { chats, meta } = await ChatServices.getSuperInbox({
       ...query,
     });

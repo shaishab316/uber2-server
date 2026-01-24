@@ -16,6 +16,7 @@ import {
 } from './Parcel.utils';
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
+import { parcelDispatchQueue } from './Parcel.queue';
 
 export const ParcelServices = {
   async getParcelDetails(parcel_id: string) {
@@ -36,7 +37,7 @@ export const ParcelServices = {
   async requestForParcel(payload: TRequestForParcel) {
     const driver_ids = await getNearestDriver(payload);
 
-    return prisma.parcel.create({
+    const parcel = await prisma.parcel.create({
       data: {
         ...payload,
         slug: await generateParcelSlug(),
@@ -48,7 +49,26 @@ export const ParcelServices = {
           },
         },
       },
+      include: {
+        helper: true,
+      },
     });
+
+    if (parcel.helper) {
+      //? enqueue parcel for dispatch processing
+      await parcelDispatchQueue.add(
+        {
+          helper_id: parcel.helper.id,
+        },
+        {
+          delay: 0,
+          jobId: `parcel-${parcel.helper.id}`, // Prevent duplicate jobs
+          removeOnComplete: true,
+        },
+      );
+    }
+
+    return parcel;
   },
 
   async acceptParcel({
@@ -114,6 +134,8 @@ export const ParcelServices = {
             id: true,
           },
         },
+
+        helper: true,
       },
     });
 
@@ -136,6 +158,11 @@ export const ParcelServices = {
         message: 'The user has cancelled the parcel delivery.',
         type: 'WARNING',
       });
+    }
+
+    if (parcel?.helper) {
+      //? Remove any pending dispatch jobs for this parcel
+      await parcelDispatchQueue.removeJobs(`parcel-${parcel.helper.id}`);
     }
 
     return cancelledParcel;
