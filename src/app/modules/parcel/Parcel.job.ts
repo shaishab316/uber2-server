@@ -24,7 +24,8 @@ import { NotificationServices } from '../notification/Notification.service';
  */
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export function ParcelJob(server: Server): () => void {
-  const parcelDispatchJob = cron.schedule('*/5 * * * * *', async () => {
+  //? every 1 minute
+  const parcelDispatchJob = cron.schedule('*/1 * * * *', async () => {
     /**
      * STEP 1: Find eligible parcel helpers for processing
      * - Helpers with search_at time reached

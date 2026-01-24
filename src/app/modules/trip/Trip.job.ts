@@ -13,8 +13,8 @@ import { NotificationServices } from '../notification/Notification.service';
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 export function TripJob(server: Server): () => void {
-  //? every 5 seconds
-  const tripDispatchJob = cron.schedule('*/5 * * * * *', async () => {
+  //? every 1 minute
+  const tripDispatchJob = cron.schedule('*/1 * * * *', async () => {
     /**
      * STEP 1: Find eligible trips for processing
      * - Trips with search_at time reached
