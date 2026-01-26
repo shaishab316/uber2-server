@@ -8,6 +8,7 @@ import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
 import { errorLogger } from '@/utils/logger';
 import { NotificationServices } from '../notification/Notification.service';
+import { userOmit } from '../user/User.constant';
 
 export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
   try {
@@ -56,22 +57,15 @@ export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         processing_at: new Date(),
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            trip_received_count: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
     /**
      * STEP 4: Send real-time dispatch request to driver
      */
-    sendDriverDispatchNotification(processingTrip as TTrip & { user: TUser });
+    sendDriverDispatchNotification(processingTrip as any);
 
     //? Notify driver about new trip request
     await NotificationServices.createNotification({

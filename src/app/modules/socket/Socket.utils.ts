@@ -19,7 +19,7 @@ export const catchAsyncSocket = <S extends z.ZodType>(
 
       response = {
         success: true,
-        data: await fn(parsed)
+        data: await fn(parsed),
       };
     } catch (error: any) {
       response = {

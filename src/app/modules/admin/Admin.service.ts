@@ -6,6 +6,7 @@ import { Prisma, prisma } from '../../../utils/db';
 import { hashPassword } from '../auth/Auth.utils';
 import { TGetOverviewArgs, TUserTripDetailsArgs } from './Admin.interface';
 import { TPagination } from '@/utils/server/serveResponse';
+import { userOmit } from '../user/User.constant';
 
 const months = [
   'Jan',
@@ -107,16 +108,8 @@ export const AdminServices = {
       skip: (page - 1) * limit,
       orderBy: { completed_at: 'desc' },
       include: {
-        driver: {
-          select: {
-            name: true,
-            phone: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-            trip_given_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 

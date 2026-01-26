@@ -2,6 +2,7 @@ import type { TGetRideHistoryArgs } from './RideHistory.interface';
 import { prisma, type Prisma } from '@/utils/db';
 import { dateRange } from '../datetime/Datetime.utils';
 import type { TPagination } from '@/utils/server/serveResponse';
+import { userOmit } from '../user/User.constant';
 
 export const RideHistoryServices = {
   async tripHistory({
@@ -26,18 +27,8 @@ export const RideHistoryServices = {
     const trips = await prisma.trip.findMany({
       where: whereTrip,
       include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-        driver: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
       skip: (page - 1) * limit,
       take: limit,

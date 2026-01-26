@@ -11,7 +11,7 @@ import chalk from 'chalk';
 /**
  * Create pg.Pool singleton
  */
-let pgPool = globalThis.pgPool
+let pgPool = globalThis.pgPool;
 
 if (!pgPool) {
   globalThis.pgPool = pgPool = new pg.Pool({
@@ -21,8 +21,6 @@ if (!pgPool) {
     connectionTimeoutMillis: 2000,
   });
 }
-
-
 
 /**
  * Create Prisma Client singleton
@@ -35,9 +33,7 @@ if (!prisma) {
   });
 }
 
-
 export { prisma, pgPool };
-
 
 /** Connect to the database */
 export async function connectDB() {
@@ -45,8 +41,14 @@ export async function connectDB() {
 
   try {
     if (!prisma || !pgPool) {
-      spinner.fail(chalk.red(`${!prisma && 'Prisma Client not initialized.'} ${!pgPool && 'pg.Pool not initialized.'}`));
-      return () => { /* no-op */ };
+      spinner.fail(
+        chalk.red(
+          `${!prisma && 'Prisma Client not initialized.'} ${!pgPool && 'pg.Pool not initialized.'}`,
+        ),
+      );
+      return () => {
+        /* no-op */
+      };
     }
 
     await prisma.$connect();
@@ -62,10 +64,11 @@ export async function connectDB() {
     };
   } catch (error) {
     if (error instanceof Error) {
-      spinner.fail(chalk.red('Failed to connect to the database. ' + error.message));
+      spinner.fail(
+        chalk.red('Failed to connect to the database. ' + error.message),
+      );
     }
 
     throw error;
   }
 }
-

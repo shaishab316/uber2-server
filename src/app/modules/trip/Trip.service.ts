@@ -46,6 +46,8 @@ export const TripServices = {
       },
       include: {
         helper: true,
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
@@ -91,6 +93,10 @@ export const TripServices = {
         is_processing: false,
         processing_driver_id: null,
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      }
     });
 
     //? sort for consistent chat user_ids
@@ -159,6 +165,10 @@ export const TripServices = {
         is_processing: false,
         processing_driver_id: null,
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      }
     });
 
     //? Notify driver if assigned
@@ -181,7 +191,7 @@ export const TripServices = {
       SocketServices.emitToUser(
         cancelledTrip.processing_driver_id,
         'trip:canceled',
-        { trip: cancelledTrip, },
+        { trip: cancelledTrip },
       );
     }
 
@@ -192,6 +202,10 @@ export const TripServices = {
     return prisma.trip.findFirst({
       where: { processing_driver_id: driver_id },
       orderBy: { processing_at: 'desc' },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      }
     });
   },
 
@@ -204,15 +218,8 @@ export const TripServices = {
         },
       },
       include: {
-        driver: {
-          select: {
-            name: true,
-            avatar: true,
-            location_lat: true,
-            location_lng: true,
-            location_address: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
       },
       orderBy: {
         requested_at: 'desc',
@@ -223,24 +230,14 @@ export const TripServices = {
   async getLastDriverTrip({ driver_id }: { driver_id: string }) {
     const data = await prisma.trip.findFirst({
       where: {
-        OR: [
-          { driver_id, },
-          { processing_driver_id: driver_id, },
-        ],
+        OR: [{ driver_id }, { processing_driver_id: driver_id }],
         status: {
           notIn: [ETripStatus.COMPLETED, ETripStatus.CANCELLED],
         },
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            trip_received_count: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
       },
       orderBy: {
         accepted_at: 'desc',
@@ -254,6 +251,11 @@ export const TripServices = {
     return prisma.trip.update({
       where: { id: trip_id },
       data: payload,
+      /** no-need */
+      // include: {
+      //   user: { omit: userOmit.USER },
+      //   driver: { omit: userOmit.DRIVER },
+      // }
     });
   },
 
@@ -279,6 +281,11 @@ export const TripServices = {
         is_processing: false,
         processing_at: new Date(), //? invoke time
       },
+      /** no-need */
+      // include: {
+      //   user: { omit: userOmit.USER },
+      //   driver: { omit: userOmit.DRIVER }
+      // }
     });
   },
 
@@ -303,6 +310,10 @@ export const TripServices = {
         status: ETripStatus.STARTED,
         started_at: new Date(),
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      }
     });
 
     if (startedTrip.user_id) {
@@ -350,14 +361,8 @@ export const TripServices = {
         total_cost: await calculateTripCost(trip as any),
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            rating: true,
-            avatar: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
@@ -377,6 +382,10 @@ export const TripServices = {
   async payForTrip({ user_id, trip_id }: { user_id: string; trip_id: string }) {
     const trip = await prisma.trip.findUnique({
       where: { id: trip_id },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
 
     if (trip?.user_id !== user_id) {
