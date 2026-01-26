@@ -96,7 +96,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-      }
+      },
     });
 
     //? sort for consistent chat user_ids
@@ -168,7 +168,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-      }
+      },
     });
 
     //? Notify driver if assigned
@@ -205,7 +205,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-      }
+      },
     });
   },
 
@@ -219,7 +219,7 @@ export const TripServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
+        driver: { omit: userOmit.DRIVER },
       },
       orderBy: {
         requested_at: 'desc',
@@ -237,7 +237,7 @@ export const TripServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
+        driver: { omit: userOmit.DRIVER },
       },
       orderBy: {
         accepted_at: 'desc',
@@ -313,7 +313,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-      }
+      },
     });
 
     if (startedTrip.user_id) {
@@ -384,8 +384,8 @@ export const TripServices = {
       where: { id: trip_id },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (trip?.user_id !== user_id) {

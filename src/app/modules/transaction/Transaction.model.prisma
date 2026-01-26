@@ -6,6 +6,7 @@ model Transaction {
   user_id               String?
   driver_id             String?
   amount                Float
+  tax                   Float            @default(0)
   type                  ETransactionType @default(TOPUP)
   payment_method        String           @default("unknown")
 
