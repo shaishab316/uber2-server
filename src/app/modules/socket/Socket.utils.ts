@@ -17,13 +17,19 @@ export const catchAsyncSocket = <S extends z.ZodType>(
       if (typeof payload === 'string') payload = JSON.parse(payload.trim());
       const parsed = await validator.parseAsync(payload);
 
-      response = await fn(parsed);
+      response = {
+        success: true,
+        data: await fn(parsed)
+      };
     } catch (error: any) {
-      response = formatError(error).errorMessages;
+      response = {
+        success: false,
+        error: formatError(error).errorMessages,
+      };
 
       //? In development mode, include stack trace in the response
       if (config.server.isDevelopment) {
-        Object.assign(response?.[0] ?? {}, { stack: error.stack });
+        Object.assign(response?.error?.[0] ?? {}, { stack: error.stack });
       }
     } finally {
       ack?.(response);

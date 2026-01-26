@@ -11,6 +11,7 @@ import { getNearestDriver } from '../parcel/Parcel.utils';
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { tripDispatchQueue } from './Trip.queue';
+import { SocketServices } from '../socket/Socket.service';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -87,6 +88,8 @@ export const TripServices = {
         status: ETripStatus.ACCEPTED,
         driver_id,
         accepted_at: new Date(),
+        is_processing: false,
+        processing_driver_id: null,
       },
     });
 
@@ -150,7 +153,12 @@ export const TripServices = {
 
     const cancelledTrip = await prisma.trip.update({
       where: { id: trip_id },
-      data: { status: ETripStatus.CANCELLED, cancelled_at: new Date() },
+      data: {
+        status: ETripStatus.CANCELLED,
+        cancelled_at: new Date(),
+        is_processing: false,
+        processing_driver_id: null,
+      },
     });
 
     //? Notify driver if assigned
@@ -161,6 +169,20 @@ export const TripServices = {
         message: 'The user has cancelled the trip.',
         type: 'WARNING',
       });
+    }
+
+    if (cancelledTrip.driver_id) {
+      SocketServices.emitToUser(cancelledTrip.driver_id, 'trip:canceled', {
+        trip: cancelledTrip,
+      });
+    }
+
+    if (cancelledTrip.processing_driver_id) {
+      SocketServices.emitToUser(
+        cancelledTrip.processing_driver_id,
+        'trip:canceled',
+        { trip: cancelledTrip, },
+      );
     }
 
     return cancelledTrip;
@@ -201,7 +223,10 @@ export const TripServices = {
   async getLastDriverTrip({ driver_id }: { driver_id: string }) {
     const data = await prisma.trip.findFirst({
       where: {
-        driver_id,
+        OR: [
+          { driver_id, },
+          { processing_driver_id: driver_id, },
+        ],
         status: {
           notIn: [ETripStatus.COMPLETED, ETripStatus.CANCELLED],
         },
@@ -222,11 +247,7 @@ export const TripServices = {
       },
     });
 
-    if (!data) return null;
-
-    const { user, ...trip } = data;
-
-    return { trip, user };
+    return data;
   },
 
   async refreshLocation({ trip_id, ...payload }: TTripRefreshLocation) {

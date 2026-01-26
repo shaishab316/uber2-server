@@ -1,5 +1,6 @@
-import { prisma } from '@/utils/db';
+import { EParcelType, prisma } from '@/utils/db';
 import { TGetNearestDriver, TRequestForParcel } from './Parcel.interface';
+import { calculateSimpleDistance } from '../trip/Trip.utils';
 
 export async function generateParcelSlug() {
   const now = new Date();
@@ -35,12 +36,55 @@ export async function generateParcelSlug() {
   return `p-${datePrefix}-${sequenceStr}`;
 }
 
-export async function calculateParcelCost(parcel: TRequestForParcel) {
-  const { weight, amount } = parcel;
+export async function calculateParcelCost(
+  parcel: TRequestForParcel,
+): Promise<number> {
+  const {
+    weight,
+    amount,
+    parcel_type,
+    pickup_lat,
+    pickup_lng,
+    dropoff_lat,
+    dropoff_lng,
+  } = parcel;
 
-  /** TODO: Calculate parcel cost */
+  const distanceKm = calculateSimpleDistance(
+    pickup_lat,
+    pickup_lng,
+    dropoff_lat,
+    dropoff_lng,
+  );
 
-  return weight * amount;
+  const BASE_FARE = 3.0;
+  const DISTANCE_RATE = 1.0; // $1 per km
+  const WEIGHT_RATE = 0.8; // $0.8 per kg
+  const ITEM_RATE = 0.2; // $0.2 per item
+
+  let cost =
+    BASE_FARE +
+    distanceKm * DISTANCE_RATE +
+    weight * WEIGHT_RATE +
+    amount * ITEM_RATE;
+
+  switch (parcel_type) {
+    case EParcelType.SMALL:
+      cost *= 1.0;
+      break;
+    case EParcelType.MEDIUM:
+      cost *= 1.1;
+      break;
+    case EParcelType.LARGE:
+      cost *= 1.3;
+      break;
+  }
+
+  const MIN_FARE = 5.0;
+  if (cost < MIN_FARE) {
+    cost = MIN_FARE;
+  }
+
+  return cost | 0;
 }
 
 export async function getNearestDriver({
@@ -57,12 +101,16 @@ export async function getNearestDriver({
       AND location_lat IS NOT NULL
       AND location_lng IS NOT NULL
     ORDER BY 
-      SQRT(
-        POWER((location_lat - ${pickup_lat}), 2) + 
-        POWER((location_lng - ${pickup_lng}), 2)
+      (
+        6371 * acos(
+          cos(radians(${pickup_lat})) 
+          * cos(radians(location_lat)) 
+          * cos(radians(location_lng) - radians(${pickup_lng})) 
+          + sin(radians(${pickup_lat})) 
+          * sin(radians(location_lat))
+        )
       ) ASC
     LIMIT 20
   `;
-
   return nearestDrivers.map(driver => driver.id);
 }

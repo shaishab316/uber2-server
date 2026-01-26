@@ -102,6 +102,8 @@ export const ParcelServices = {
         status: EParcelStatus.ACCEPTED,
         driver_id,
         accepted_at: new Date(),
+        is_processing: true,
+        processing_driver_id: null,
       },
     });
 
@@ -147,7 +149,12 @@ export const ParcelServices = {
 
     const cancelledParcel = await prisma.parcel.update({
       where: { id: parcel_id },
-      data: { status: EParcelStatus.CANCELLED, cancelled_at: new Date() },
+      data: {
+        status: EParcelStatus.CANCELLED,
+        cancelled_at: new Date(),
+        is_processing: false,
+        processing_driver_id: null,
+      },
     });
 
     //? Notify driver if assigned

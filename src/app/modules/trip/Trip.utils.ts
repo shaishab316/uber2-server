@@ -35,10 +35,49 @@ export async function generateTripSlug() {
   return `t-${datePrefix}-${sequenceStr}`;
 }
 
-export async function calculateTripCost(trip: TRequestForTrip) {
-  /** TODO: Calculate trip cost */
+export function calculateSimpleDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
 
-  void trip;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
-  return 100;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+export async function calculateTripCost(
+  trip: TRequestForTrip,
+): Promise<number> {
+  // Calculate distance in kilometers
+  const distanceKm = calculateSimpleDistance(
+    trip.pickup_lat,
+    trip.pickup_lng,
+    trip.dropoff_lat,
+    trip.dropoff_lng,
+  );
+
+  // Simple pricing formula
+  const BASE_FARE = 3.0; // Base fare
+  const PER_KM_RATE = 2.0; // Rate per km
+  const MINIMUM_FARE = 5.0; // Minimum fare
+
+  // Calculate fare
+  let fare = BASE_FARE + distanceKm * PER_KM_RATE;
+
+  // Ensure minimum fare
+  fare = Math.max(fare, MINIMUM_FARE);
+
+  // Round to 2 decimal places
+  return fare | 0;
 }

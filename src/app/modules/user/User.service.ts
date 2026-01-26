@@ -37,11 +37,26 @@ export const UserServices = {
       where: { OR: [{ email }, { phone }] },
     });
 
-    if (existingUser)
+    if (existingUser?.is_verified) {
+      if (existingUser.is_deleted) {
+        throw new ServerError(
+          StatusCodes.GONE,
+          'This account has been permanently deleted. Please contact support if you believe this is a mistake.',
+        );
+      }
+
+      if (!existingUser.is_active) {
+        throw new ServerError(
+          StatusCodes.FORBIDDEN,
+          'This email is already registered, but the account is pending admin approval. You will be notified once it is activated.',
+        );
+      }
+
       throw new ServerError(
-        StatusCodes.CONFLICT,
-        `User already exists with this ${email ? 'email' : ''} ${phone ? 'phone' : ''}`.trim(),
+        StatusCodes.BAD_REQUEST,
+        'You already have an active account with this email. Please sign in.',
       );
+    }
 
     //! finally create user and in return omit auth fields
     const user = await prisma.user.create({

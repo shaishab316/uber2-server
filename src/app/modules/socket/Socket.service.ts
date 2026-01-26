@@ -51,7 +51,10 @@ export const SocketServices = {
       }
 
       socket.on('disconnect', async () => {
-        await this._markOffline(user.id);
+        if (user) {
+          await this._markOffline(user.id);
+        }
+
         logger.info(`👤 User (${user.name}) disconnected from /`);
       });
     });
@@ -87,11 +90,15 @@ export const SocketServices = {
     onlineUsers.delete(userId);
     this._emitOnline();
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { is_online: false, last_online_at: new Date() },
-      select: { id: true },
-    });
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { is_online: false, last_online_at: new Date() },
+        select: { id: true },
+      });
+    } catch (error) {
+      console.error('Error updating user online status:', error);
+    }
   },
 
   _emitOnline() {

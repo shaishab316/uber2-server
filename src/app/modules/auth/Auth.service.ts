@@ -40,6 +40,20 @@ export const AuthServices = {
       throw new ServerError(StatusCodes.UNAUTHORIZED, 'Incorrect password');
     }
 
+    if (user.is_deleted) {
+      throw new ServerError(
+        StatusCodes.GONE,
+        'This account has been permanently deleted. Please contact support if you believe this is an error.',
+      );
+    }
+
+    if (!user.is_active) {
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'Your account is currently under review. You will be able to access the system once it has been approved by an administrator.',
+      );
+    }
+
     if (!user.is_verified) {
       const otp = generateOTP({
         tokenType: 'access_token',
