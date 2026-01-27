@@ -66,7 +66,9 @@ export const ReviewServices = {
       where: { id: user_id },
       data: {
         rating_count: aggregation._count.rating,
-        rating: aggregation._avg.rating ?? 5,
+
+        //? ensure rating is rounded to 1 decimal place
+        rating: Number((aggregation._avg.rating ?? 5).toFixed(1)),
       },
     });
 
@@ -74,7 +76,7 @@ export const ReviewServices = {
     await NotificationServices.createNotification({
       user_id,
       title: 'New Review Received',
-      message: `You received a ${review.rating}-star review. Your average rating is now ${updatedUser.rating.toFixed(1)}.`,
+      message: `You received a ${review.rating}-star review. Your average rating is now ${updatedUser.rating}.`,
       type: 'INFO',
     });
 

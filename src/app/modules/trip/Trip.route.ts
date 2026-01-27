@@ -6,6 +6,9 @@ import { TripValidations } from './Trip.validation';
 
 const all = Router();
 {
+  //? Get last trip for user or driver
+  all.get('/recover-trip', TripControllers.getLastTrip);
+
   //? Get trip details
   all.get(
     '/:trip_id',

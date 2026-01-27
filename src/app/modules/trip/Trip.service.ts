@@ -407,6 +407,10 @@ export const TripServices = {
       const trip = await tx.trip.update({
         where: { id: trip_id },
         data: { payment_at: new Date() },
+        include: {
+          user: { omit: userOmit.USER },
+          driver: { omit: userOmit.DRIVER },
+        },
       });
 
       //? Deduct from wallet

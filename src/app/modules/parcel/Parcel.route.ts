@@ -6,6 +6,9 @@ import { ParcelValidations } from './Parcel.validation';
 
 const all = Router();
 {
+  //? Recover last parcel
+  all.get('/recover-parcel', ParcelControllers.getLastParcel);
+
   //? Get parcel details
   all.get(
     '/:parcel_id',

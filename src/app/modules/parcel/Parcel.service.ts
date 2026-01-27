@@ -213,15 +213,8 @@ export const ParcelServices = {
         },
       },
       include: {
-        driver: {
-          select: {
-            name: true,
-            avatar: true,
-            location_lat: true,
-            location_lng: true,
-            location_address: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
       orderBy: {
         requested_at: 'desc',
@@ -241,15 +234,8 @@ export const ParcelServices = {
         accepted_at: 'desc',
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            trip_received_count: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
