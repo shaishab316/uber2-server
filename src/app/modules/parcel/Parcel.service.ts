@@ -51,6 +51,8 @@ export const ParcelServices = {
       },
       include: {
         helper: true,
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
       },
     });
 
@@ -105,6 +107,10 @@ export const ParcelServices = {
         is_processing: true,
         processing_driver_id: null,
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
 
     if (acceptedParcel.user_id) {
@@ -155,6 +161,10 @@ export const ParcelServices = {
         is_processing: false,
         processing_driver_id: null,
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
 
     //? Notify driver if assigned
@@ -179,15 +189,8 @@ export const ParcelServices = {
     const data = await prisma.parcel.findFirst({
       where: { processing_driver_id: driver_id },
       include: {
-        user: {
-          select: {
-            name: true,
-            trip_received_count: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
       },
       orderBy: { processing_at: 'desc' },
     });
@@ -196,11 +199,12 @@ export const ParcelServices = {
       return null;
     }
 
-    const { user, ...parcel } = data;
+    const { user, driver } = data;
 
     return {
-      parcel,
+      parcel: data,
       user,
+      driver,
     };
   },
 
@@ -215,6 +219,7 @@ export const ParcelServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
       orderBy: {
         requested_at: 'desc',
@@ -236,14 +241,15 @@ export const ParcelServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
     });
 
     if (!data) return null;
 
-    const { user, ...parcel } = data;
+    const { user, driver, } = data;
 
-    return { parcel, user };
+    return { parcel: data, user, driver };
   },
 
   async refreshLocation({ parcel_id, ...payload }: TParcelRefreshLocation) {
@@ -302,6 +308,10 @@ export const ParcelServices = {
         status: EParcelStatus.STARTED,
         started_at: new Date(),
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
   },
 
@@ -336,6 +346,10 @@ export const ParcelServices = {
         delivery_lat,
         delivery_lng,
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
   },
 
@@ -369,6 +383,10 @@ export const ParcelServices = {
       const parcel = await tx.parcel.update({
         where: { id: parcel_id },
         data: { payment_at: new Date() },
+        include: {
+          user: { omit: userOmit.USER },
+          driver: { omit: userOmit.DRIVER }
+        }
       });
 
       //? Deduct from wallet
@@ -470,6 +488,10 @@ export const ParcelServices = {
         //? Calculate total time in milliseconds
         time: completed_at.getTime() - parcel.started_at.getTime(),
       },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER }
+      }
     });
   },
 

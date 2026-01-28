@@ -96,6 +96,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
     });
 
@@ -220,6 +221,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
       orderBy: {
         requested_at: 'desc',
@@ -238,6 +240,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
       orderBy: {
         accepted_at: 'desc',
@@ -313,6 +316,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
     });
 
@@ -346,16 +350,16 @@ export const TripServices = {
 
     trip.started_at ??= new Date();
 
-    const completed_at = new Date();
+    const arrived_at = new Date();
 
     const completedTrip = await prisma.trip.update({
       where: { id: trip_id },
       data: {
-        status: ETripStatus.COMPLETED,
-        completed_at,
+        status: ETripStatus.ARRIVED,
+        arrived_at,
 
         //? Calculate total time in milliseconds
-        time: completed_at.getTime() - trip.started_at.getTime(),
+        time: arrived_at.getTime() - trip.started_at.getTime(),
 
         //? Recalculate total cost in case of any changes during the trip
         total_cost: await calculateTripCost(trip as any),
@@ -363,6 +367,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
+        reviews: { select: { reviewer_id: true, } }
       },
     });
 
@@ -406,7 +411,7 @@ export const TripServices = {
       //? Mark trip as paid
       const trip = await tx.trip.update({
         where: { id: trip_id },
-        data: { payment_at: new Date() },
+        data: { payment_at: new Date(), completed_at: new Date(), status: ETripStatus.COMPLETED },
         include: {
           user: { omit: userOmit.USER },
           driver: { omit: userOmit.DRIVER },

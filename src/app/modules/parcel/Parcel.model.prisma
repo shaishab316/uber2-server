@@ -54,6 +54,7 @@ model Parcel {
 
   helper       ParcelHelper? @relation("ParcelHelper")
   transactions Transaction[]
+  reviews      Review[]
 
   @@index([pickup_lat, pickup_lng])
   @@index([dropoff_lat, dropoff_lng])
