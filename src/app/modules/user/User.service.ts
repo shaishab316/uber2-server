@@ -288,14 +288,19 @@ export const UserServices = {
 
   //?? Admin Actions
   async pendingUserAction({ action, user_id }: TPendingUserAction) {
-    return prisma.user.update({
-      where: { id: user_id },
-      data: {
-        is_verification_pending: false,
-        is_active: action === 'approve',
-      },
-      omit: userSelfOmit.USER,
-    });
+    if (action === "approve") {
+      return prisma.user.update({
+        where: { id: user_id },
+        data: {
+          is_verification_pending: false,
+          is_active: true,
+          is_verified: true,
+        },
+        omit: userSelfOmit.USER,
+      });
+    } else {
+      return this.deleteAccount({ user_id });
+    }
   },
 
   async uploadCaptureAvatar({

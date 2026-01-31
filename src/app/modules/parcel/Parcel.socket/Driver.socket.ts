@@ -101,7 +101,6 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     }, parcelValidator),
   );
 
-
   socket.on(
     'parcel:complete_delivery',
     catchAsyncSocket(async ({ parcel_id }) => {
