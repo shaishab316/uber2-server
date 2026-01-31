@@ -74,8 +74,13 @@ export const TripServices = {
             id: true,
           },
         },
+        user_id: true,
       },
     });
+
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
 
     if (trip?.driver?.id && trip?.driver?.id !== driver_id) {
       throw new ServerError(
@@ -132,6 +137,28 @@ export const TripServices = {
         title: 'Trip Accepted',
         message: 'A driver has accepted your trip request.',
         type: 'INFO',
+      });
+    }
+
+    //? Increment driver's trip given count
+    await prisma.user.update({
+      where: { id: driver_id },
+      data: {
+        trip_given_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    //? Increment user's trip received count
+    if (trip.user_id) {
+      await prisma.user.update({
+        where: { id: trip.user_id },
+        data: {
+          trip_received_count: {
+            increment: 1,
+          },
+        },
       });
     }
 

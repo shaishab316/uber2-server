@@ -90,8 +90,13 @@ export const ParcelServices = {
             id: true,
           },
         },
+        user_id: true,
       },
     });
+
+    if (!parcel) {
+      throw new Error('Parcel not found');
+    }
 
     if (parcel?.driver?.id && parcel?.driver?.id !== driver_id)
       throw new ServerError(
@@ -121,6 +126,28 @@ export const ParcelServices = {
         title: 'Parcel Accepted',
         message: 'A driver has accepted your parcel delivery request.',
         type: 'INFO',
+      });
+    }
+
+    //? Update driver trip given count
+    await prisma.user.update({
+      where: { id: driver_id },
+      data: {
+        trip_given_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    //? Update user trip received count
+    if (parcel.user_id) {
+      await prisma.user.update({
+        where: { id: parcel.user_id },
+        data: {
+          trip_received_count: {
+            increment: 1,
+          },
+        },
       });
     }
 
