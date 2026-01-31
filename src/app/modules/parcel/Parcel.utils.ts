@@ -87,10 +87,15 @@ export async function calculateParcelCost(
   return cost | 0;
 }
 
+/**
+ * Find nearest drivers within a specified maximum distance (in kilometers)
+ * using the Haversine formula for distance calculation.
+ */
 export async function getNearestDriver({
   pickup_lat,
   pickup_lng,
-}: TGetNearestDriver): Promise<string[]> {
+  maxDistanceKm = 10,
+}: TGetNearestDriver & { maxDistanceKm?: number }): Promise<string[]> {
   const nearestDrivers = await prisma.$queryRaw<Array<{ id: string }>>`
     SELECT id
     FROM users
@@ -100,17 +105,22 @@ export async function getNearestDriver({
       AND is_active = true
       AND location_lat IS NOT NULL
       AND location_lng IS NOT NULL
-    ORDER BY 
-      (
+      AND (
         6371 * acos(
-          cos(radians(${pickup_lat})) 
-          * cos(radians(location_lat)) 
-          * cos(radians(location_lng) - radians(${pickup_lng})) 
-          + sin(radians(${pickup_lat})) 
-          * sin(radians(location_lat))
+          cos(radians(${pickup_lat})) * cos(radians(location_lat)) *
+          cos(radians(location_lng) - radians(${pickup_lng})) +
+          sin(radians(${pickup_lat})) * sin(radians(location_lat))
         )
-      ) ASC
+      ) <= ${maxDistanceKm}
+    ORDER BY (
+      6371 * acos(
+        cos(radians(${pickup_lat})) * cos(radians(location_lat)) *
+        cos(radians(location_lng) - radians(${pickup_lng})) +
+        sin(radians(${pickup_lat})) * sin(radians(location_lat))
+      )
+    ) ASC
     LIMIT 20
   `;
+
   return nearestDrivers.map(driver => driver.id);
 }

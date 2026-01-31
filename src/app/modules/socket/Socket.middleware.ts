@@ -1,12 +1,16 @@
 /* eslint-disable no-unused-vars */
-import { Socket } from 'socket.io';
 import { decodeToken } from '../auth/Auth.utils';
-import { prisma } from '@/utils/db';
-import { userSelfOmit } from '../user/User.constant';
+import { prisma, type User as TUser } from '@/utils/db';
+import { userOmit } from '../user/User.constant';
 import { commonValidator as commonAuthValidator } from '@/app/middlewares/auth';
 import { formatError } from '@/app/middlewares/globalErrorHandler';
+import { TAuthenticatedSocket } from './Socket.interface';
+import { omit } from '@/utils/db/omit';
 
-const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
+const socketAuth = async (
+  socket: TAuthenticatedSocket,
+  next: (err?: Error) => void,
+) => {
   const token =
     socket.handshake?.auth?.token ?? socket.handshake?.headers?.authorization;
 
@@ -14,18 +18,21 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
     const { uid } = decodeToken(token, 'access_token');
 
     try {
-      socket.data.user = await prisma.user.update({
-        where: { id: uid, is_deleted: false },
-        //? Set user as online on every socket connection
-        data: { is_online: true, last_online_at: new Date() },
-        omit: userSelfOmit.USER,
+      const user = await prisma.user.findUnique({
+        where: { id: uid },
       });
-    } catch {
-      next(new Error('Your account is not found'));
-    }
 
-    //? Run common auth validators
-    commonAuthValidator(socket.data.user);
+      if (!user || user.is_deleted) {
+        return next(new Error('Your account is not found'));
+      }
+
+      //? Run common auth validators
+      commonAuthValidator(user);
+
+      socket.data.user = omit(user, userOmit[user.role]) as TUser;
+    } catch {
+      return next(new Error('Your account is not found'));
+    }
 
     next();
   } catch (error) {
