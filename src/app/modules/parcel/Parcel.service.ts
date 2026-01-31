@@ -289,7 +289,15 @@ export const ParcelServices = {
       where: { id: parcel_id },
     });
 
-    if (parcel?.processing_driver_id !== driver_id) {
+    if (!parcel) {
+      throw new Error('Parcel not found');
+    }
+
+    if (parcel?.status === EParcelStatus.REQUESTED) {
+      if (parcel?.processing_driver_id !== driver_id) {
+        throw new Error('You are not assigned to this parcel');
+      }
+    } else if (parcel?.driver_id !== driver_id) {
       throw new Error('You are not assigned to this parcel');
     }
 
