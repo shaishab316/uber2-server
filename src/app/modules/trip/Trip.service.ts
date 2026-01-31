@@ -283,7 +283,15 @@ export const TripServices = {
       where: { id: trip_id },
     });
 
-    if (trip?.processing_driver_id !== driver_id || trip.driver_id !== driver_id) {
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    if (trip.status === ETripStatus.REQUESTED) {
+      if (trip.processing_driver_id !== driver_id) {
+        throw new Error('You are not assigned to this trip');
+      }
+    } else if (trip.driver_id !== driver_id) {
       throw new Error('You are not assigned to this trip');
     }
 

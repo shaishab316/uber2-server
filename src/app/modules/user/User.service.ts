@@ -288,7 +288,7 @@ export const UserServices = {
 
   //?? Admin Actions
   async pendingUserAction({ action, user_id }: TPendingUserAction) {
-    if (action === "approve") {
+    if (action === 'approve') {
       return prisma.user.update({
         where: { id: user_id },
         data: {
