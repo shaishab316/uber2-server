@@ -60,22 +60,14 @@ export const ParcelValidations = {
     }),
   }),
 
-  deliver_parcel: z.object({
-    parcel_id: z.string().refine(exists('parcel'), {
-      error: ({ input }) => `Parcel not found with id: ${input}`,
+  deliverParcel: z.object({
+    body: z.object({
+      parcel_id: z.string().refine(exists('parcel'), {
+        error: ({ input }) => `Parcel not found with id: ${input}`,
+      }),
+      files: z
+        .array(z.string())
+        .min(1, { message: 'At least one file is required' }),
     }),
-    files: z
-      .array(z.string())
-      .min(1, { message: 'At least one file is required' }),
-    delivery_lat: z.coerce
-      .number({ error: 'Delivery latitude is required' })
-      .refine(lat => lat >= -90 && lat <= 90, {
-        error: 'Delivery latitude must be between -90 and 90',
-      }),
-    delivery_lng: z.coerce
-      .number({ error: 'Delivery longitude is required' })
-      .refine(lng => lng >= -180 && lng <= 180, {
-        error: 'Delivery longitude must be between -180 and 180',
-      }),
   }),
 };

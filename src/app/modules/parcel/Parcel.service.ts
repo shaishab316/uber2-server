@@ -17,6 +17,7 @@ import {
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { parcelDispatchQueue } from './Parcel.queue';
+import { SocketServices } from '../socket/Socket.service';
 
 export const ParcelServices = {
   async getParcelDetails(parcel_id: string) {
@@ -52,7 +53,7 @@ export const ParcelServices = {
       include: {
         helper: true,
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
@@ -109,8 +110,8 @@ export const ParcelServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (acceptedParcel.user_id) {
@@ -163,8 +164,8 @@ export const ParcelServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     //? Notify driver if assigned
@@ -182,6 +183,12 @@ export const ParcelServices = {
       await parcelDispatchQueue.removeJobs(`parcel-${parcel.helper.id}`);
     }
 
+    if (cancelledParcel.driver_id) {
+      SocketServices.emitToUser(cancelledParcel.driver_id, 'parcel:cancelled', {
+        parcel: cancelledParcel,
+      });
+    }
+
     return cancelledParcel;
   },
 
@@ -190,7 +197,7 @@ export const ParcelServices = {
       where: { processing_driver_id: driver_id },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
+        driver: { omit: userOmit.DRIVER },
       },
       orderBy: { processing_at: 'desc' },
     });
@@ -209,7 +216,7 @@ export const ParcelServices = {
   },
 
   async getLastUserParcel({ user_id }: { user_id: string }) {
-    return prisma.parcel.findFirst({
+    const parcel = await prisma.parcel.findFirst({
       where: {
         user_id,
         status: {
@@ -219,37 +226,49 @@ export const ParcelServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
       orderBy: {
         requested_at: 'desc',
       },
     });
+
+    if (
+      parcel?.status === EParcelStatus.COMPLETED ||
+      parcel?.status === EParcelStatus.CANCELLED
+    ) {
+      return;
+    }
+
+    return parcel;
   },
 
   async getLastDriverParcel({ driver_id }: { driver_id: string }) {
-    const data = await prisma.parcel.findFirst({
+    const parcel = await prisma.parcel.findFirst({
       where: {
         driver_id,
         status: {
           notIn: [EParcelStatus.COMPLETED, EParcelStatus.CANCELLED],
         },
       },
-      orderBy: {
-        accepted_at: 'desc',
-      },
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
+      },
+      orderBy: {
+        accepted_at: 'desc',
       },
     });
 
-    if (!data) return null;
+    if (
+      parcel?.status === EParcelStatus.COMPLETED ||
+      parcel?.status === EParcelStatus.CANCELLED
+    ) {
+      return;
+    }
 
-    const { user, driver, } = data;
-
-    return { parcel: data, user, driver };
+    return parcel;
   },
 
   async refreshLocation({ parcel_id, ...payload }: TParcelRefreshLocation) {
@@ -310,31 +329,31 @@ export const ParcelServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
   },
 
-  async deliverParcel({
-    driver_id,
-    files,
-    parcel_id,
-    delivery_lat,
-    delivery_lng,
-  }: TDeliverParcelArgs) {
+  async deliverParcel({ driver_id, files, parcel_id }: TDeliverParcelArgs) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
     });
 
     if (parcel?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this parcel');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this parcel',
+      );
     }
 
     if (
       parcel.status !== EParcelStatus.DELIVERED &&
       parcel.status !== EParcelStatus.STARTED
     ) {
-      throw new Error('Parcel is not started yet');
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Parcel is not started yet',
+      );
     }
 
     return prisma.parcel.update({
@@ -343,13 +362,11 @@ export const ParcelServices = {
         status: EParcelStatus.DELIVERED,
         delivered_at: new Date(),
         delivery_proof_files: files,
-        delivery_lat,
-        delivery_lng,
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
   },
 
@@ -379,14 +396,14 @@ export const ParcelServices = {
     }
 
     return prisma.$transaction(async tx => {
-      //? Mark parcel as paid
+      //? Mark parcel as paid and completed
       const parcel = await tx.parcel.update({
         where: { id: parcel_id },
-        data: { payment_at: new Date() },
+        data: { payment_at: new Date(), status: EParcelStatus.COMPLETED, },
         include: {
           user: { omit: userOmit.USER },
-          driver: { omit: userOmit.DRIVER }
-        }
+          driver: { omit: userOmit.DRIVER },
+        },
       });
 
       //? Deduct from wallet
@@ -490,8 +507,8 @@ export const ParcelServices = {
       },
       include: {
         user: { omit: userOmit.USER },
-        driver: { omit: userOmit.DRIVER }
-      }
+        driver: { omit: userOmit.DRIVER },
+      },
     });
   },
 

@@ -1,8 +1,9 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
-import { TGetSuperParcelDetails } from './Parcel.interface';
+import { TDeliverParcel, TGetSuperParcelDetails } from './Parcel.interface';
 import { StatusCodes } from 'http-status-codes';
+import { SocketServices } from '../socket/Socket.service';
 
 export const ParcelControllers = {
   getParcelDetails: catchAsync(async ({ params }) => {
@@ -56,6 +57,26 @@ export const ParcelControllers = {
     return {
       statusCode: parcel ? StatusCodes.OK : StatusCodes.NO_CONTENT,
       message: 'Last parcel fetched successfully',
+      data: parcel,
+    };
+  }),
+
+  /**
+   * Driver deliver parcel
+   */
+  deliverParcel: catchAsync<TDeliverParcel>(async ({ body, user: driver }) => {
+    const parcel = await ParcelServices.deliverParcel({
+      ...body,
+      driver_id: driver.id,
+    });
+
+    if (parcel.user_id) {
+      //? Notify user that their parcel is being delivered
+      SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', parcel);
+    }
+
+    return {
+      message: 'Parcel delivery data submitted successfully',
       data: parcel,
     };
   }),

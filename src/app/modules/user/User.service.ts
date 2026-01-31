@@ -243,7 +243,11 @@ export const UserServices = {
 
   async getPendingUsers({ limit, page, search, role }: TGetPendingUsers) {
     const where: Prisma.UserWhereInput = {
-      is_verification_pending: true,
+      OR: [
+        { is_verification_pending: true },
+        { is_active: false },
+        { is_verified: false },
+      ],
       role,
     };
 

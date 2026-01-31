@@ -101,30 +101,6 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
     }, parcelValidator),
   );
 
-  socket.on(
-    'parcel:deliver',
-    catchAsyncSocket(async payload => {
-      const parcel = await ParcelServices.deliverParcel({
-        ...payload,
-        driver_id: driver.id,
-      });
-
-      if (parcel.user_id) {
-        //? Notify user that their parcel is being delivered
-        SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', {
-          parcel,
-          driver: await prisma.user.findUnique({
-            where: {
-              id: driver.id,
-            },
-            omit: userOmit.DRIVER,
-          }),
-        });
-      }
-
-      return parcel;
-    }, ParcelValidations.deliver_parcel),
-  );
 
   socket.on(
     'parcel:complete_delivery',

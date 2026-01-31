@@ -3,6 +3,7 @@ import { TripServices } from './Trip.service';
 import { calculateTripCost } from './Trip.utils';
 import type { TGetSuperTripDetails } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
+import { ParcelServices } from '../parcel/Parcel.service';
 
 export const TripControllers = {
   getTripDetails: catchAsync(async ({ params }) => {
@@ -49,10 +50,24 @@ export const TripControllers = {
       trip = await TripServices.getLastDriverTrip({ driver_id: user.id });
     }
 
+    let parcel: any = null;
+    if (user.role === 'DRIVER') {
+      parcel = await ParcelServices.getLastDriverParcel({
+        driver_id: user.id,
+      });
+    } else if (user.role === 'USER') {
+      parcel = await ParcelServices.getLastUserParcel({
+        user_id: user.id,
+      });
+    }
+
     return {
-      statusCode: trip ? StatusCodes.OK : StatusCodes.NOT_FOUND,
-      message: 'Last trip fetched successfully',
-      data: trip,
+      statusCode: trip || parcel ? StatusCodes.OK : StatusCodes.NO_CONTENT,
+      message: `Last ${trip ? 'trip' : 'parcel'} fetched successfully`,
+      data: {
+        isParcel: Boolean(parcel && !trip),
+        data: trip ?? parcel,
+      },
     };
   }),
 };

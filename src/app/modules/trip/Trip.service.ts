@@ -96,7 +96,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
     });
 
@@ -211,43 +211,53 @@ export const TripServices = {
   },
 
   async getLastUserTrip({ user_id }: { user_id: string }) {
-    return prisma.trip.findFirst({
+    const trip = await prisma.trip.findFirst({
       where: {
         user_id,
-        status: {
-          notIn: [ETripStatus.COMPLETED, ETripStatus.CANCELLED],
-        },
       },
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
       orderBy: {
         requested_at: 'desc',
       },
     });
+
+    if (
+      trip?.status === ETripStatus.COMPLETED ||
+      trip?.status === ETripStatus.CANCELLED
+    ) {
+      return;
+    }
+
+    return trip;
   },
 
   async getLastDriverTrip({ driver_id }: { driver_id: string }) {
-    const data = await prisma.trip.findFirst({
+    const trip = await prisma.trip.findFirst({
       where: {
         OR: [{ driver_id }, { processing_driver_id: driver_id }],
-        status: {
-          notIn: [ETripStatus.COMPLETED, ETripStatus.CANCELLED],
-        },
       },
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
       orderBy: {
         accepted_at: 'desc',
       },
     });
 
-    return data;
+    if (
+      trip?.status === ETripStatus.COMPLETED ||
+      trip?.status === ETripStatus.CANCELLED
+    ) {
+      return;
+    }
+
+    return trip;
   },
 
   async refreshLocation({ trip_id, ...payload }: TTripRefreshLocation) {
@@ -316,7 +326,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
     });
 
@@ -367,7 +377,7 @@ export const TripServices = {
       include: {
         user: { omit: userOmit.USER },
         driver: { omit: userOmit.DRIVER },
-        reviews: { select: { reviewer_id: true, } }
+        reviews: { select: { reviewer_id: true } },
       },
     });
 
@@ -411,7 +421,11 @@ export const TripServices = {
       //? Mark trip as paid
       const trip = await tx.trip.update({
         where: { id: trip_id },
-        data: { payment_at: new Date(), completed_at: new Date(), status: ETripStatus.COMPLETED },
+        data: {
+          payment_at: new Date(),
+          completed_at: new Date(),
+          status: ETripStatus.COMPLETED,
+        },
         include: {
           user: { omit: userOmit.USER },
           driver: { omit: userOmit.DRIVER },
