@@ -12,6 +12,7 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { tripDispatchQueue } from './Trip.queue';
 import { SocketServices } from '../socket/Socket.service';
+import { processSingleDriverDispatch } from './Trip.job';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -318,23 +319,36 @@ export const TripServices = {
       if (trip.processing_driver_id !== driver_id) {
         throw new Error('You are not assigned to this trip');
       }
-    } else if (trip.driver_id !== driver_id) {
+    }
+    else if (trip.driver_id !== driver_id) {
       throw new Error('You are not assigned to this trip');
     }
 
-    await prisma.trip.update({
-      where: { id: trip_id },
-      data: {
-        processing_driver_id: null,
-        is_processing: false,
-        processing_at: new Date(), //? invoke time
-      },
-      /** no-need */
-      // include: {
-      //   user: { omit: userOmit.USER },
-      //   driver: { omit: userOmit.DRIVER }
-      // }
-    });
+    if (trip.status === ETripStatus.REQUESTED) {
+      const trip = await prisma.trip.update({
+        where: { id: trip_id },
+        data: {
+          processing_driver_id: null,
+          is_processing: false,
+          processing_at: new Date(), //? invoke time
+        },
+        select: {
+          helper: true,
+        }
+      });
+
+      if (!trip.helper) return;
+
+      await processSingleDriverDispatch(trip.helper);
+    } else {
+      await prisma.trip.update({
+        where: { id: trip_id },
+        data: {
+          status: ETripStatus.CANCELLED,
+          cancelled_at: new Date(),
+        },
+      });
+    }
   },
 
   async startTrip({
