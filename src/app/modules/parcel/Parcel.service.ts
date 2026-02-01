@@ -164,7 +164,7 @@ export const ParcelServices = {
   }) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
-      select: {
+      include: {
         user: {
           select: {
             name: true,
@@ -197,9 +197,9 @@ export const ParcelServices = {
     });
 
     //? Notify driver if assigned
-    if (cancelledParcel.driver_id) {
+    if (parcel.driver_id) {
       await NotificationServices.createNotification({
-        user_id: cancelledParcel.driver_id,
+        user_id: parcel.driver_id,
         title: 'Parcel Cancelled',
         message: 'The user has cancelled the parcel delivery.',
         type: 'WARNING',
@@ -211,9 +211,9 @@ export const ParcelServices = {
       await parcelDispatchQueue.removeJobs(`parcel-${parcel.helper.id}`);
     }
 
-    if (cancelledParcel.driver_id) {
-      SocketServices.emitToUser(cancelledParcel.driver_id, 'parcel:cancelled', {
-        parcel: cancelledParcel,
+    if (parcel.driver_id) {
+      SocketServices.emitToUser(parcel.driver_id, 'parcel:cancelled', {
+        parcel: parcel,
       });
     }
 

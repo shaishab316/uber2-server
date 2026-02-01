@@ -169,7 +169,7 @@ export const TripServices = {
   async cancelTrip({ trip_id, user_id }: { trip_id: string; user_id: string }) {
     const trip = await prisma.trip.findUnique({
       where: { id: trip_id },
-      select: {
+      include: {
         user: {
           select: {
             name: true,
@@ -201,26 +201,26 @@ export const TripServices = {
     });
 
     //? Notify driver if assigned
-    if (cancelledTrip.driver_id) {
+    if (trip.driver_id) {
       await NotificationServices.createNotification({
-        user_id: cancelledTrip.driver_id,
+        user_id: trip.driver_id,
         title: 'Trip Cancelled',
         message: 'The user has cancelled the trip.',
         type: 'WARNING',
       });
     }
 
-    if (cancelledTrip.driver_id) {
-      SocketServices.emitToUser(cancelledTrip.driver_id, 'trip:canceled', {
-        trip: cancelledTrip,
+    if (trip.driver_id) {
+      SocketServices.emitToUser(trip.driver_id, 'trip:canceled', {
+        trip: trip,
       });
     }
 
-    if (cancelledTrip.processing_driver_id) {
+    if (trip.processing_driver_id) {
       SocketServices.emitToUser(
-        cancelledTrip.processing_driver_id,
+        trip.processing_driver_id,
         'trip:canceled',
-        { trip: cancelledTrip },
+        { trip: trip },
       );
     }
 
