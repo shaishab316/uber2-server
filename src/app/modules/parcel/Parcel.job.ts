@@ -17,41 +17,61 @@ import { getNearestDriver } from './Parcel.utils';
 async function searchAgainForDrivers(
   parcelId: string,
   pickupLat: number,
-  pickupLng: number
+  pickupLng: number,
 ): Promise<void> {
-  const driver_ids = await getNearestDriver({
-    pickup_lat: pickupLat,
-    pickup_lng: pickupLng,
-  });
+  try {
+    const parcel = await prisma.parcel.findUnique({ where: { id: parcelId } });
 
-  if (driver_ids.length > 0) {
-    const newHelper = await prisma.parcelHelper.create({
-      data: {
-        parcel_id: parcelId,
-        driver_ids,
-        search_at: new Date(), // Retry immediately
-      },
+    //? Only continue searching if parcel is still in REQUESTED status
+    if (!parcel || parcel.status !== 'REQUESTED') {
+      return;
+    }
+
+    const driver_ids = await getNearestDriver({
+      pickup_lat: pickupLat,
+      pickup_lng: pickupLng,
     });
 
-    return await processSingleDriverDispatch(newHelper);
-  } else {
-    setTimeout(async () => {
-      // Check if parcel is still pending before retrying
-      const parcel = await prisma.parcel.findUnique({
-        where: { id: parcelId },
-        select: { status: true },
+    if (driver_ids.length > 0) {
+      const newHelper = await prisma.parcelHelper.create({
+        data: {
+          parcel_id: parcelId,
+          driver_ids,
+          search_at: new Date(), // Retry immediately
+        },
       });
 
-      // Only continue searching if parcel is still in REQUESTED status
-      if (parcel && parcel.status === 'REQUESTED') {
-        await searchAgainForDrivers(parcelId, pickupLat, pickupLng);
-      }
-    }, 10_000); // 10 seconds delay
+      return await processSingleDriverDispatch(newHelper);
+    } else {
+      setTimeout(async () => {
+        // Check if parcel is still pending before retrying
+        const parcel = await prisma.parcel.findUnique({
+          where: { id: parcelId },
+          select: { status: true },
+        });
+
+        // Only continue searching if parcel is still in REQUESTED status
+        if (parcel && parcel.status === 'REQUESTED') {
+          await searchAgainForDrivers(parcelId, pickupLat, pickupLng);
+        }
+      }, 10_000); // 10 seconds delay
+    }
+  } catch (error) {
+    console.error('Error in searchAgainForDrivers:', error);
   }
 }
 
 export async function processSingleDriverDispatch(parcelHelper: TParcelHelper) {
   try {
+    const parcel = await prisma.parcel.findUnique({
+      where: { id: parcelHelper.parcel_id },
+    });
+
+    //? Only proceed if parcel is still in REQUESTED status
+    if (!parcel || parcel.status !== 'REQUESTED') {
+      return;
+    }
+
     /**
      * STEP 1: Extract next driver from the queue (FIFO)
      */
@@ -84,7 +104,7 @@ export async function processSingleDriverDispatch(parcelHelper: TParcelHelper) {
       await searchAgainForDrivers(
         parcel.id,
         parcel.pickup_lat,
-        parcel.pickup_lng
+        parcel.pickup_lng,
       );
 
       return;
@@ -110,6 +130,11 @@ export async function processSingleDriverDispatch(parcelHelper: TParcelHelper) {
         driver: { omit: userOmit.DRIVER },
       },
     });
+
+    if (processingParcel.status !== 'REQUESTED') {
+      //? Only proceed if parcel is still requested
+      return;
+    }
 
     /**
      * STEP 4: Send real-time dispatch request to driver

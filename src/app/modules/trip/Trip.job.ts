@@ -1,4 +1,5 @@
 import {
+  ETripStatus,
   prisma,
   Trip as TTrip,
   TripHelper as TTripHelper,
@@ -18,32 +19,52 @@ async function searchAgainForDrivers(
   tripId: string,
   tripHelperId: string,
   pickupLat: number,
-  pickupLng: number
+  pickupLng: number,
 ): Promise<void> {
-  const driver_ids = await getNearestDriver({
-    pickup_lat: pickupLat,
-    pickup_lng: pickupLng,
-  });
+  try {
+    const trip = await prisma.trip.findUnique({ where: { id: tripId } });
 
-  if (driver_ids.length > 0) {
-    const newHelper = await prisma.tripHelper.create({
-      data: {
-        trip_id: tripId,
-        driver_ids,
-        search_at: new Date(), // Retry immediately
-      },
+    //? Only continue searching if trip is still requested
+    if (!trip || trip.status !== ETripStatus.REQUESTED) {
+      return;
+    }
+
+    const driver_ids = await getNearestDriver({
+      pickup_lat: pickupLat,
+      pickup_lng: pickupLng,
     });
 
-    return await processSingleDriverDispatch(newHelper);
-  } else {
-    setTimeout(async () => {
-      await searchAgainForDrivers(tripId, tripHelperId, pickupLat, pickupLng);
-    }, 10_000);
+    if (driver_ids.length > 0) {
+      const newHelper = await prisma.tripHelper.create({
+        data: {
+          trip_id: tripId,
+          driver_ids,
+          search_at: new Date(), // Retry immediately
+        },
+      });
+
+      return await processSingleDriverDispatch(newHelper);
+    } else {
+      setTimeout(async () => {
+        await searchAgainForDrivers(tripId, tripHelperId, pickupLat, pickupLng);
+      }, 10_000);
+    }
+  } catch (error) {
+    console.error('Error in searchAgainForDrivers:', error);
   }
 }
 
 export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
   try {
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripHelper.trip_id },
+    });
+
+    //? Only proceed if trip is still requested
+    if (!trip || trip.status !== ETripStatus.REQUESTED) {
+      return;
+    }
+
     /**
      * STEP 1: Extract next driver from the queue (FIFO)
      */
@@ -77,7 +98,7 @@ export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         trip.id,
         tripHelper.id,
         trip.pickup_lat,
-        trip.pickup_lng
+        trip.pickup_lng,
       );
 
       return;
@@ -103,6 +124,11 @@ export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
         driver: { omit: userOmit.DRIVER },
       },
     });
+
+    if (processingTrip.status !== ETripStatus.REQUESTED) {
+      // Trip is no longer in requested state, skip dispatch
+      return;
+    }
 
     /**
      * STEP 4: Send real-time dispatch request to driver
