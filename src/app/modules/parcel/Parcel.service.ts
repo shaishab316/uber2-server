@@ -211,8 +211,16 @@ export const ParcelServices = {
       await parcelDispatchQueue.removeJobs(`parcel-${parcel.helper.id}`);
     }
 
+    //? Notify assigned drivers about cancellation
     if (parcel.driver_id) {
       SocketServices.emitToUser(parcel.driver_id, 'parcel:cancelled', {
+        parcel: parcel,
+      });
+    }
+
+    //? Notify processing driver about cancellation
+    if (parcel.processing_driver_id) {
+      SocketServices.emitToUser(parcel.processing_driver_id, 'parcel:cancelled', {
         parcel: parcel,
       });
     }
