@@ -1,6 +1,7 @@
 import catchAsync from '../../middlewares/catchAsync';
 import { TGetEarningsArgs } from './Driver.interface';
 import { DriverServices } from './Driver.service';
+import { User as TUser } from '@/utils/db';
 
 export const DriverControllers = {
   superGetPendingDrivers: catchAsync(async ({ query }) => {
@@ -55,8 +56,8 @@ export const DriverControllers = {
     };
   }),
 
-  getEarnings: catchAsync(async ({ query }: { query: TGetEarningsArgs }) => {
-    const { meta, data } = await DriverServices[`${query.tab}Earnings`](query);
+  getEarnings: catchAsync(async ({ query, user }: { query: TGetEarningsArgs, user: TUser }) => {
+    const { meta, data } = await DriverServices[`${query.tab}Earnings`]({ ...query, driver_id: user.id });
 
     return {
       message: 'Driver earnings retrieved successfully!',
