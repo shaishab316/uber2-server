@@ -217,11 +217,9 @@ export const TripServices = {
     }
 
     if (trip.processing_driver_id) {
-      SocketServices.emitToUser(
-        trip.processing_driver_id,
-        'trip:canceled',
-        { trip: trip },
-      );
+      SocketServices.emitToUser(trip.processing_driver_id, 'trip:canceled', {
+        trip: trip,
+      });
     }
 
     return cancelledTrip;

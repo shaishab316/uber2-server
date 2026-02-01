@@ -9,6 +9,38 @@ import ms from 'ms';
 import { errorLogger } from '@/utils/logger';
 import { NotificationServices } from '../notification/Notification.service';
 import { userOmit } from '../user/User.constant';
+import { getNearestDriver } from '../parcel/Parcel.utils';
+
+/**
+ * Recursively searches for drivers when none are available
+ */
+async function searchAgainForDrivers(
+  tripId: string,
+  tripHelperId: string,
+  pickupLat: number,
+  pickupLng: number
+): Promise<void> {
+  const driver_ids = await getNearestDriver({
+    pickup_lat: pickupLat,
+    pickup_lng: pickupLng,
+  });
+
+  if (driver_ids.length > 0) {
+    const newHelper = await prisma.tripHelper.create({
+      data: {
+        trip_id: tripId,
+        driver_ids,
+        search_at: new Date(), // Retry immediately
+      },
+    });
+
+    return await processSingleDriverDispatch(newHelper);
+  } else {
+    setTimeout(async () => {
+      await searchAgainForDrivers(tripId, tripHelperId, pickupLat, pickupLng);
+    }, 10_000);
+  }
+}
 
 export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
   try {
@@ -24,10 +56,12 @@ export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
       //? Get trip details to notify user
       const trip = await prisma.trip.findUnique({
         where: { id: tripHelper.trip_id },
-        select: { user_id: true },
+        select: { id: true, user_id: true, pickup_lat: true, pickup_lng: true },
       });
 
-      if (trip && trip.user_id) {
+      if (!trip) return;
+
+      if (trip.user_id) {
         //? Notify user that no drivers were found
         await NotificationServices.createNotification({
           user_id: trip.user_id,
@@ -37,6 +71,14 @@ export async function processSingleDriverDispatch(tripHelper: TTripHelper) {
           type: 'WARNING',
         });
       }
+
+      // Start searching for drivers again
+      await searchAgainForDrivers(
+        trip.id,
+        tripHelper.id,
+        trip.pickup_lat,
+        trip.pickup_lng
+      );
 
       return;
     }

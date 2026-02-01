@@ -1,28 +1,56 @@
-/* eslint-disable no-console */
 import {
-  ParcelHelper as TParcelHelper,
-  Parcel as TParcel,
   prisma,
+  Parcel as TParcel,
+  ParcelHelper as TParcelHelper,
   User as TUser,
 } from '@/utils/db';
 import { SocketServices } from '../socket/Socket.service';
 import ms from 'ms';
+import { errorLogger } from '@/utils/logger';
 import { NotificationServices } from '../notification/Notification.service';
+import { userOmit } from '../user/User.constant';
+import { getNearestDriver } from './Parcel.utils';
 
 /**
- * Processes a single driver dispatch for a parcel helper
- *
- * Flow:
- * 1. Takes the first available driver from the queue
- * 2. Marks parcel as processing and driver as offline
- * 3. Sends real-time dispatch request via WebSocket
- * 4. Either schedules next driver or cleans up completed helper
- *
- * @param parcelHelper - The helper containing driver queue and parcel reference
+ * Recursively searches for drivers when none are available
  */
-export async function processSingleDriverDispatch(
-  parcelHelper: TParcelHelper,
+async function searchAgainForDrivers(
+  parcelId: string,
+  pickupLat: number,
+  pickupLng: number
 ): Promise<void> {
+  const driver_ids = await getNearestDriver({
+    pickup_lat: pickupLat,
+    pickup_lng: pickupLng,
+  });
+
+  if (driver_ids.length > 0) {
+    const newHelper = await prisma.parcelHelper.create({
+      data: {
+        parcel_id: parcelId,
+        driver_ids,
+        search_at: new Date(), // Retry immediately
+      },
+    });
+
+    return await processSingleDriverDispatch(newHelper);
+  } else {
+    setTimeout(async () => {
+      // Check if parcel is still pending before retrying
+      const parcel = await prisma.parcel.findUnique({
+        where: { id: parcelId },
+        select: { status: true },
+      });
+
+      // Only continue searching if parcel is still in REQUESTED status
+      if (parcel && parcel.status === 'REQUESTED') {
+        await searchAgainForDrivers(parcelId, pickupLat, pickupLng);
+      }
+    }, 10_000); // 10 seconds delay
+  }
+}
+
+export async function processSingleDriverDispatch(parcelHelper: TParcelHelper) {
   try {
     /**
      * STEP 1: Extract next driver from the queue (FIFO)
@@ -36,10 +64,12 @@ export async function processSingleDriverDispatch(
       //? Get parcel details to notify user
       const parcel = await prisma.parcel.findUnique({
         where: { id: parcelHelper.parcel_id },
-        select: { user_id: true },
+        select: { id: true, user_id: true, pickup_lat: true, pickup_lng: true },
       });
 
-      if (parcel && parcel.user_id) {
+      if (!parcel) return;
+
+      if (parcel.user_id) {
         //? Notify user that no drivers were found
         await NotificationServices.createNotification({
           user_id: parcel.user_id,
@@ -50,6 +80,13 @@ export async function processSingleDriverDispatch(
         });
       }
 
+      // Start searching for drivers again
+      await searchAgainForDrivers(
+        parcel.id,
+        parcel.pickup_lat,
+        parcel.pickup_lng
+      );
+
       return;
     }
 
@@ -59,9 +96,7 @@ export async function processSingleDriverDispatch(
     const remainingDriverQueue = parcelHelper.driver_ids.slice(1);
 
     /**
-     * STEP 3: Update parcel status to mark as processing
-     * - Prevents concurrent processing of same parcel
-     * - Tracks which driver is currently being notified
+     * STEP 3: Mark parcel as processing and driver as offline
      */
     const processingParcel = await prisma.parcel.update({
       where: { id: parcelHelper.parcel_id },
@@ -71,30 +106,21 @@ export async function processSingleDriverDispatch(
         processing_at: new Date(),
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            trip_received_count: true,
-            avatar: true,
-            rating: true,
-            rating_count: true,
-          },
-        },
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
     /**
      * STEP 4: Send real-time dispatch request to driver
      */
-    sendDriverDispatchNotification(
-      processingParcel as TParcel & { user: TUser },
-    );
+    sendDriverDispatchNotification(processingParcel as any);
 
-    //? Notify driver about new parcel delivery request
+    //? Notify driver about new parcel request
     await NotificationServices.createNotification({
       user_id: nextDriverId,
-      title: 'New Parcel Delivery Request',
-      message: 'You have a new parcel delivery request nearby.',
+      title: 'New Parcel Request',
+      message: 'You have a new parcel delivery request nearby. Check it out!',
       type: 'INFO',
     });
 
@@ -123,11 +149,11 @@ export async function processSingleDriverDispatch(
         },
       });
     } else {
-      // No more drivers in queue - cleanup completed helper
+      // No drivers remaining in queue - cleanup completed helper
       await prisma.parcelHelper.delete({ where: { id: parcelHelper.id } });
     }
   } catch (error) {
-    console.error(`Error processing parcel helper ${parcelHelper.id}:`, error);
+    errorLogger.error(`Error processing parcel: ${parcelHelper.id}`, error);
   }
 }
 

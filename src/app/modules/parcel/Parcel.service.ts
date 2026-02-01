@@ -220,9 +220,13 @@ export const ParcelServices = {
 
     //? Notify processing driver about cancellation
     if (parcel.processing_driver_id) {
-      SocketServices.emitToUser(parcel.processing_driver_id, 'parcel:cancelled', {
-        parcel: parcel,
-      });
+      SocketServices.emitToUser(
+        parcel.processing_driver_id,
+        'parcel:cancelled',
+        {
+          parcel: parcel,
+        },
+      );
     }
 
     return cancelledParcel;
