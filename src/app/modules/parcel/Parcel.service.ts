@@ -16,7 +16,6 @@ import {
 } from './Parcel.utils';
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
-import { parcelDispatchQueue } from './Parcel.queue';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Parcel.job';
 
@@ -59,17 +58,7 @@ export const ParcelServices = {
     });
 
     if (parcel.helper) {
-      //? enqueue parcel for dispatch processing
-      await parcelDispatchQueue.add(
-        {
-          helper_id: parcel.helper.id,
-        },
-        {
-          delay: 0,
-          jobId: `parcel-${parcel.helper.id}`, // Prevent duplicate jobs
-          removeOnComplete: true,
-        },
-      );
+      await processSingleDriverDispatch(parcel.helper);
     }
 
     return parcel;
@@ -204,11 +193,6 @@ export const ParcelServices = {
         message: 'The user has cancelled the parcel delivery.',
         type: 'WARNING',
       });
-    }
-
-    if (parcel?.helper) {
-      //? Remove any pending dispatch jobs for this parcel
-      await parcelDispatchQueue.removeJobs(`parcel-${parcel.helper.id}`);
     }
 
     //? Notify assigned drivers about cancellation

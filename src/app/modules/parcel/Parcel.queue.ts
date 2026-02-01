@@ -1,39 +1,39 @@
-import Queue from 'bull';
-import config from '@/config';
-import { prisma } from '@/utils/db';
-import { processSingleDriverDispatch } from './Parcel.job';
-// import { errorLogger } from '@/utils/logger';
+// import Queue from 'bull';
+// import config from '@/config';
+// import { prisma } from '@/utils/db';
+// import { processSingleDriverDispatch } from './Parcel.job';
+// // import { errorLogger } from '@/utils/logger';
 
-export type TParcelDispatchQueueData = {
-  helper_id: string;
-};
+// export type TParcelDispatchQueueData = {
+//   helper_id: string;
+// };
 
-export const parcelDispatchQueue = new Queue<TParcelDispatchQueueData>(
-  `${config.server.name}:parcel-dispatch`,
-  config.url.redis,
-);
+// export const parcelDispatchQueue = new Queue<TParcelDispatchQueueData>(
+//   `${config.server.name}:parcel-dispatch`,
+//   config.url.redis,
+// );
 
-parcelDispatchQueue.process(async ({ data }) => {
-  const { helper_id } = data;
+// parcelDispatchQueue.process(async ({ data }) => {
+//   const { helper_id } = data;
 
-  const helper = await prisma.parcelHelper.findUnique({
-    where: { id: helper_id },
-    include: {
-      parcel: {
-        select: {
-          is_processing: true,
-        },
-      },
-    },
-  });
+//   const helper = await prisma.parcelHelper.findUnique({
+//     where: { id: helper_id },
+//     include: {
+//       parcel: {
+//         select: {
+//           is_processing: true,
+//         },
+//       },
+//     },
+//   });
 
-  if (!helper || helper.parcel.is_processing) {
-    // Invalid helper or parcel already processing
-    return;
-  }
+//   if (!helper || helper.parcel.is_processing) {
+//     // Invalid helper or parcel already processing
+//     return;
+//   }
 
-  await processSingleDriverDispatch(helper);
-});
+//   await processSingleDriverDispatch(helper);
+// });
 
 // parcelDispatchQueue.on('completed', async job => {
 //   await job.remove(); // Force remove to free memory

@@ -10,7 +10,6 @@ import { calculateTripCost, generateTripSlug } from './Trip.utils';
 import { getNearestDriver } from '../parcel/Parcel.utils';
 import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
-import { tripDispatchQueue } from './Trip.queue';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Trip.job';
 
@@ -53,7 +52,7 @@ export const TripServices = {
     });
 
     if (trip.helper) {
-      await tripDispatchQueue.add({ helper_id: trip.helper.id });
+      await processSingleDriverDispatch(trip.helper);
     }
 
     return trip;
