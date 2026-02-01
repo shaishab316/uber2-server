@@ -319,8 +319,7 @@ export const TripServices = {
       if (trip.processing_driver_id !== driver_id) {
         throw new Error('You are not assigned to this trip');
       }
-    }
-    else if (trip.driver_id !== driver_id) {
+    } else if (trip.driver_id !== driver_id) {
       throw new Error('You are not assigned to this trip');
     }
 
@@ -334,11 +333,12 @@ export const TripServices = {
         },
         select: {
           helper: true,
-        }
+        },
       });
 
       if (!trip.helper) return;
 
+      //? Proceed to next driver in queue
       await processSingleDriverDispatch(trip.helper);
     } else {
       await prisma.trip.update({

@@ -18,6 +18,7 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { parcelDispatchQueue } from './Parcel.queue';
 import { SocketServices } from '../socket/Socket.service';
+import { processSingleDriverDispatch } from './Parcel.job';
 
 export const ParcelServices = {
   async getParcelDetails(parcel_id: string) {
@@ -328,14 +329,32 @@ export const ParcelServices = {
       throw new Error('You are not assigned to this parcel');
     }
 
-    await prisma.parcel.update({
-      where: { id: parcel_id },
-      data: {
-        processing_driver_id: null,
-        is_processing: false,
-        processing_at: new Date(), //? invoke time
-      },
-    });
+    if (parcel.status === EParcelStatus.REQUESTED) {
+      const parcel = await prisma.parcel.update({
+        where: { id: parcel_id },
+        data: {
+          processing_driver_id: null,
+          is_processing: false,
+          processing_at: new Date(), //? invoke time
+        },
+        select: {
+          helper: true,
+        },
+      });
+
+      if (!parcel.helper) return;
+
+      //? re-enqueue parcel for dispatch processing
+      await processSingleDriverDispatch(parcel.helper);
+    } else {
+      await prisma.parcel.update({
+        where: { id: parcel_id },
+        data: {
+          status: EParcelStatus.CANCELLED,
+          cancelled_at: new Date(),
+        },
+      });
+    }
   },
 
   //? New method to start parcel
