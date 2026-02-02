@@ -270,10 +270,7 @@ export const ParcelServices = {
   async getLastDriverParcel({ driver_id }: { driver_id: string }) {
     const parcel = await prisma.parcel.findFirst({
       where: {
-        driver_id,
-        status: {
-          notIn: [EParcelStatus.COMPLETED, EParcelStatus.CANCELLED],
-        },
+        OR: [{ driver_id }, { processing_driver_id: driver_id }],
       },
       include: {
         user: { omit: userOmit.USER },
