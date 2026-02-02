@@ -463,6 +463,16 @@ export const ParcelServices = {
         },
       });
 
+      //? add balance to driver's wallet
+      await tx.wallet.update({
+        where: { id: parcel.driver_id! },
+        data: {
+          balance: {
+            increment: parcel.total_cost,
+          },
+        },
+      });
+
       //? Check for sufficient balance
       if (wallet.balance < 0) {
         throw new Error('Insufficient balance in wallet');

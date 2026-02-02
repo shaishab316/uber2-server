@@ -488,6 +488,16 @@ export const TripServices = {
         },
       });
 
+      //? add balance to driver's wallet
+      await tx.wallet.update({
+        where: { id: trip.driver_id! },
+        data: {
+          balance: {
+            increment: trip.total_cost,
+          },
+        },
+      });
+
       //? Check for sufficient balance
       if (wallet.balance < 0) {
         throw new Error('Insufficient balance in wallet');
