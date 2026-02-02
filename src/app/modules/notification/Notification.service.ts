@@ -22,8 +22,9 @@ export const NotificationServices = {
     page,
     is_read,
     search,
+    user_id,
   }: TGetAllNotificationsArgs) {
-    const where: Prisma.NotificationWhereInput = {};
+    const where: Prisma.NotificationWhereInput = { user_id };
 
     if (search) {
       where.OR = notificationSearchableFields.map(field => ({

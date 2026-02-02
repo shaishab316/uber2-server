@@ -5,4 +5,4 @@ import { NotificationValidations } from './Notification.validation';
 export type TGetAllNotificationsArgs = z.infer<
   typeof NotificationValidations.getAllNotifications
 >['query'] &
-  TList;
+  TList & { user_id: string };
