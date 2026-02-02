@@ -2,7 +2,7 @@ import { prisma, type Prisma } from '@/utils/db';
 import { TPagination } from '@/utils/server/serveResponse';
 import { notificationSearchableFields } from './Notification.constants';
 import { TGetAllNotificationsArgs } from './Notification.interface';
-import pushQueue from '@/utils/mq/pushQueue';
+import {sendPushNotification} from './Notification.utils';
 
 export const NotificationServices = {
   async createNotification(payload: Prisma.NotificationCreateArgs['data']) {
@@ -16,7 +16,7 @@ export const NotificationServices = {
     }
 
     if (user.onesignal_id) {
-      await pushQueue.add({
+      await sendPushNotification({
         message: payload.message,
         onesignal_id: user.onesignal_id,
       });
