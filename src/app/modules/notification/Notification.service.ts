@@ -6,10 +6,21 @@ import pushQueue from '@/utils/mq/pushQueue';
 
 export const NotificationServices = {
   async createNotification(payload: Prisma.NotificationCreateArgs['data']) {
-    await pushQueue.add({
-      message: payload.message,
-      onesignal_ids: [payload.user_id],
+    const user = await prisma.user.findUnique({
+      where: { id: payload.user_id },
+      select: { onesignal_id: true },
     });
+
+    if (!user) {
+      return; //? user not found
+    }
+
+    if (user.onesignal_id) {
+      await pushQueue.add({
+        message: payload.message,
+        onesignal_id: user.onesignal_id,
+      });
+    }
 
     //? create a new notification
     return prisma.notification.create({
