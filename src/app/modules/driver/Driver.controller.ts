@@ -56,15 +56,20 @@ export const DriverControllers = {
     };
   }),
 
-  getEarnings: catchAsync(async ({ query, user }: { query: TGetEarningsArgs, user: TUser }) => {
-    const { meta, data } = await DriverServices[`${query.tab}Earnings`]({ ...query, driver_id: user.id });
+  getEarnings: catchAsync(
+    async ({ query, user }: { query: TGetEarningsArgs; user: TUser }) => {
+      const { meta, data } = await DriverServices[`${query.tab}Earnings`]({
+        ...query,
+        driver_id: user.id,
+      });
 
-    return {
-      message: 'Driver earnings retrieved successfully!',
-      meta,
-      data,
-    };
-  }),
+      return {
+        message: 'Driver earnings retrieved successfully!',
+        meta,
+        data,
+      };
+    },
+  ),
 
   home: catchAsync(async ({ user: driver }) => {
     const data = await DriverServices.home({ driver_id: driver.id });

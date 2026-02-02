@@ -1,5 +1,6 @@
 import axios from 'axios';
 import config from '@/config';
+import { prisma } from '@/utils/db';
 
 const ONE_SIGNAL_API_URL = 'https://onesignal.com/api/v1';
 const headers = {
@@ -20,11 +21,29 @@ const oneSignalClient = axios.create({
  */
 export const sendPushNotification = async ({
   message,
-  onesignal_ids,
+  onesignal_ids: user_ids,
 }: TSendPushNotificationPayload) => {
+  if (!user_ids?.length) {
+    return;
+  }
+
+  const include_player_ids = await prisma.user
+    .findMany({
+      where: {
+        id: { in: user_ids },
+        onesignal_id: { not: null },
+      },
+      select: { onesignal_id: true },
+    })
+    .then(users => users.map(user => user.onesignal_id));
+
+  if (!include_player_ids.length) {
+    return;
+  }
+
   const payload = {
     app_id: config.onesignal.onesignal_app_id,
-    include_player_ids: onesignal_ids,
+    include_player_ids,
     contents: { en: message },
   };
 
