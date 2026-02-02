@@ -446,7 +446,11 @@ export const ParcelServices = {
       //? Mark parcel as paid and completed
       const parcel = await tx.parcel.update({
         where: { id: parcel_id },
-        data: { payment_at: new Date(), status: EParcelStatus.COMPLETED },
+        data: {
+          payment_at: new Date(),
+          completed_at: new Date(),
+          status: EParcelStatus.COMPLETED,
+        },
         include: {
           user: { omit: userOmit.USER },
           driver: { omit: userOmit.DRIVER },
