@@ -3,10 +3,11 @@ import { prisma } from '@/utils/db';
 import ServerError from '@/errors/ServerError';
 import { TTopup, TWithdrawArgs } from './Payment.interface';
 import { UserServices } from '../user/User.service';
-import withdrawQueue from '@/utils/mq/withdrawQueue';
 import config from '@/config';
 import { stripe } from './Payment.utils';
 import { NotificationServices } from '../notification/Notification.service';
+import chalk from 'chalk';
+import ora from 'ora';
 
 /**
  * Payment Services
@@ -47,19 +48,140 @@ export const PaymentServices = {
       await UserServices.stripeAccountConnect({ user_id: user.id });
     }
 
-    await withdrawQueue.add({ amount, user });
+    const spinner = ora({
+      color: 'yellow',
+      text: `Withdrawing ${amount} from ${user.email}`,
+    }).start();
 
-    //? Notify user about withdrawal request
-    await NotificationServices.createNotification({
-      user_id: user.id,
-      title: 'Withdrawal Request Submitted',
-      message: `Your withdrawal request of $${amount} is being processed.`,
-      type: 'INFO',
-    });
+    try {
+      const result = await prisma.$transaction(async tx => {
+        spinner.text = `Checking Stripe account and balance for ${user.email}`;
 
-    return {
-      available_balance: wallet.balance - amount,
-    };
+        const userData = await tx.user.findUnique({
+          where: { id: user.id },
+          select: {
+            wallet: {
+              select: {
+                balance: true,
+              },
+            },
+            stripe_account_id: true,
+          },
+        });
+
+        if (!userData?.stripe_account_id) {
+          throw new ServerError(
+            StatusCodes.BAD_REQUEST,
+            'Stripe account not connected, please contact support.',
+          );
+        }
+
+        // Double-check balance with fresh data
+        if (userData.wallet!.balance < amount) {
+          await NotificationServices.createNotification({
+            user_id: user.id,
+            title: 'Withdrawal Failed',
+            message: `Insufficient balance, current balance: ${userData.wallet!.balance}, required balance: ${amount} ${config.payment.currency}`,
+            type: 'ERROR',
+          });
+
+          return Promise.reject(
+            new ServerError(StatusCodes.BAD_REQUEST, 'Insufficient balance'),
+          );
+        }
+
+        // Notify user about withdrawal request (at the start)
+        await NotificationServices.createNotification({
+          user_id: user.id,
+          title: 'Withdrawal Request Submitted',
+          message: `Your withdrawal request of $${amount} is being processed.`,
+          type: 'INFO',
+        });
+
+        // Transfer to connected account
+        spinner.text = `Transferring ${amount} ${config.payment.currency} to ${user.email}`;
+
+        await stripe.transfers.create({
+          amount: amount * 100,
+          currency: config.payment.currency,
+          destination: userData.stripe_account_id,
+          description: `Transfer to ${user.email}`,
+        });
+
+        // Retrieve balance
+        spinner.text = `Retrieving balance for ${user.email}`;
+
+        const balance = (
+          await stripe.balance.retrieve({
+            stripeAccount: userData.stripe_account_id,
+          })
+        ).available.find(b => b.currency === config.payment.currency)?.amount;
+
+        if (!balance) {
+          throw new Error('Transfer failed - balance not available');
+        }
+
+        // Create payout
+        spinner.text = `Payout ${balance / 100} ${config.payment.currency} to ${user.email}`;
+
+        await stripe.payouts.create(
+          {
+            amount: balance,
+            currency: config.payment.currency,
+          },
+          {
+            stripeAccount: userData.stripe_account_id,
+          },
+        );
+
+        // Update wallet balance
+        spinner.text = `Updating balance for ${user.email}`;
+
+        const updatedWallet = await tx.wallet.update({
+          where: { id: user.id },
+          data: {
+            balance: {
+              decrement: amount,
+            },
+          },
+        });
+
+        return updatedWallet;
+      });
+
+      // Notify user about successful withdrawal
+      await NotificationServices.createNotification({
+        user_id: user.id,
+        title: 'Withdrawal Completed',
+        message: `$${amount} has been successfully withdrawn to your account.`,
+        type: 'INFO',
+      });
+
+      spinner.succeed(
+        chalk.green(
+          `${amount} ${config.payment.currency} withdrawn successfully to ${user.email}`,
+        ),
+      );
+
+      return {
+        available_balance: result.balance,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        // Notify user about withdrawal failure
+        await NotificationServices.createNotification({
+          user_id: user.id,
+          title: 'Withdrawal Failed',
+          message: `Your withdrawal request of $${amount} failed. ${error.message}`,
+          type: 'ERROR',
+        });
+
+        spinner.fail(chalk.red(`Withdrawal failed: ${error.message}`));
+      }
+
+      // Re-throw the error so the caller knows it failed
+      throw error;
+    }
   },
 
   async topup({ amount, user_id }: TTopup) {
