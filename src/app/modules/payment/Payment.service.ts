@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { prisma } from '@/utils/db';
 import ServerError from '@/errors/ServerError';
 import { TTopup, TWithdrawArgs } from './Payment.interface';
-import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
+import { UserServices } from '../user/User.service';
 import withdrawQueue from '@/utils/mq/withdrawQueue';
 import config from '@/config';
 import { stripe } from './Payment.utils';
@@ -44,12 +44,7 @@ export const PaymentServices = {
     }
 
     if (!user.stripe_account_id) {
-      await stripeAccountConnectQueue.add({ user_id: user.id });
-
-      throw new ServerError(
-        StatusCodes.ACCEPTED,
-        'Stripe account connecting. Try again later!',
-      );
+      await UserServices.stripeAccountConnect({ user_id: user.id });
     }
 
     await withdrawQueue.add({ amount, user });

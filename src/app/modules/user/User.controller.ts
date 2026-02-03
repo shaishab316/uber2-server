@@ -6,7 +6,6 @@ import { prisma, User as TUser } from '@/utils/db';
 import { enum_decode } from '@/utils/transform/enum';
 import { capitalize } from '@/utils/transform/capitalize';
 import { userSelfOmit } from './User.constant';
-import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 import ServerError from '@/errors/ServerError';
 import { stripe } from '../payment/Payment.utils';
 import config from '@/config';
@@ -147,18 +146,20 @@ export const UserControllers = {
    */
   connectStripeAccount: catchAsync(async ({ user }) => {
     if (!user.stripe_account_id) {
-      await stripeAccountConnectQueue.add({ user_id: user.id });
-
-      return {
-        statusCode: StatusCodes.ACCEPTED,
-        message: 'Stripe account connecting. Try again later!',
-      };
+      await UserServices.stripeAccountConnect({ user_id: user.id });
     }
 
     if (user.is_stripe_connected) {
       throw new ServerError(
         StatusCodes.BAD_REQUEST,
         'Stripe account already connected',
+      );
+    }
+
+    if (!user.stripe_account_id) {
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Your Stripe account is not set up yet, please contact support.',
       );
     }
 

@@ -20,7 +20,9 @@ import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
 import { hashPassword } from '../auth/Auth.utils';
 import { deleteFiles } from '@/app/middlewares/capture';
-import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
+import { stripe } from '../payment/Payment.utils';
+import ora from 'ora';
+import chalk from 'chalk';
 import { NotificationServices } from '../notification/Notification.service';
 import { generateOTP } from '@/utils/crypto/otp';
 import { sendEmail } from '@/utils/sendMail';
@@ -75,9 +77,7 @@ export const UserServices = {
       data: { id: user.id },
     });
 
-    await stripeAccountConnectQueue.add({
-      user_id: user.id,
-    });
+    await this.stripeAccountConnect({ user_id: user.id });
 
     try {
       const otp = generateOTP({
@@ -337,5 +337,46 @@ export const UserServices = {
         onesignal_id,
       },
     });
+  },
+
+  async stripeAccountConnect({ user_id }: { user_id: string }) {
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+      select: {
+        stripe_account_id: true,
+        email: true,
+      },
+    });
+
+    if (user && !user.stripe_account_id) {
+      const spinner = ora({
+        color: 'yellow',
+        text: `Checking Stripe account for ${user.email}`,
+      }).start();
+
+      try {
+        const stripeAccount = await stripe.accounts.create({
+          type: 'express',
+          email: user.email ?? undefined,
+          capabilities: {
+            transfers: { requested: true },
+          },
+        });
+
+        await prisma.user.update({
+          where: { id: user_id },
+          data: { stripe_account_id: stripeAccount.id },
+        });
+
+        spinner.succeed(`Stripe account created for ${user.email}`);
+      } catch (error) {
+        spinner.fail(`Failed creating Stripe account for ${user.email}`);
+
+        errorLogger.error(
+          chalk.red(`Error creating Stripe account for ${user.email}`),
+          error,
+        );
+      }
+    }
   },
 };
