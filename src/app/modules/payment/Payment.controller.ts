@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { TStripWebhookEvent } from './Payment.interface';
 import { prisma } from '@/utils/db';
 import { PaymentServices } from './Payment.service';
+import { NotificationServices } from '../notification/Notification.service';
 
 /**
  * Payment controllers
@@ -40,6 +41,17 @@ export const PaymentControllers = {
       where: { id: query.user_id as string },
       data: { is_stripe_connected: true },
     });
+
+    try {
+      await NotificationServices.createNotification({
+        user_id: query.user_id as string,
+        title: 'Stripe Connected',
+        message: 'Your Stripe account has been connected successfully.',
+        type: 'INFO',
+      })
+    } catch (error) {
+      console.error('Failed to send notification for Stripe connect:', error);
+    }
 
     return { message: 'Stripe connected successfully' };
   }),

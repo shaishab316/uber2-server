@@ -25,7 +25,7 @@
     "dev-f5": "npm run type-check && set DEBUG=socket.io* && tsx --watch --inspect src/server.ts",
     "seed-env": "tsx src/config",
     "seed-admin": "tsx scripts/seedAdmin.ts",
-    "seed-stripe": "tsx scripts/seedStripe.ts",
+    "seed-stripe": "tsx scripts/stripe.ts",
     "lint": "eslint src --ignore-path .gitignore --ext .ts",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
     "type-check": "tsc --noEmit",
