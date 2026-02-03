@@ -2,7 +2,7 @@ import { prisma, type Prisma } from '@/utils/db';
 import { TPagination } from '@/utils/server/serveResponse';
 import { notificationSearchableFields } from './Notification.constants';
 import { TGetAllNotificationsArgs } from './Notification.interface';
-import {sendPushNotification} from './Notification.utils';
+import { sendPushNotification } from './Notification.utils';
 
 export const NotificationServices = {
   async createNotification(payload: Prisma.NotificationCreateArgs['data']) {

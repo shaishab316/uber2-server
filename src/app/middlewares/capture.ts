@@ -210,44 +210,44 @@ const storage: StorageEngine = multer.diskStorage({
  */
 const fileFilter =
   (fields: UploadFields) =>
-    (_: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-      const fieldConfig = fields[file.fieldname];
+  (_: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    const fieldConfig = fields[file.fieldname];
 
-      if (!fieldConfig) {
-        return cb(
-          new ServerError(
-            StatusCodes.BAD_REQUEST,
-            `Unexpected field: ${file.fieldname}`,
-          ),
-        );
-      }
-
-      const { fileType } = fieldConfig;
-      const validator = fileValidators[fileType]?.validator;
-
-      if (!validator) {
-        return cb(
-          new ServerError(
-            StatusCodes.INTERNAL_SERVER_ERROR,
-            `Invalid file type configuration: ${fileType}`,
-          ),
-        );
-      }
-
-      const mime = file.mimetype.toLowerCase();
-
-      //? if mime is application/octet-stream, it's a binary file, so it's valid, but we need to check the file extension
-      if (mime === 'application/octet-stream' || validator.test(mime)) {
-        return cb(null, true);
-      }
-
-      cb(
+    if (!fieldConfig) {
+      return cb(
         new ServerError(
           StatusCodes.BAD_REQUEST,
-          `File '${file.originalname}' is not a valid ${fileType} (got ${mime})`,
+          `Unexpected field: ${file.fieldname}`,
         ),
       );
-    };
+    }
+
+    const { fileType } = fieldConfig;
+    const validator = fileValidators[fileType]?.validator;
+
+    if (!validator) {
+      return cb(
+        new ServerError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          `Invalid file type configuration: ${fileType}`,
+        ),
+      );
+    }
+
+    const mime = file.mimetype.toLowerCase();
+
+    //? if mime is application/octet-stream, it's a binary file, so it's valid, but we need to check the file extension
+    if (mime === 'application/octet-stream' || validator.test(mime)) {
+      return cb(null, true);
+    }
+
+    cb(
+      new ServerError(
+        StatusCodes.BAD_REQUEST,
+        `File '${file.originalname}' is not a valid ${fileType} (got ${mime})`,
+      ),
+    );
+  };
 
 /**
  * Create multer upload middleware

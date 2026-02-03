@@ -22,7 +22,7 @@ import { Response } from 'express';
 import { generateOTP, validateOTP } from '@/utils/crypto/otp';
 import { userSelfOmit } from '../user/User.constant';
 import { emailTemplate } from '@/templates';
-import emailQueue from '@/utils/mq/emailQueue';
+import { sendEmail } from '@/utils/sendMail';
 import { NotificationServices } from '../notification/Notification.service';
 
 export const AuthServices = {
@@ -62,7 +62,7 @@ export const AuthServices = {
 
       try {
         if (email)
-          await emailQueue.add({
+          await sendEmail({
             to: email,
             subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
             html: await emailTemplate({
@@ -159,7 +159,7 @@ export const AuthServices = {
 
     try {
       if (email)
-        await emailQueue.add({
+        await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
           html: await emailTemplate({
@@ -190,7 +190,7 @@ export const AuthServices = {
 
     try {
       if (email)
-        await emailQueue.add({
+        await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Password Reset OTP is ⚡ ${otp} ⚡.`,
           html: await emailTemplate({

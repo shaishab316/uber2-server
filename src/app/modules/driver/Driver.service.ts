@@ -99,8 +99,7 @@ export const DriverServices = {
     });
 
     // Clean up old files
-    if (payload?.avatar && driver?.avatar)
-      await deleteFiles([driver.avatar]);
+    if (payload?.avatar && driver?.avatar) await deleteFiles([driver.avatar]);
     if (payload?.nid_photos && driver?.nid_photos)
       await deleteFiles(driver.nid_photos);
 
@@ -122,8 +121,7 @@ export const DriverServices = {
 
     if (driver?.vehicle_registration_photos)
       await deleteFiles(driver.vehicle_registration_photos);
-    if (driver?.vehicle_photos)
-      await deleteFiles(driver.vehicle_photos);
+    if (driver?.vehicle_photos) await deleteFiles(driver.vehicle_photos);
 
     return prisma.user.update({
       where: { id: driver_id },

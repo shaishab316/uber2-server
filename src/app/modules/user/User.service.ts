@@ -23,7 +23,7 @@ import { deleteFiles } from '@/app/middlewares/capture';
 import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 import { NotificationServices } from '../notification/Notification.service';
 import { generateOTP } from '@/utils/crypto/otp';
-import emailQueue from '@/utils/mq/emailQueue';
+import { sendEmail } from '@/utils/sendMail';
 import config from '@/config';
 import { emailTemplate } from '@/templates';
 import { errorLogger } from '@/utils/logger';
@@ -86,7 +86,7 @@ export const UserServices = {
       });
 
       if (email)
-        await emailQueue.add({
+        await sendEmail({
           to: email,
           subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
           html: emailTemplate({

@@ -45,8 +45,6 @@ if (mock_mail) {
  * Send email using nodemailer
  *
  * @param {TSendMail} { to, subject, html }
- *
- * @deprecated use emailQueue
  */
 export const sendEmail = async ({
   to,
