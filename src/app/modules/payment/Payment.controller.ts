@@ -48,7 +48,7 @@ export const PaymentControllers = {
         title: 'Stripe Connected',
         message: 'Your Stripe account has been connected successfully.',
         type: 'INFO',
-      })
+      });
     } catch (error) {
       console.error('Failed to send notification for Stripe connect:', error);
     }

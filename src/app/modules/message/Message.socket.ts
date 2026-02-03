@@ -48,10 +48,14 @@ export const MessageSocket: TSocketHandler = ({ socket }) => {
       for (const opponent_id of opponent_ids) {
         const opponent = await prisma.user.findUnique({
           where: { id: opponent_id },
-          select: { is_online: true },
+          select: { last_online_at: true },
         });
 
-        if (!opponent?.is_online) {
+        //? if opponent is offline for more than 30 minute, send notification
+        if (
+          !opponent?.last_online_at ||
+          Date.now() - opponent.last_online_at.getTime() > 30 * 60 * 1000
+        ) {
           await NotificationServices.createNotification({
             user_id: opponent_id,
             title: `New message from ${user.name}`,
