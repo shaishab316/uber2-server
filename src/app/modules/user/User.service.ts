@@ -288,6 +288,27 @@ export const UserServices = {
 
   //?? Admin Actions
   async pendingUserAction({ action, user_id }: TPendingUserAction) {
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+
+    if (!user) {
+      throw new ServerError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    await NotificationServices.createNotification({
+      user_id: user.id,
+      title:
+        action === 'approve'
+          ? 'Account Approved'
+          : 'Account Rejected',
+      message:
+        action === 'approve'
+          ? 'Your account has been approved. You can now log in and start using our services.'
+          : 'Your account verification has been rejected. Please contact support for further assistance.',
+      type: "INFO",
+    });
+
     if (action === 'approve') {
       return prisma.user.update({
         where: { id: user_id },
