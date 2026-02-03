@@ -24,10 +24,10 @@ import { stripe } from '../payment/Payment.utils';
 import ora from 'ora';
 import chalk from 'chalk';
 import { NotificationServices } from '../notification/Notification.service';
-import { generateOTP } from '@/utils/crypto/otp';
-import { sendEmail } from '@/utils/sendMail';
-import config from '@/config';
-import { emailTemplate } from '@/templates';
+// import { generateOTP } from '@/utils/crypto/otp';
+// import { sendEmail } from '@/utils/sendMail';
+// import config from '@/config';
+// import { emailTemplate } from '@/templates';
 import { errorLogger } from '@/utils/logger';
 
 export const UserServices = {
@@ -79,32 +79,32 @@ export const UserServices = {
 
     await this.stripeAccountConnect({ user_id: user.id });
 
-    try {
-      const otp = generateOTP({
-        tokenType: 'access_token',
-        otpId: user.id + 1,
-      });
+    // try {
+    //   const otp = generateOTP({
+    //     tokenType: 'access_token',
+    //     otpId: user.id + 1,
+    //   });
 
-      if (email)
-        await sendEmail({
-          to: email,
-          subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
-          html: emailTemplate({
-            userName: user.name,
-            otp,
-            template: 'account_verify',
-          }),
-        });
-    } catch (error: any) {
-      errorLogger.error(error.message);
-    }
+    //   if (email)
+    //     await sendEmail({
+    //       to: email,
+    //       subject: `Your ${config.server.name} Account Verification OTP is ⚡ ${otp} ⚡.`,
+    //       html: emailTemplate({
+    //         userName: user.name,
+    //         otp,
+    //         template: 'account_verify',
+    //       }),
+    //     });
+    // } catch (error: any) {
+    //   errorLogger.error(error.message);
+    // }
 
     //? Send welcome notification
     await NotificationServices.createNotification({
       user_id: user.id,
       title: 'Welcome to Pathao!',
       message:
-        'Thank you for registering. Please verify your account to get started.',
+        'Thank you for registering. Your account has been created successfully.',
       type: 'INFO',
     });
 

@@ -51,16 +51,14 @@ const auth = ({
 /**
  * Common validator function
  */
-export function commonValidator({ is_admin, is_verified, is_active }: TUser) {
+export function commonValidator({ is_admin, is_active }: TUser) {
   if (is_admin) return;
 
-  if (!is_verified) {
+  if (!is_active) {
     throw new ServerError(
       StatusCodes.FORBIDDEN,
-      'Your account is not verified',
+      'Your account is not active, please contact support.',
     );
-  } else if (!is_active) {
-    throw new ServerError(StatusCodes.FORBIDDEN, 'Your account is not active');
   }
 }
 
