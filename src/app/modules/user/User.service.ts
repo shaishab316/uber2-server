@@ -19,7 +19,7 @@ import ServerError from '@/errors/ServerError';
 import { StatusCodes } from 'http-status-codes';
 import { AuthServices } from '../auth/Auth.service';
 import { hashPassword } from '../auth/Auth.utils';
-import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
+import { deleteFiles } from '@/app/middlewares/capture';
 import stripeAccountConnectQueue from '@/utils/mq/stripeAccountConnectQueue';
 import { NotificationServices } from '../notification/Notification.service';
 import { generateOTP } from '@/utils/crypto/otp';
@@ -127,7 +127,7 @@ export const UserServices = {
     }
 
     body.avatar ||= undefined;
-    if (body.avatar && user?.avatar) await deleteFilesQueue.add([user.avatar]);
+    if (body.avatar && user?.avatar) await deleteFiles([user.avatar]);
 
     return prisma.user.update({
       where: { id: user.id },
@@ -201,7 +201,7 @@ export const UserServices = {
   async deleteAccount({ user_id }: TDeleteUser) {
     const user = await prisma.user.findUnique({ where: { id: user_id } });
 
-    if (user?.avatar) await deleteFilesQueue.add([user.avatar]);
+    if (user?.avatar) await deleteFiles([user.avatar]);
 
     return prisma.user.delete({
       where: { id: user_id },
@@ -222,8 +222,8 @@ export const UserServices = {
     });
 
     // Clean up old files
-    if (user?.avatar) await deleteFilesQueue.add([user.avatar]);
-    if (user?.nid_photos) await deleteFilesQueue.add(user.nid_photos);
+    if (user?.avatar) await deleteFiles([user.avatar]);
+    if (user?.nid_photos) await deleteFiles(user.nid_photos);
 
     return prisma.user.update({
       where: { id: user_id },
@@ -318,7 +318,7 @@ export const UserServices = {
       where: { id: user_id },
     });
 
-    if (user?.capture_avatar) await deleteFilesQueue.add([user.capture_avatar]);
+    if (user?.capture_avatar) await deleteFiles([user.capture_avatar]);
 
     return prisma.user.update({
       where: { id: user_id },

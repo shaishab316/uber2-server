@@ -1,17 +1,17 @@
-import Queue from 'bull';
-import config from '@/config';
-import { deleteFiles } from '@/app/middlewares/capture';
+// import Queue from 'bull';
+// import config from '@/config';
+// import { deleteFiles } from '@/app/middlewares/capture';
 
-/**
- * Delete files queue
- */
-const deleteFilesQueue = new Queue<string[]>(
-  `${config.server.name}:delete-files`,
-  config.url.redis,
-);
+// /**
+//  * Delete files queue
+//  */
+// const deleteFilesQueue = new Queue<string[]>(
+//   `${config.server.name}:delete-files`,
+//   config.url.redis,
+// );
 
-deleteFilesQueue.process(async ({ data }) => {
-  await deleteFiles(data);
-});
+// deleteFilesQueue.process(async ({ data }) => {
+//   await deleteFiles(data);
+// });
 
-export default deleteFilesQueue;
+// export default deleteFilesQueue;

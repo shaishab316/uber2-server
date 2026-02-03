@@ -13,7 +13,7 @@ import {
   TSetupVehicle,
   TToggleOnline,
 } from './Driver.interface';
-import deleteFilesQueue from '@/utils/mq/deleteFilesQueue';
+import { deleteFiles } from '@/app/middlewares/capture';
 import { dateRange } from '../datetime/Datetime.utils';
 import { NotificationServices } from '../notification/Notification.service';
 
@@ -100,9 +100,9 @@ export const DriverServices = {
 
     // Clean up old files
     if (payload?.avatar && driver?.avatar)
-      await deleteFilesQueue.add([driver.avatar]);
+      await deleteFiles([driver.avatar]);
     if (payload?.nid_photos && driver?.nid_photos)
-      await deleteFilesQueue.add(driver.nid_photos);
+      await deleteFiles(driver.nid_photos);
 
     return prisma.user.update({
       where: { id: driver_id },
@@ -121,9 +121,9 @@ export const DriverServices = {
     });
 
     if (driver?.vehicle_registration_photos)
-      await deleteFilesQueue.add(driver.vehicle_registration_photos);
+      await deleteFiles(driver.vehicle_registration_photos);
     if (driver?.vehicle_photos)
-      await deleteFilesQueue.add(driver.vehicle_photos);
+      await deleteFiles(driver.vehicle_photos);
 
     return prisma.user.update({
       where: { id: driver_id },
