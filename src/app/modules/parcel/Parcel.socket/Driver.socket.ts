@@ -13,14 +13,14 @@ export const parcelValidator = QueryValidations.exists('parcel_id', 'parcel')
 export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
 
-  //! Recover driver last parcel
-  const lastParcel = await ParcelServices.getLastDriverParcel({
-    driver_id: driver.id,
-  });
+  // //! Recover driver last parcel
+  // const lastParcel = await ParcelServices.getLastDriverParcel({
+  //   driver_id: driver.id,
+  // });
 
-  if (lastParcel) {
-    socket.emit('parcel:recover', lastParcel);
-  }
+  // if (lastParcel) {
+  //   socket.emit('parcel:recover', lastParcel);
+  // }
 
   socket.on(
     'parcel:accept',

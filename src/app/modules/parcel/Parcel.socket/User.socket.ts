@@ -9,14 +9,14 @@ import { SocketServices } from '../../socket/Socket.service';
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
 
-  //! Recover user last parcel
-  const lastParcel = await ParcelServices.getLastUserParcel({
-    user_id: user.id,
-  });
+  // //! Recover user last parcel
+  // const lastParcel = await ParcelServices.getLastUserParcel({
+  //   user_id: user.id,
+  // });
 
-  if (lastParcel) {
-    socket.emit('parcel:recover', lastParcel);
-  }
+  // if (lastParcel) {
+  //   socket.emit('parcel:recover', lastParcel);
+  // }
 
   socket.on(
     'parcel:new_request',

@@ -200,7 +200,15 @@ export const TripServices = {
     });
 
     //? Notify driver if assigned
-    if (trip.driver_id) {
+
+    if (trip.status === ETripStatus.REQUESTED && trip.processing_driver_id) {
+      await NotificationServices.createNotification({
+        user_id: trip.processing_driver_id,
+        title: 'Trip Cancelled',
+        message: 'The user has cancelled the trip.',
+        type: 'WARNING',
+      });
+    } else if (trip.driver_id) {
       await NotificationServices.createNotification({
         user_id: trip.driver_id,
         title: 'Trip Cancelled',
@@ -344,6 +352,13 @@ export const TripServices = {
           status: ETripStatus.CANCELLED,
           cancelled_at: new Date(),
         },
+      });
+
+      await NotificationServices.createNotification({
+        user_id: trip.user_id!,
+        title: 'Trip Cancelled by Driver',
+        message: 'The driver has cancelled the trip.',
+        type: 'WARNING',
       });
     }
   },

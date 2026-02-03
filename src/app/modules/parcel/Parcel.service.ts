@@ -185,12 +185,22 @@ export const ParcelServices = {
       },
     });
 
-    //? Notify driver if assigned
-    if (parcel.driver_id) {
+    if (
+      parcel.status === EParcelStatus.REQUESTED &&
+      parcel.processing_driver_id
+    ) {
+      await NotificationServices.createNotification({
+        user_id: parcel.processing_driver_id,
+        title: 'Parcel Cancelled',
+        message:
+          'The parcel you were processing has been cancelled by the user.',
+        type: 'WARNING',
+      });
+    } else if (parcel.driver_id) {
       await NotificationServices.createNotification({
         user_id: parcel.driver_id,
         title: 'Parcel Cancelled',
-        message: 'The user has cancelled the parcel delivery.',
+        message: 'The parcel assigned to you has been cancelled by the user.',
         type: 'WARNING',
       });
     }
@@ -347,6 +357,13 @@ export const ParcelServices = {
           cancelled_at: new Date(),
         },
       });
+
+      await NotificationServices.createNotification({
+        user_id: parcel.user_id!,
+        title: 'Parcel Cancelled by Driver',
+        message: 'The driver has cancelled your parcel delivery.',
+        type: 'WARNING',
+      });
     }
   },
 
@@ -367,6 +384,13 @@ export const ParcelServices = {
     if (parcel.status !== EParcelStatus.ACCEPTED) {
       throw new Error('Parcel is not accepted yet');
     }
+
+    await NotificationServices.createNotification({
+      user_id: parcel.user_id!,
+      title: 'Parcel Delivery Started',
+      message: 'The driver has started delivering your parcel.',
+      type: 'INFO',
+    });
 
     return prisma.parcel.update({
       where: { id: parcel_id },
@@ -402,6 +426,13 @@ export const ParcelServices = {
         'Parcel is not started yet',
       );
     }
+
+    await NotificationServices.createNotification({
+      user_id: parcel.user_id!,
+      title: 'Parcel Delivered',
+      message: 'Your parcel has been delivered successfully.',
+      type: 'INFO',
+    });
 
     return prisma.parcel.update({
       where: { id: parcel_id },
@@ -556,6 +587,13 @@ export const ParcelServices = {
 
     parcel.started_at ??= new Date(); //? fallback
     const completed_at = new Date();
+
+    await NotificationServices.createNotification({
+      user_id: parcel.user_id!,
+      title: 'Parcel Delivery Completed',
+      message: 'Your parcel has been delivered successfully.',
+      type: 'INFO',
+    });
 
     return prisma.parcel.update({
       where: { id: parcel_id },

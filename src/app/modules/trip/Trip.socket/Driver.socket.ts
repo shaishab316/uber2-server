@@ -10,15 +10,15 @@ import { userOmit } from '../../user/User.constant';
 export const DriverSocket: TSocketHandler = async ({ socket }) => {
   const driver = socket.data.user;
 
-  //! Recover driver last trip
-  const lastTrip = await TripServices.getLastDriverTrip({
-    driver_id: driver.id,
-  });
+  // //! Recover driver last trip
+  // const lastTrip = await TripServices.getLastDriverTrip({
+  //   driver_id: driver.id,
+  // });
 
-  //? If there's an ongoing trip, recover it
-  if (lastTrip) {
-    socket.emit('trip:recover', lastTrip);
-  }
+  // //? If there's an ongoing trip, recover it
+  // if (lastTrip) {
+  //   socket.emit('trip:recover', lastTrip);
+  // }
 
   socket.on(
     'trip:accept',

@@ -9,14 +9,14 @@ import { NotificationServices } from '../../notification/Notification.service';
 export const UserSocket: TSocketHandler = async ({ socket }) => {
   const { user } = socket.data;
 
-  //! Recover user last trip
-  const lastTrip = await TripServices.getLastUserTrip({
-    user_id: user.id,
-  });
+  // //! Recover user last trip
+  // const lastTrip = await TripServices.getLastUserTrip({
+  //   user_id: user.id,
+  // });
 
-  if (lastTrip) {
-    socket.emit('trip:recover', lastTrip);
-  }
+  // if (lastTrip) {
+  //   socket.emit('trip:recover', lastTrip);
+  // }
 
   socket.on(
     'trip:new_request',
