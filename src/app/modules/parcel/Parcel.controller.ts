@@ -1,10 +1,11 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
-import {
+import type {
   TAcceptParcelV2,
   TCancelParcelV2,
   TDeliverParcel,
+  TDriverCancelParcelV2,
   TGetSuperParcelDetails,
   TPayForParcelV2,
   TRequestForParcelV2,
@@ -217,6 +218,27 @@ export const ParcelControllers = {
 
       return {
         message: 'Parcel accepted successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * driver cancel parcel v2
+   */
+  driverCancelParcelV2: catchAsync<TDriverCancelParcelV2>(
+    async ({ body: payload, user: driver }) => {
+      const parcel = await ParcelServices.driverCancelParcel({
+        driver_id: driver.id,
+        parcel_id: payload.parcel_id,
+      });
+
+      return {
+        message: 'Parcel cancelled successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
           trip: null,

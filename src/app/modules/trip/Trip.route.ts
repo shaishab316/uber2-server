@@ -76,7 +76,7 @@ const all = Router();
    * [driver] Accepts a trip request by providing the trip ID.
    */
   all.post(
-    '/accept-trip',
+    '/accept-trip-request',
     auth.driver,
     purifyRequest(TripValidations.acceptTripV2),
     TripControllers.acceptTripV2,

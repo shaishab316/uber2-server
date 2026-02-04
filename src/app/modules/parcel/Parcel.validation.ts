@@ -121,4 +121,13 @@ export const ParcelValidations = {
       parcel_id: _.parcel_id,
     }),
   }),
+
+  /**
+   * driver cancel parcel v2
+   */
+  driverCancelParcelV2: z.object({
+    body: z.object({
+      parcel_id: _.parcel_id,
+    }),
+  }),
 };

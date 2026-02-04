@@ -69,3 +69,10 @@ export type TPayForParcelV2 = z.infer<typeof ParcelValidations.payForParcelV2>;
  * accept parcel v2
  */
 export type TAcceptParcelV2 = z.infer<typeof ParcelValidations.acceptParcelV2>;
+
+/**
+ * driver cancel parcel v2
+ */
+export type TDriverCancelParcelV2 = z.infer<
+  typeof ParcelValidations.driverCancelParcelV2
+>;

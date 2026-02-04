@@ -87,11 +87,28 @@ const all = Router();
    * Driver Parcel v2 Route
    */
 
+  /**
+   * Accept Parcel v2 Route
+   *
+   * [driver] Accept parcel v2
+   */
   all.post(
-    '/accept-parcel',
+    '/accept-parcel-request',
     auth.driver,
     purifyRequest(ParcelValidations.acceptParcelV2),
     ParcelControllers.acceptParcelV2,
+  );
+
+  /**
+   * Driver Cancel Parcel v2 Route
+   *
+   * [driver] Driver cancel parcel v2
+   */
+  all.post(
+    '/cancel-parcel-request',
+    auth.driver,
+    purifyRequest(ParcelValidations.driverCancelParcelV2),
+    ParcelControllers.driverCancelParcelV2,
   );
 }
 

@@ -318,6 +318,10 @@ export const ParcelServices = {
   }) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (!parcel) {
@@ -339,7 +343,7 @@ export const ParcelServices = {
     }
 
     if (parcel.status === EParcelStatus.REQUESTED) {
-      const parcel = await prisma.parcel.update({
+      const updatedParcel = await prisma.parcel.update({
         where: { id: parcel_id },
         data: {
           processing_driver_id: null,
@@ -351,10 +355,10 @@ export const ParcelServices = {
         },
       });
 
-      if (!parcel.helper) return;
+      if (!updatedParcel.helper) return parcel;
 
       //? re-enqueue parcel for dispatch processing
-      await processSingleDriverDispatch(parcel.helper);
+      await processSingleDriverDispatch(updatedParcel.helper);
     } else {
       await prisma.parcel.update({
         where: { id: parcel_id },
@@ -371,6 +375,8 @@ export const ParcelServices = {
         type: 'WARNING',
       });
     }
+
+    return parcel;
   },
 
   //? New method to start parcel
