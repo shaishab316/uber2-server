@@ -4,6 +4,7 @@ import { ETransactionType, ETripStatus, prisma } from '@/utils/db';
 import type {
   TGetSuperTripDetailsPayload,
   TRequestForTrip,
+  TRideResponseV2,
   TTripRefreshLocation,
 } from './Trip.interface';
 import { calculateTripCost, generateTripSlug } from './Trip.utils';
@@ -12,6 +13,7 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Trip.job';
+import { RIDE_KIND } from './Trip.constant';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -222,15 +224,17 @@ export const TripServices = {
     }
 
     if (trip.driver_id) {
-      SocketServices.emitToUser(trip.driver_id, 'trip:canceled', {
-        trip: trip,
-      });
+      SocketServices.emitToUser(trip.driver_id, 'driver-trip', {
+        kind: RIDE_KIND.TRIP,
+        data: cancelledTrip,
+      } satisfies TRideResponseV2);
     }
 
     if (trip.processing_driver_id) {
-      SocketServices.emitToUser(trip.processing_driver_id, 'trip:canceled', {
-        trip: trip,
-      });
+      SocketServices.emitToUser(trip.processing_driver_id, 'driver-trip', {
+        kind: RIDE_KIND.TRIP,
+        data: cancelledTrip,
+      } satisfies TRideResponseV2);
     }
 
     return cancelledTrip;
