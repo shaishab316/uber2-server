@@ -48,6 +48,17 @@ const all = Router();
     purifyRequest(TripValidations.cancelTripV2),
     TripControllers.cancelTripV2,
   );
+
+  /**
+   * Pay for trip v2
+   *
+   * [user] Pays for a completed trip by providing payment details.
+   */
+  all.post(
+    '/pay-trip',
+    purifyRequest(TripValidations.payForTripV2),
+    TripControllers.payForTripV2,
+  );
 }
 
 const admin = Router();

@@ -36,10 +36,22 @@ export type TRideResponseV2 = {
   kind: keyof typeof RIDE_KIND;
   trip: Awaited<ReturnType<typeof TripServices.requestForTrip>> | null;
   parcel: Awaited<ReturnType<typeof ParcelServices.requestForParcel>> | null;
+  [extra: string]: any;
 };
 
+/**
+ * Request for Trip v2 Interface
+ */
 export type TRequestForTripV2 = z.infer<
   typeof TripValidations.requestForTripV2
 >;
 
+/**
+ * Cancel Trip v2 Interface
+ */
 export type TCancelTripV2 = z.infer<typeof TripValidations.cancelTripV2>;
+
+/**
+ * Pay for Trip v2 Interface
+ */
+export type TPayForTripV2 = z.infer<typeof TripValidations.payForTripV2>;

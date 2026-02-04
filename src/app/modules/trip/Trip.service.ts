@@ -79,7 +79,7 @@ export const TripServices = {
     });
 
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new ServerError(StatusCodes.NOT_FOUND, 'Trip not found');
     }
 
     if (trip?.driver?.id && trip?.driver?.id !== driver_id) {
@@ -317,15 +317,21 @@ export const TripServices = {
     });
 
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new ServerError(StatusCodes.NOT_FOUND, 'Trip not found');
     }
 
     if (trip.status === ETripStatus.REQUESTED) {
       if (trip.processing_driver_id !== driver_id) {
-        throw new Error('You are not assigned to this trip');
+        throw new ServerError(
+          StatusCodes.FORBIDDEN,
+          'You are not assigned to this trip',
+        );
       }
     } else if (trip.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this trip');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this trip',
+      );
     }
 
     if (trip.status === ETripStatus.REQUESTED) {
@@ -375,7 +381,10 @@ export const TripServices = {
     });
 
     if (trip?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this trip');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this trip',
+      );
     }
 
     const startedTrip = await prisma.trip.update({
@@ -416,7 +425,10 @@ export const TripServices = {
     });
 
     if (trip?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this trip');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this trip',
+      );
     }
 
     trip.started_at ??= new Date();
@@ -465,7 +477,10 @@ export const TripServices = {
     });
 
     if (trip?.user_id !== user_id) {
-      throw new Error('You are not authorized to pay for this trip');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not authorized to pay for this trip',
+      );
     }
 
     if (trip.payment_at) {
@@ -515,7 +530,10 @@ export const TripServices = {
 
       //? Check for sufficient balance
       if (wallet.balance < 0) {
-        throw new Error('Insufficient balance in wallet');
+        throw new ServerError(
+          StatusCodes.BAD_REQUEST,
+          'Insufficient balance in wallet',
+        );
       }
 
       //? Warn if balance is low (less than $10)

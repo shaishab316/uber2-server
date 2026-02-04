@@ -6,11 +6,13 @@ import type {
   TRequestForTripV2,
   TRideResponseV2,
   TCancelTripV2,
+  TPayForTripV2,
 } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
 import { NotificationServices } from '../notification/Notification.service';
 import { RIDE_KIND } from './Trip.constant';
+import { SocketServices } from '../socket/Socket.service';
 
 export const TripControllers = {
   getTripDetails: catchAsync(async ({ params }) => {
@@ -126,6 +128,35 @@ export const TripControllers = {
         kind: RIDE_KIND.TRIP,
         trip: data,
         parcel: null,
+      } satisfies TRideResponseV2,
+    };
+  }),
+
+  /**
+   * Pay for trip v2
+   */
+  payForTripV2: catchAsync<TPayForTripV2>(async ({ body: payload, user }) => {
+    const { transaction, trip, wallet } = await TripServices.payForTrip({
+      trip_id: payload.trip_id,
+      user_id: user.id,
+    });
+
+    //? Notify driver that trip has been paid
+    SocketServices.emitToUser(trip.driver_id!, 'trip:paid', {
+      trip,
+      transaction,
+    });
+
+    return {
+      message: 'Trip paid successfully',
+      data: {
+        kind: RIDE_KIND.TRIP,
+        trip,
+        parcel: null,
+
+        //? extra info
+        current_balance: wallet?.balance,
+        transaction,
       } satisfies TRideResponseV2,
     };
   }),

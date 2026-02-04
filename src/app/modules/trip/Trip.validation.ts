@@ -76,6 +76,15 @@ export const TripValidations = {
       trip_id: _.trip_id,
     }),
   }),
+
+  /**
+   * Pay for Trip Validation
+   */
+  payForTripV2: z.object({
+    body: z.object({
+      trip_id: _.trip_id,
+    }),
+  }),
 };
 
 /**
