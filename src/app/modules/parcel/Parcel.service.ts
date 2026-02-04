@@ -18,6 +18,8 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Parcel.job';
+import { RIDE_KIND } from '../trip/Trip.constant';
+import { TRideResponseV2 } from '../trip/Trip.interface';
 
 export const ParcelServices = {
   async getParcelDetails(parcel_id: string) {
@@ -211,20 +213,18 @@ export const ParcelServices = {
 
     //? Notify assigned drivers about cancellation
     if (parcel.driver_id) {
-      SocketServices.emitToUser(parcel.driver_id, 'parcel:cancelled', {
-        parcel: parcel,
-      });
+      SocketServices.emitToUser(parcel.driver_id, 'driver-trip', {
+        kind: RIDE_KIND.PARCEL,
+        data: cancelledParcel,
+      } satisfies TRideResponseV2);
     }
 
     //? Notify processing driver about cancellation
     if (parcel.processing_driver_id) {
-      SocketServices.emitToUser(
-        parcel.processing_driver_id,
-        'parcel:cancelled',
-        {
-          parcel: parcel,
-        },
-      );
+      SocketServices.emitToUser(parcel.processing_driver_id, 'driver-trip', {
+        kind: RIDE_KIND.PARCEL,
+        data: cancelledParcel,
+      } satisfies TRideResponseV2);
     }
 
     return cancelledParcel;
