@@ -220,19 +220,10 @@ export const TripControllers = {
 
       if (trip.user_id) {
         //? Notify user that driver accepted the trip
-        SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
-          driver: await prisma.user.findUnique({
-            where: {
-              id: driver.id,
-            },
-            omit: userOmit.DRIVER,
-          }),
-          trip,
-
-          /**
-           * Todo: fix this emit
-           */
-        });
+        SocketServices.emitToUser(trip.user_id, 'user-trip', {
+          kind: RIDE_KIND.TRIP,
+          data: trip,
+        } satisfies TRideResponseV2);
       }
 
       return {
