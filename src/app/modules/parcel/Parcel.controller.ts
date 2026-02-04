@@ -5,6 +5,7 @@ import {
   TCancelParcelV2,
   TDeliverParcel,
   TGetSuperParcelDetails,
+  TPayForParcelV2,
   TRequestForParcelV2,
 } from './Parcel.interface';
 import { StatusCodes } from 'http-status-codes';
@@ -138,6 +139,47 @@ export const ParcelControllers = {
           kind: RIDE_KIND.PARCEL,
           trip: null,
           parcel: data,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * pay for parcel v2
+   */
+  payForParcelV2: catchAsync<TPayForParcelV2>(
+    async ({ body: payload, user }) => {
+      const { transaction, parcel, wallet } = await ParcelServices.payForParcel(
+        {
+          parcel_id: payload.parcel_id,
+          user_id: user.id,
+        },
+      );
+
+      //? Notify driver that parcel has been paid
+      SocketServices.emitToUser(parcel.driver_id!, 'parcel:paid', {
+        parcel,
+        transaction,
+        user: {
+          name: user.name,
+          trip_received_count: user.trip_received_count,
+          avatar: user.avatar,
+          rating: user.rating,
+          rating_count: user.rating_count,
+        },
+      });
+
+      return {
+        message: 'Parcel paid successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
+
+          //? extra data
+          current_balance: wallet?.balance,
+          transaction,
+          parcel_id: parcel.id,
         } satisfies TRideResponseV2,
       };
     },

@@ -62,6 +62,13 @@ const all = Router();
     purifyRequest(ParcelValidations.cancelParcelV2),
     ParcelControllers.cancelParcelV2,
   );
+
+  all.post(
+    '/pay-for-parcel',
+    auth.user,
+    purifyRequest(ParcelValidations.payForParcelV2),
+    ParcelControllers.payForParcelV2,
+  );
 }
 
 const admin = Router();

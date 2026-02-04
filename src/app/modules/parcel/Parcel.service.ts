@@ -85,7 +85,7 @@ export const ParcelServices = {
     });
 
     if (!parcel) {
-      throw new Error('Parcel not found');
+      throw new ServerError(StatusCodes.NOT_FOUND, 'Parcel not found');
     }
 
     if (parcel?.driver?.id && parcel?.driver?.id !== driver_id)
@@ -321,15 +321,21 @@ export const ParcelServices = {
     });
 
     if (!parcel) {
-      throw new Error('Parcel not found');
+      throw new ServerError(StatusCodes.NOT_FOUND, 'Parcel not found');
     }
 
     if (parcel?.status === EParcelStatus.REQUESTED) {
       if (parcel?.processing_driver_id !== driver_id) {
-        throw new Error('You are not assigned to this parcel');
+        throw new ServerError(
+          StatusCodes.FORBIDDEN,
+          'You are not assigned to this parcel',
+        );
       }
     } else if (parcel?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this parcel');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this parcel',
+      );
     }
 
     if (parcel.status === EParcelStatus.REQUESTED) {
@@ -374,7 +380,10 @@ export const ParcelServices = {
     });
 
     if (parcel?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this parcel');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this parcel',
+      );
     }
 
     if (parcel.status === EParcelStatus.STARTED) {
@@ -382,7 +391,10 @@ export const ParcelServices = {
     }
 
     if (parcel.status !== EParcelStatus.ACCEPTED) {
-      throw new Error('Parcel is not accepted yet');
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Parcel is not accepted yet',
+      );
     }
 
     await NotificationServices.createNotification({
@@ -457,10 +469,17 @@ export const ParcelServices = {
   }) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (parcel?.user_id !== user_id) {
-      throw new Error('You are not authorized to pay for this parcel');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not authorized to pay for this parcel',
+      );
     }
 
     if (parcel.payment_at) {
@@ -510,7 +529,10 @@ export const ParcelServices = {
 
       //? Check for sufficient balance
       if (wallet.balance < 0) {
-        throw new Error('Insufficient balance in wallet');
+        throw new ServerError(
+          StatusCodes.BAD_REQUEST,
+          'Insufficient balance in wallet',
+        );
       }
 
       //? Warn if balance is low (less than $10)
@@ -574,7 +596,10 @@ export const ParcelServices = {
     });
 
     if (parcel?.driver_id !== driver_id) {
-      throw new Error('You are not assigned to this parcel');
+      throw new ServerError(
+        StatusCodes.FORBIDDEN,
+        'You are not assigned to this parcel',
+      );
     }
 
     if (parcel.status === EParcelStatus.COMPLETED) {
@@ -582,7 +607,10 @@ export const ParcelServices = {
     }
 
     if (parcel.status !== EParcelStatus.DELIVERED) {
-      throw new Error('Parcel is not delivered yet');
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Parcel is not delivered yet',
+      );
     }
 
     parcel.started_at ??= new Date(); //? fallback

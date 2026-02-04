@@ -92,4 +92,15 @@ export const ParcelValidations = {
       }),
     }),
   }),
+
+  /**
+   * pay for parcel v2
+   */
+  payForParcelV2: z.object({
+    body: z.object({
+      parcel_id: z.string().refine(exists('parcel'), {
+        error: ({ input }) => `Parcel not found with id: ${input}`,
+      }),
+    }),
+  }),
 };
