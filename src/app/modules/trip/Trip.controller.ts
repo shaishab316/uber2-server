@@ -5,6 +5,7 @@ import type {
   TGetSuperTripDetails,
   TRequestForTripV2,
   TRideResponseV2,
+  TCancelTripV2,
 } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
@@ -109,4 +110,23 @@ export const TripControllers = {
       };
     },
   ),
+
+  /**
+   * Cancel trip v2
+   */
+  cancelTripV2: catchAsync<TCancelTripV2>(async ({ body: payload, user }) => {
+    const data = await TripServices.cancelTrip({
+      trip_id: payload.trip_id,
+      user_id: user.id,
+    });
+
+    return {
+      message: 'Trip cancelled successfully',
+      data: {
+        kind: RIDE_KIND.TRIP,
+        trip: data,
+        parcel: null,
+      } satisfies TRideResponseV2,
+    };
+  }),
 };

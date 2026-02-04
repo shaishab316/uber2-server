@@ -41,3 +41,5 @@ export type TRideResponseV2 = {
 export type TRequestForTripV2 = z.infer<
   typeof TripValidations.requestForTripV2
 >;
+
+export type TCancelTripV2 = z.infer<typeof TripValidations.cancelTripV2>;

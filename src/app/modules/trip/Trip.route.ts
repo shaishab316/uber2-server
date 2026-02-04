@@ -29,11 +29,24 @@ const all = Router();
 
   /**
    * Request for a new trip v2
+   *
+   * [user] Requests a new trip by providing pickup and dropoff details.
    */
   all.post(
-    '/new-request',
+    '/new-trip-request',
     purifyRequest(TripValidations.requestForTripV2),
     TripControllers.requestForTripV2,
+  );
+
+  /**
+   * Cancel trip v2
+   *
+   * [user] Cancels an ongoing trip by providing the trip ID.
+   */
+  all.post(
+    '/cancel-trip',
+    purifyRequest(TripValidations.cancelTripV2),
+    TripControllers.cancelTripV2,
   );
 }
 

@@ -32,7 +32,7 @@ export const TripServices = {
   async requestForTrip(payload: TRequestForTrip) {
     const driver_ids = await getNearestDriver(payload);
 
-    const trip = await prisma.trip.create({
+    const { helper, ...trip } = await prisma.trip.create({
       data: {
         ...payload,
         slug: await generateTripSlug(),
@@ -51,8 +51,8 @@ export const TripServices = {
       },
     });
 
-    if (trip.helper) {
-      await processSingleDriverDispatch(trip.helper);
+    if (helper) {
+      await processSingleDriverDispatch(helper);
     }
 
     return trip;
