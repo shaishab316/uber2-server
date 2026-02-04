@@ -35,6 +35,14 @@ export type TUpdateDriverLocationV2 = z.infer<
   typeof DriverValidations.updateDriverLocation
 >;
 
+/**
+ * Type for updating driver location payload in V2
+ */
 export type TUpdateDriverLocationPayloadV2 = TUpdateDriverLocationV2['body'] & {
   driver_id: string;
 };
+
+/**
+ * Type for toggling online status in V2
+ */
+export type TToggleOnlineV2 = z.infer<typeof DriverValidations.toggleOnlineV2>;

@@ -159,4 +159,13 @@ export const DriverValidations = {
       location_address: _.location_address,
     }),
   }),
+
+  /**
+   * Toggle Online Status Validation v2
+   */
+  toggleOnlineV2: z.object({
+    body: z.object({
+      is_online: z.boolean({ error: 'Online status is required' }),
+    }),
+  }),
 };

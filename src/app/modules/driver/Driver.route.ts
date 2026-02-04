@@ -50,6 +50,15 @@ const driver = injectRoutes(Router(), {
     purifyRequest(DriverValidations.updateDriverLocation),
     DriverControllers.updateDriverLocationV2,
   );
+
+  /**
+   * Toggle Online Status Route v2
+   */
+  driver.post(
+    '/toggle-online',
+    purifyRequest(DriverValidations.toggleOnlineV2),
+    DriverControllers.toggleOnlineV2,
+  );
 }
 
 export const DriverRoutes = { admin, driver };

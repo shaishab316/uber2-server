@@ -1,6 +1,7 @@
 import catchAsync from '../../middlewares/catchAsync';
 import type {
   TGetEarningsArgs,
+  TToggleOnlineV2,
   TUpdateDriverLocationV2,
 } from './Driver.interface';
 import { DriverServices } from './Driver.service';
@@ -96,6 +97,23 @@ export const DriverControllers = {
       return {
         message: 'Location updated successfully!',
         data: payload,
+      };
+    },
+  ),
+
+  /**
+   * Toggle Online Status Controller v2
+   */
+  toggleOnlineV2: catchAsync<TToggleOnlineV2>(
+    async ({ body: payload, user: driver }) => {
+      const data = await DriverServices.toggleOnline({
+        driver_id: driver.id,
+        online: payload.is_online,
+      });
+
+      return {
+        message: 'Online status updated successfully!',
+        data,
       };
     },
   ),
