@@ -1,4 +1,5 @@
 import catchAsync from '../../middlewares/catchAsync';
+import { SocketServices } from '../socket/Socket.service';
 import type {
   TGetEarningsArgs,
   TToggleOnlineV2,
@@ -93,6 +94,9 @@ export const DriverControllers = {
         ...payload,
         driver_id: driver.id,
       });
+
+      //? Emit location update to interested parties
+      SocketServices.broadcast(`location::${driver.id}`, payload);
 
       return {
         message: 'Location updated successfully!',
