@@ -16,8 +16,6 @@ import { ParcelServices } from '../parcel/Parcel.service';
 import { NotificationServices } from '../notification/Notification.service';
 import { RIDE_KIND } from './Trip.constant';
 import { SocketServices } from '../socket/Socket.service';
-import { userOmit } from '../user/User.constant';
-import { prisma } from '@/utils/db';
 
 export const TripControllers = {
   getTripDetails: catchAsync(async ({ params }) => {
@@ -295,20 +293,10 @@ export const TripControllers = {
 
     if (trip.user_id) {
       //? Notify user that driver ended the trip
-      SocketServices.emitToUser(trip.user_id, 'trip:ended', {
-        trip,
-        driver: await prisma.user.findUnique({
-          where: {
-            id: driver.id,
-          },
-          omit: userOmit.DRIVER,
-        }),
-        fare: trip.total_cost,
-
-        /**
-         * Todo: fix this emit
-         */
-      });
+      SocketServices.emitToUser(trip.user_id, 'user-trip', {
+        kind: RIDE_KIND.TRIP,
+        data: trip,
+      } satisfies TRideResponseV2);
     }
 
     return {
