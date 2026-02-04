@@ -56,4 +56,13 @@ export const TripValidations = {
       error: ({ input }) => `Trip not found with id: ${input}`,
     }),
   }),
+  //! Socket - end
+
+  /**
+   * v2 Trip Request Validation
+   */
+
+  requestForTripV2: z.object({
+    body: requestForTrip,
+  }),
 };

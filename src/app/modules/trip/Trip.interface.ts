@@ -1,5 +1,8 @@
-import z from 'zod';
-import { TripValidations } from './Trip.validation';
+import type { z } from 'zod';
+import type { TripValidations } from './Trip.validation';
+import type { RIDE_KIND } from './Trip.constant';
+import type { TripServices } from './Trip.service';
+import type { ParcelServices } from '../parcel/Parcel.service';
 
 /**
  * @type : validation for request for trip
@@ -21,3 +24,20 @@ export type TGetSuperTripDetailsPayload = TGetSuperTripDetailsParams;
 export type TGetSuperTripDetails = {
   params: TGetSuperTripDetailsParams;
 };
+
+/**
+ * v2 Trip Request Interface
+ */
+
+/**
+ * v2 Ride Response Interface
+ */
+export type TRideResponseV2 = {
+  kind: keyof typeof RIDE_KIND;
+  trip: Awaited<ReturnType<typeof TripServices.requestForTrip>> | null;
+  parcel: Awaited<ReturnType<typeof ParcelServices.requestForParcel>> | null;
+};
+
+export type TRequestForTripV2 = z.infer<
+  typeof TripValidations.requestForTripV2
+>;

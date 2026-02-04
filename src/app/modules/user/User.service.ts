@@ -298,15 +298,12 @@ export const UserServices = {
 
     await NotificationServices.createNotification({
       user_id: user.id,
-      title:
-        action === 'approve'
-          ? 'Account Approved'
-          : 'Account Rejected',
+      title: action === 'approve' ? 'Account Approved' : 'Account Rejected',
       message:
         action === 'approve'
           ? 'Your account has been approved. You can now log in and start using our services.'
           : 'Your account verification has been rejected. Please contact support for further assistance.',
-      type: "INFO",
+      type: 'INFO',
     });
 
     if (action === 'approve') {

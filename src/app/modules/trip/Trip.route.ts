@@ -22,6 +22,19 @@ const all = Router();
     purifyRequest(TripValidations.calculateEstimatedFare),
     TripControllers.calculateEstimatedFare,
   );
+
+  /**
+   * v2 Trip Request Route
+   */
+
+  /**
+   * Request for a new trip v2
+   */
+  all.post(
+    '/new-request',
+    purifyRequest(TripValidations.requestForTripV2),
+    TripControllers.requestForTripV2,
+  );
 }
 
 const admin = Router();

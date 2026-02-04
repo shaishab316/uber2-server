@@ -1,9 +1,15 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { TripServices } from './Trip.service';
 import { calculateTripCost } from './Trip.utils';
-import type { TGetSuperTripDetails } from './Trip.interface';
+import type {
+  TGetSuperTripDetails,
+  TRequestForTripV2,
+  TRideResponseV2,
+} from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
+import { NotificationServices } from '../notification/Notification.service';
+import { RIDE_KIND } from './Trip.constant';
 
 export const TripControllers = {
   getTripDetails: catchAsync(async ({ params }) => {
@@ -70,4 +76,37 @@ export const TripControllers = {
       },
     };
   }),
+
+  /**
+   ****** v2 Trip Request Controller *****
+   */
+
+  /**
+   * Request for a new trip v2
+   */
+  requestForTripV2: catchAsync<TRequestForTripV2>(
+    async ({ body: payload, user }) => {
+      const data = await TripServices.requestForTrip({
+        ...payload,
+        user_id: user.id,
+      });
+
+      //? Notify user that their trip request is being processed
+      await NotificationServices.createNotification({
+        user_id: user.id,
+        title: 'Trip Request Received',
+        message: 'Searching for nearby drivers...',
+        type: 'INFO',
+      });
+
+      return {
+        message: 'Trip request created successfully',
+        data: {
+          kind: RIDE_KIND.TRIP,
+          trip: data,
+          parcel: null,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
 };
