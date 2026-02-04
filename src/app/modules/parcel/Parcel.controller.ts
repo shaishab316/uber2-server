@@ -309,7 +309,10 @@ export const ParcelControllers = {
 
       if (parcel.user_id) {
         //? Notify user that their parcel is being delivered
-        SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', parcel);
+        SocketServices.emitToUser(parcel.user_id, 'user-trip', {
+          kind: RIDE_KIND.PARCEL,
+          data: parcel,
+        } satisfies TRideResponseV2);
       }
 
       return {
