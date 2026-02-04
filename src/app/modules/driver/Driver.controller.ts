@@ -1,5 +1,8 @@
 import catchAsync from '../../middlewares/catchAsync';
-import { TGetEarningsArgs } from './Driver.interface';
+import type {
+  TGetEarningsArgs,
+  TUpdateDriverLocationV2,
+} from './Driver.interface';
 import { DriverServices } from './Driver.service';
 import { User as TUser } from '@/utils/db';
 
@@ -79,4 +82,21 @@ export const DriverControllers = {
       data,
     };
   }),
+
+  /**
+   * V2 Controllers can be added here
+   */
+  updateDriverLocationV2: catchAsync<TUpdateDriverLocationV2>(
+    async ({ user: driver, body: payload }) => {
+      await DriverServices.updateDriverLocationV2({
+        ...payload,
+        driver_id: driver.id,
+      });
+
+      return {
+        message: 'Location updated successfully!',
+        data: payload,
+      };
+    },
+  ),
 };

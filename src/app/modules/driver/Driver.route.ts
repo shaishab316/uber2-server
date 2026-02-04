@@ -41,6 +41,15 @@ const driver = injectRoutes(Router(), {
     purifyRequest(QueryValidations.list, DriverValidations.getEarnings),
     DriverControllers.getEarnings,
   );
+
+  /**
+   * v2 routes can be added here
+   */
+  driver.post(
+    '/update-location',
+    purifyRequest(DriverValidations.updateDriverLocation),
+    DriverControllers.updateDriverLocationV2,
+  );
 }
 
 export const DriverRoutes = { admin, driver };

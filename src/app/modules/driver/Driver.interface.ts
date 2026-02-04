@@ -23,3 +23,18 @@ export type TGetEarningsArgs = z.infer<
 >['query'] & {
   driver_id: string;
 } & TList;
+
+/**
+ * V2 Types can be added here
+ */
+
+/**
+ * Type for updating driver location in V2
+ */
+export type TUpdateDriverLocationV2 = z.infer<
+  typeof DriverValidations.updateDriverLocation
+>;
+
+export type TUpdateDriverLocationPayloadV2 = TUpdateDriverLocationV2['body'] & {
+  driver_id: string;
+};

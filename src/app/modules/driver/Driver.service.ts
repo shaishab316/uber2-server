@@ -1,17 +1,18 @@
-import { EUserRole, Prisma } from '@/utils/db';
+import { EParcelStatus, ETripStatus, EUserRole, Prisma } from '@/utils/db';
 import { prisma } from '../../../utils/db';
-import { TList } from '../query/Query.interface';
+import type { TList } from '../query/Query.interface';
 import {
   userSearchableFields as searchFields,
   userOmit,
 } from '../user/User.constant';
 import { TPagination } from '../../../utils/server/serveResponse';
-import {
+import type {
   TGetEarningsArgs,
   TRefreshLocation,
   TSetupDriverProfile,
   TSetupVehicle,
   TToggleOnline,
+  TUpdateDriverLocationPayloadV2,
 } from './Driver.interface';
 import { deleteFiles } from '@/app/middlewares/capture';
 import { dateRange } from '../datetime/Datetime.utils';
@@ -298,5 +299,93 @@ export const DriverServices = {
       total_time:
         (aggregateTrip._sum.time ?? 0) + (aggregateParcel._sum.time ?? 0),
     };
+  },
+
+  /**
+   * V2 Services can be added here
+   */
+
+  /**
+   *  update driver location v2
+   */
+  async updateDriverLocationV2({
+    driver_id,
+    ...locationData
+  }: TUpdateDriverLocationPayloadV2) {
+    /**
+     * Step 1: Update driver's location in the database
+     */
+    await prisma.user.update({
+      where: { id: driver_id },
+      data: locationData,
+      select: { location_address: true },
+    });
+
+    /**
+     * Step 2: Check this driver has any running Trips or Parcels,
+     * if yes, update the location there as well
+     */
+
+    const runningTrip = await prisma.trip.findFirst({
+      where: { OR: [{ driver_id }, { processing_driver_id: driver_id }] },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
+    });
+
+    /**
+     * If there is a running trip which is not completed or cancelled, update the location there
+     */
+    if (
+      runningTrip &&
+      runningTrip.status !== ETripStatus.COMPLETED &&
+      runningTrip.status !== ETripStatus.CANCELLED
+    ) {
+      await prisma.trip.update({
+        where: { id: runningTrip.id },
+        data: {
+          location_lat: locationData.location_lat,
+          location_lng: locationData.location_lng,
+          location_address: locationData.location_address,
+        },
+        select: { location_address: true },
+      });
+
+      /**
+       * Todo: Notify user about updated driver location
+       */
+    }
+
+    const runningParcel = await prisma.parcel.findFirst({
+      where: { OR: [{ driver_id }, { processing_driver_id: driver_id }] },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
+    });
+
+    /**
+     * If there is a running parcel which is not delivered or cancelled, update the location there
+     */
+    if (
+      runningParcel &&
+      runningParcel.status !== EParcelStatus.DELIVERED &&
+      runningParcel.status !== EParcelStatus.CANCELLED
+    ) {
+      await prisma.parcel.update({
+        where: { id: runningParcel.id },
+        data: {
+          location_lat: locationData.location_lat,
+          location_lng: locationData.location_lng,
+          location_address: locationData.location_address,
+        },
+        select: { location_address: true },
+      });
+
+      /**
+       * Todo: Notify user about updated driver location
+       */
+    }
   },
 };
