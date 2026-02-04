@@ -200,19 +200,10 @@ export const ParcelControllers = {
 
       if (parcel.user_id) {
         //? Notify user that their parcel has been accepted
-        SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
-          driver: await prisma.user.findUnique({
-            where: {
-              id: driver.id,
-            },
-            omit: userOmit.DRIVER,
-          }),
-          parcel,
-
-          /**
-           * Todo: fix driver emit data type
-           */
-        });
+        SocketServices.emitToUser(parcel.user_id, 'user-trip', {
+          kind: RIDE_KIND.PARCEL,
+          data: parcel,
+        } satisfies TRideResponseV2);
       }
 
       return {
