@@ -47,7 +47,11 @@ const all = Router();
    * v2 Routes
    */
 
-  //? Request for parcel v2
+  /**
+   * Request for Parcel v2 Route
+   *
+   * [user] Request for parcel v2
+   */
   all.post(
     '/request-for-parcel',
     auth.user,
@@ -55,7 +59,11 @@ const all = Router();
     ParcelControllers.requestForParcelV2,
   );
 
-  //? Cancel parcel v2
+  /**
+   * Cancel Parcel v2 Route
+   *
+   * [user] Cancel parcel v2
+   */
   all.post(
     '/cancel-parcel',
     auth.user,
@@ -63,11 +71,27 @@ const all = Router();
     ParcelControllers.cancelParcelV2,
   );
 
+  /**
+   * Pay for Parcel v2 Route
+   *
+   * [user] Pay for parcel v2
+   */
   all.post(
     '/pay-for-parcel',
     auth.user,
     purifyRequest(ParcelValidations.payForParcelV2),
     ParcelControllers.payForParcelV2,
+  );
+
+  /**
+   * Driver Parcel v2 Route
+   */
+
+  all.post(
+    '/accept-parcel',
+    auth.driver,
+    purifyRequest(ParcelValidations.acceptParcelV2),
+    ParcelControllers.acceptParcelV2,
   );
 }
 

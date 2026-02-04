@@ -64,3 +64,8 @@ export type TCancelParcelV2 = z.infer<typeof ParcelValidations.cancelParcelV2>;
  * pay for parcel v2
  */
 export type TPayForParcelV2 = z.infer<typeof ParcelValidations.payForParcelV2>;
+
+/**
+ * accept parcel v2
+ */
+export type TAcceptParcelV2 = z.infer<typeof ParcelValidations.acceptParcelV2>;

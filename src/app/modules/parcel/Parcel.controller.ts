@@ -2,6 +2,7 @@ import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
 import {
+  TAcceptParcelV2,
   TCancelParcelV2,
   TDeliverParcel,
   TGetSuperParcelDetails,
@@ -13,6 +14,8 @@ import { SocketServices } from '../socket/Socket.service';
 import { NotificationServices } from '../notification/Notification.service';
 import { RIDE_KIND } from '../trip/Trip.constant';
 import { TRideResponseV2 } from '../trip/Trip.interface';
+import { userOmit } from '../user/User.constant';
+import { prisma } from '@/utils/db';
 
 export const ParcelControllers = {
   getParcelDetails: catchAsync(async ({ params }) => {
@@ -180,6 +183,44 @@ export const ParcelControllers = {
           current_balance: wallet?.balance,
           transaction,
           parcel_id: parcel.id,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * accept parcel v2
+   */
+  acceptParcelV2: catchAsync<TAcceptParcelV2>(
+    async ({ body: payload, user: driver }) => {
+      const parcel = await ParcelServices.acceptParcel({
+        driver_id: driver.id,
+        parcel_id: payload.parcel_id,
+      });
+
+      if (parcel.user_id) {
+        //? Notify user that their parcel has been accepted
+        SocketServices.emitToUser(parcel.user_id, 'parcel:accepted', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          parcel,
+
+          /**
+           * Todo: fix driver emit data type
+           */
+        });
+      }
+
+      return {
+        message: 'Parcel accepted successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
         } satisfies TRideResponseV2,
       };
     },

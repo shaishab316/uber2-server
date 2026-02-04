@@ -2,6 +2,15 @@ import z from 'zod';
 import { EParcelType } from '@/utils/db';
 import { exists } from '@/utils/db/exists';
 
+/**
+ * Shared validators
+ */
+const _ = {
+  parcel_id: z.string().refine(exists('parcel'), {
+    error: ({ input }) => `Parcel not found with id: ${input}`,
+  }),
+};
+
 const requestForParcel = z.object({
   parcel_type: z.enum(EParcelType).default(EParcelType.MEDIUM),
   weight: z.coerce.number().min(1).max(1000).default(10),
@@ -87,9 +96,7 @@ export const ParcelValidations = {
    */
   cancelParcelV2: z.object({
     body: z.object({
-      parcel_id: z.string().refine(exists('parcel'), {
-        error: ({ input }) => `Parcel not found with id: ${input}`,
-      }),
+      parcel_id: _.parcel_id,
     }),
   }),
 
@@ -98,9 +105,20 @@ export const ParcelValidations = {
    */
   payForParcelV2: z.object({
     body: z.object({
-      parcel_id: z.string().refine(exists('parcel'), {
-        error: ({ input }) => `Parcel not found with id: ${input}`,
-      }),
+      parcel_id: _.parcel_id,
+    }),
+  }),
+
+  /**
+   * Driver Validations
+   */
+
+  /**
+   * accept parcel v2
+   */
+  acceptParcelV2: z.object({
+    body: z.object({
+      parcel_id: _.parcel_id,
     }),
   }),
 };
