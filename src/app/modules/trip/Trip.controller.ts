@@ -116,8 +116,7 @@ export const TripControllers = {
       message: `Last ${trip ? 'trip' : 'parcel'} fetched successfully`,
       data: {
         kind: trip ? RIDE_KIND.TRIP : RIDE_KIND.PARCEL,
-        trip,
-        parcel,
+        data: trip ?? parcel,
       } satisfies TRideResponseV2,
     };
   }),
@@ -144,8 +143,7 @@ export const TripControllers = {
         message: 'Trip request created successfully',
         data: {
           kind: RIDE_KIND.TRIP,
-          trip: data,
-          parcel: null,
+          data,
         } satisfies TRideResponseV2,
       };
     },
@@ -164,8 +162,7 @@ export const TripControllers = {
       message: 'Trip cancelled successfully',
       data: {
         kind: RIDE_KIND.TRIP,
-        trip: data,
-        parcel: null,
+        data,
       } satisfies TRideResponseV2,
     };
   }),
@@ -193,8 +190,7 @@ export const TripControllers = {
       message: 'Trip paid successfully',
       data: {
         kind: RIDE_KIND.TRIP,
-        trip,
-        parcel: null,
+        data: trip,
 
         //? extra info
         current_balance: wallet?.balance,
@@ -238,8 +234,7 @@ export const TripControllers = {
         message: 'Trip accepted successfully',
         data: {
           kind: RIDE_KIND.TRIP,
-          trip,
-          parcel: null,
+          data: trip,
         } satisfies TRideResponseV2,
       };
     },
@@ -259,8 +254,7 @@ export const TripControllers = {
         message: 'Trip cancelled successfully',
         data: {
           kind: RIDE_KIND.TRIP,
-          trip,
-          parcel: null,
+          data: trip,
         } satisfies TRideResponseV2,
       };
     },
@@ -297,8 +291,7 @@ export const TripControllers = {
         message: 'Trip started successfully',
         data: {
           kind: RIDE_KIND.TRIP,
-          trip,
-          parcel: null,
+          data: trip,
         } satisfies TRideResponseV2,
       };
     },
@@ -335,8 +328,7 @@ export const TripControllers = {
       message: 'Trip ended successfully',
       data: {
         kind: RIDE_KIND.TRIP,
-        trip,
-        parcel: null,
+        data: trip,
       } satisfies TRideResponseV2,
     };
   }),

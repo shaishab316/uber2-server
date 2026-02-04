@@ -34,8 +34,10 @@ export type TGetSuperTripDetails = {
  */
 export type TRideResponseV2 = {
   kind: keyof typeof RIDE_KIND;
-  trip: Awaited<ReturnType<typeof TripServices.requestForTrip>> | null;
-  parcel: Awaited<ReturnType<typeof ParcelServices.requestForParcel>> | null;
+  data:
+    | Awaited<ReturnType<typeof TripServices.requestForTrip>>
+    | Awaited<ReturnType<typeof ParcelServices.requestForParcel>>
+    | null;
   [extra: string]: any;
 };
 

@@ -122,8 +122,7 @@ export const ParcelControllers = {
         message: 'Parcel request submitted successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel: data,
+          data,
         } satisfies TRideResponseV2,
       };
     },
@@ -143,8 +142,7 @@ export const ParcelControllers = {
         message: 'Parcel cancelled successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel: data,
+          data,
         } satisfies TRideResponseV2,
       };
     },
@@ -179,8 +177,7 @@ export const ParcelControllers = {
         message: 'Parcel paid successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
 
           //? extra data
           current_balance: wallet?.balance,
@@ -222,8 +219,7 @@ export const ParcelControllers = {
         message: 'Parcel accepted successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
         } satisfies TRideResponseV2,
       };
     },
@@ -243,8 +239,7 @@ export const ParcelControllers = {
         message: 'Parcel cancelled successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
         } satisfies TRideResponseV2,
       };
     },
@@ -281,8 +276,7 @@ export const ParcelControllers = {
         message: 'Parcel delivery started successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
         } satisfies TRideResponseV2,
       };
     },
@@ -315,8 +309,7 @@ export const ParcelControllers = {
         message: 'Parcel delivery completed successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
         } satisfies TRideResponseV2,
       };
     },
@@ -341,8 +334,7 @@ export const ParcelControllers = {
         message: 'Parcel delivery data submitted successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
-          trip: null,
-          parcel,
+          data: parcel,
         } satisfies TRideResponseV2,
       };
     },
