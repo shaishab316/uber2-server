@@ -321,4 +321,30 @@ export const ParcelControllers = {
       };
     },
   ),
+
+  /**
+   * deliver parcel v2
+   */
+  deliverParcelV2: catchAsync<TDeliverParcel>(
+    async ({ body, user: driver }) => {
+      const parcel = await ParcelServices.deliverParcel({
+        ...body,
+        driver_id: driver.id,
+      });
+
+      if (parcel.user_id) {
+        //? Notify user that their parcel is being delivered
+        SocketServices.emitToUser(parcel.user_id, 'parcel:delivered', parcel);
+      }
+
+      return {
+        message: 'Parcel delivery data submitted successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
 };

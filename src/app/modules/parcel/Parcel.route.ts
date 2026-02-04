@@ -122,6 +122,20 @@ const all = Router();
     purifyRequest(ParcelValidations.startParcelV2),
     ParcelControllers.startParcelV2,
   );
+
+  all.post(
+    '/deliver-parcel-v2',
+    auth.driver,
+    capture({
+      files: {
+        fileType: 'images',
+        maxCount: 5,
+        size: 10 * 1024 * 1024, // 10 MB
+      },
+    }),
+    purifyRequest(ParcelValidations.deliverParcel),
+    ParcelControllers.deliverParcelV2,
+  );
 }
 
 const admin = Router();
