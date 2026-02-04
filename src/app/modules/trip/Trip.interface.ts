@@ -60,3 +60,8 @@ export type TPayForTripV2 = z.infer<typeof TripValidations.payForTripV2>;
  * Accept Trip v2 Interface
  */
 export type TAcceptTripV2 = z.infer<typeof TripValidations.acceptTripV2>;
+
+/**
+ * Start Trip v2 Interface
+ */
+export type TStartTripV2 = z.infer<typeof TripValidations.startTripV2>;

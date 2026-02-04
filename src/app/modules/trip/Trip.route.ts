@@ -9,6 +9,7 @@ const all = Router();
 {
   //? Get last trip for user or driver
   all.get('/recover-trip', auth.all, TripControllers.getLastTrip);
+  all.get('/recover-trip-v2', auth.all, TripControllers.getLastTripV2);
 
   //? Get trip details
   all.get(
@@ -91,6 +92,18 @@ const all = Router();
     auth.driver,
     purifyRequest(TripValidations.cancelTripV2),
     TripControllers.cancelTripRequestV2,
+  );
+
+  /**
+   * Start trip v2
+   *
+   * [driver] Starts a trip by providing the trip ID.
+   */
+  all.post(
+    '/start-trip',
+    auth.driver,
+    purifyRequest(TripValidations.startTripV2),
+    TripControllers.startTripV2,
   );
 }
 

@@ -8,6 +8,7 @@ import type {
   TCancelTripV2,
   TPayForTripV2,
   TAcceptTripV2,
+  TStartTripV2,
 } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
@@ -88,6 +89,39 @@ export const TripControllers = {
    */
 
   /**
+   * Get last trip for user or driver
+   */
+  getLastTripV2: catchAsync(async ({ user }) => {
+    let trip: any = null;
+    if (user.role === 'USER') {
+      trip = await TripServices.getLastUserTrip({ user_id: user.id });
+    } else if (user.role === 'DRIVER') {
+      trip = await TripServices.getLastDriverTrip({ driver_id: user.id });
+    }
+
+    let parcel: any = null;
+    if (user.role === 'DRIVER') {
+      parcel = await ParcelServices.getLastDriverParcel({
+        driver_id: user.id,
+      });
+    } else if (user.role === 'USER') {
+      parcel = await ParcelServices.getLastUserParcel({
+        user_id: user.id,
+      });
+    }
+
+    return {
+      statusCode: trip || parcel ? StatusCodes.OK : StatusCodes.NO_CONTENT,
+      message: `Last ${trip ? 'trip' : 'parcel'} fetched successfully`,
+      data: {
+        kind: trip ? RIDE_KIND.TRIP : RIDE_KIND.PARCEL,
+        trip,
+        parcel,
+      } satisfies TRideResponseV2,
+    };
+  }),
+
+  /**
    * Request for a new trip v2
    */
   requestForTripV2: catchAsync<TRequestForTripV2>(
@@ -148,6 +182,10 @@ export const TripControllers = {
     SocketServices.emitToUser(trip.driver_id!, 'trip:paid', {
       trip,
       transaction,
+
+      /**
+       * Todo: fix this emit
+       */
     });
 
     return {
@@ -218,6 +256,44 @@ export const TripControllers = {
 
       return {
         message: 'Trip cancelled successfully',
+        data: {
+          kind: RIDE_KIND.TRIP,
+          trip,
+          parcel: null,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * Start trip v2
+   */
+  startTripV2: catchAsync<TStartTripV2>(
+    async ({ body: payload, user: driver }) => {
+      const trip = await TripServices.startTrip({
+        driver_id: driver.id,
+        trip_id: payload.trip_id,
+      });
+
+      if (trip.user_id) {
+        //? Notify user that driver started the trip
+        SocketServices.emitToUser(trip.user_id, 'trip:started', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          trip,
+
+          /**
+           * Todo: fix this emit
+           */
+        });
+      }
+
+      return {
+        message: 'Trip started successfully',
         data: {
           kind: RIDE_KIND.TRIP,
           trip,

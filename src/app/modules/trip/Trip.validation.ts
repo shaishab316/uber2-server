@@ -98,6 +98,15 @@ export const TripValidations = {
       trip_id: _.trip_id,
     }),
   }),
+
+  /**
+   * Start Trip Validation
+   */
+  startTripV2: z.object({
+    body: z.object({
+      trip_id: _.trip_id,
+    }),
+  }),
 };
 
 /**
