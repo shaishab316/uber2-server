@@ -1,9 +1,16 @@
 import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
-import { TDeliverParcel, TGetSuperParcelDetails } from './Parcel.interface';
+import {
+  TDeliverParcel,
+  TGetSuperParcelDetails,
+  TRequestForParcelV2,
+} from './Parcel.interface';
 import { StatusCodes } from 'http-status-codes';
 import { SocketServices } from '../socket/Socket.service';
+import { NotificationServices } from '../notification/Notification.service';
+import { RIDE_KIND } from '../trip/Trip.constant';
+import { TRideResponseV2 } from '../trip/Trip.interface';
 
 export const ParcelControllers = {
   getParcelDetails: catchAsync(async ({ params }) => {
@@ -80,4 +87,37 @@ export const ParcelControllers = {
       data: parcel,
     };
   }),
+
+  /**
+   * V2 Controllers
+   */
+
+  /**
+   * request for parcel v2
+   */
+  requestForParcelV2: catchAsync<TRequestForParcelV2>(
+    async ({ body: payload, user }) => {
+      const data = await ParcelServices.requestForParcel({
+        ...payload,
+        user_id: user.id,
+      });
+
+      //? Notify user that their parcel request is being processed
+      await NotificationServices.createNotification({
+        user_id: user.id,
+        title: 'Parcel Request Received',
+        message: 'Searching for nearby drivers...',
+        type: 'INFO',
+      });
+
+      return {
+        message: 'Parcel request submitted successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel: data,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
 };

@@ -46,6 +46,7 @@ export default injectRoutes(appRouter, {
   '/payments': [PaymentRoutes.free],
   '/context-pages': [ContextPageRoutes.user],
   '/trips': [TripRoutes.all],
+  '/parcels': [ParcelRoutes.all],
 
   // Free auth
   '/profile': [auth.default, UserRoutes.all],
@@ -54,7 +55,6 @@ export default injectRoutes(appRouter, {
   '/inbox': [auth.default, ChatRoutes.all],
   '/messages': [auth.default, MessageRoutes.all],
   '/notifications': [auth.default, NotificationRoutes.all],
-  '/parcels': [auth.all, ParcelRoutes.all],
   '/ride-history': [auth.default, RideHistoryRoutes.all],
 
   // Driver auth

@@ -9,11 +9,12 @@ import capture from '@/app/middlewares/capture';
 const all = Router();
 {
   //? Recover last parcel
-  all.get('/recover-parcel', ParcelControllers.getLastParcel);
+  all.get('/recover-parcel', auth.all, ParcelControllers.getLastParcel);
 
   //? Get parcel details
   all.get(
     '/:parcel_id',
+    auth.all,
     purifyRequest(QueryValidations.exists('parcel_id', 'parcel')),
     ParcelControllers.getParcelDetails,
   );
@@ -40,6 +41,18 @@ const all = Router();
     '/estimate-fare',
     purifyRequest(ParcelValidations.calculateEstimatedFare),
     ParcelControllers.calculateEstimatedFare,
+  );
+
+  /**
+   * v2 Routes
+   */
+
+  //? Request for parcel v2
+  all.post(
+    '/request-for-parcel',
+    auth.user,
+    purifyRequest(ParcelValidations.requestForParcelV2),
+    ParcelControllers.requestForParcelV2,
   );
 }
 

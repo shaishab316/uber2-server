@@ -70,4 +70,15 @@ export const ParcelValidations = {
         .min(1, { message: 'At least one file is required' }),
     }),
   }),
+
+  /**
+   * V2 Validations
+   */
+
+  /**
+   * request for parcel v2
+   */
+  requestForParcelV2: z.object({
+    body: requestForParcel,
+  }),
 };

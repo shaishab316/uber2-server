@@ -43,3 +43,14 @@ export type TGetSuperParcelDetailsPayload = TGetSuperParcelDetailsParams;
 export type TGetSuperParcelDetails = {
   params: TGetSuperParcelDetailsParams;
 };
+
+/**
+ * V2 Types
+ */
+
+/**
+ * request for parcel v2
+ */
+export type TRequestForParcelV2 = z.infer<
+  typeof ParcelValidations.requestForParcelV2
+>;
