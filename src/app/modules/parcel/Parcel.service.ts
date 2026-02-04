@@ -603,6 +603,10 @@ export const ParcelServices = {
   }: TCompleteParcelDeliveryArgs) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (parcel?.driver_id !== driver_id) {

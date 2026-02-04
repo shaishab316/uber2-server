@@ -139,4 +139,13 @@ export const ParcelValidations = {
       parcel_id: _.parcel_id,
     }),
   }),
+
+  /**
+   * complete parcel delivery v2
+   */
+  completeParcelDeliveryV2: z.object({
+    body: z.object({
+      parcel_id: _.parcel_id,
+    }),
+  }),
 };

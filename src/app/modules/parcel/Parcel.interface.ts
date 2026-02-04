@@ -81,3 +81,10 @@ export type TDriverCancelParcelV2 = z.infer<
  * start parcel v2
  */
 export type TStartParcelV2 = z.infer<typeof ParcelValidations.startParcelV2>;
+
+/**
+ * complete parcel delivery v2
+ */
+export type TCompleteParcelDeliveryV2 = z.infer<
+  typeof ParcelValidations.completeParcelDeliveryV2
+>;

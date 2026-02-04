@@ -10,6 +10,7 @@ import type {
   TGetSuperParcelDetails,
   TPayForParcelV2,
   TRequestForParcelV2,
+  TCompleteParcelDeliveryV2,
 } from './Parcel.interface';
 import { StatusCodes } from 'http-status-codes';
 import { SocketServices } from '../socket/Socket.service';
@@ -278,6 +279,40 @@ export const ParcelControllers = {
 
       return {
         message: 'Parcel delivery started successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  completeParcelDeliveryV2: catchAsync<TCompleteParcelDeliveryV2>(
+    async ({ body: payload, user: driver }) => {
+      const parcel = await ParcelServices.completeParcelDelivery({
+        driver_id: driver.id,
+        parcel_id: payload.parcel_id,
+      });
+
+      if (parcel.user_id) {
+        //? Notify user that their parcel delivery is completed
+        SocketServices.emitToUser(parcel.user_id, 'parcel:delivery_completed', {
+          parcel,
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+            /**
+             * Todo: fix driver emit data type
+             */
+          }),
+        });
+      }
+
+      return {
+        message: 'Parcel delivery completed successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
           trip: null,
