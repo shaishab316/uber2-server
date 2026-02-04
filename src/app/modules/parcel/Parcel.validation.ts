@@ -130,4 +130,13 @@ export const ParcelValidations = {
       parcel_id: _.parcel_id,
     }),
   }),
+
+  /**
+   * start parcel v2
+   */
+  startParcelV2: z.object({
+    body: z.object({
+      parcel_id: _.parcel_id,
+    }),
+  }),
 };

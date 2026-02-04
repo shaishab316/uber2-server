@@ -110,6 +110,18 @@ const all = Router();
     purifyRequest(ParcelValidations.driverCancelParcelV2),
     ParcelControllers.driverCancelParcelV2,
   );
+
+  /**
+   * Start Parcel v2 Route
+   *
+   * [driver] Start parcel v2
+   */
+  all.post(
+    '/start-parcel',
+    auth.driver,
+    purifyRequest(ParcelValidations.startParcelV2),
+    ParcelControllers.startParcelV2,
+  );
 }
 
 const admin = Router();

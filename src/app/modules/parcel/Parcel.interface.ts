@@ -76,3 +76,8 @@ export type TAcceptParcelV2 = z.infer<typeof ParcelValidations.acceptParcelV2>;
 export type TDriverCancelParcelV2 = z.infer<
   typeof ParcelValidations.driverCancelParcelV2
 >;
+
+/**
+ * start parcel v2
+ */
+export type TStartParcelV2 = z.infer<typeof ParcelValidations.startParcelV2>;

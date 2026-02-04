@@ -2,6 +2,7 @@ import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
 import type {
+  TStartParcelV2,
   TAcceptParcelV2,
   TCancelParcelV2,
   TDeliverParcel,
@@ -239,6 +240,44 @@ export const ParcelControllers = {
 
       return {
         message: 'Parcel cancelled successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * start parcel v2
+   */
+  startParcelV2: catchAsync<TStartParcelV2>(
+    async ({ body: payload, user: driver }) => {
+      const parcel = await ParcelServices.startParcel({
+        driver_id: driver.id,
+        parcel_id: payload.parcel_id,
+      });
+
+      if (parcel.user_id) {
+        //? Notify user that their parcel delivery has started
+        SocketServices.emitToUser(parcel.user_id, 'parcel:started', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          parcel,
+
+          /**
+           * Todo: fix driver emit data type
+           */
+        });
+      }
+
+      return {
+        message: 'Parcel delivery started successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
           trip: null,
