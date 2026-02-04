@@ -9,6 +9,7 @@ import type {
   TPayForTripV2,
   TAcceptTripV2,
   TStartTripV2,
+  TEndTripV2,
 } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
@@ -302,4 +303,41 @@ export const TripControllers = {
       };
     },
   ),
+
+  /**
+   * End trip v2
+   */
+  endTripV2: catchAsync<TEndTripV2>(async ({ user: driver, body: payload }) => {
+    const trip = await TripServices.endTrip({
+      driver_id: driver.id,
+      trip_id: payload.trip_id,
+    });
+
+    if (trip.user_id) {
+      //? Notify user that driver ended the trip
+      SocketServices.emitToUser(trip.user_id, 'trip:ended', {
+        trip,
+        driver: await prisma.user.findUnique({
+          where: {
+            id: driver.id,
+          },
+          omit: userOmit.DRIVER,
+        }),
+        fare: trip.total_cost,
+
+        /**
+         * Todo: fix this emit
+         */
+      });
+    }
+
+    return {
+      message: 'Trip ended successfully',
+      data: {
+        kind: RIDE_KIND.TRIP,
+        trip,
+        parcel: null,
+      } satisfies TRideResponseV2,
+    };
+  }),
 };

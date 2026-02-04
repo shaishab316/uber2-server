@@ -65,3 +65,8 @@ export type TAcceptTripV2 = z.infer<typeof TripValidations.acceptTripV2>;
  * Start Trip v2 Interface
  */
 export type TStartTripV2 = z.infer<typeof TripValidations.startTripV2>;
+
+/**
+ * End Trip v2 Interface
+ */
+export type TEndTripV2 = z.infer<typeof TripValidations.endTripV2>;

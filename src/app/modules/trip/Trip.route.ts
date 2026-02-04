@@ -105,6 +105,18 @@ const all = Router();
     purifyRequest(TripValidations.startTripV2),
     TripControllers.startTripV2,
   );
+
+  /**
+   * End trip v2
+   *
+   * [driver] Ends a trip by providing the trip ID.
+   */
+  all.post(
+    '/end-trip',
+    auth.driver,
+    purifyRequest(TripValidations.endTripV2),
+    TripControllers.endTripV2,
+  );
 }
 
 const admin = Router();
