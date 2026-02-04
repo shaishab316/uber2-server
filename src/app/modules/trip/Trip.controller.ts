@@ -111,12 +111,17 @@ export const TripControllers = {
       });
     }
 
+    const data = trip ?? parcel ?? {};
+
     return {
       statusCode: trip || parcel ? StatusCodes.OK : StatusCodes.NO_CONTENT,
       message: `Last ${trip ? 'trip' : 'parcel'} fetched successfully`,
       data: {
         kind: trip ? RIDE_KIND.TRIP : RIDE_KIND.PARCEL,
-        data: trip ?? parcel,
+        data: {
+          ...data,
+          reviews: undefined,
+        },
       } satisfies TRideResponseV2,
     };
   }),
