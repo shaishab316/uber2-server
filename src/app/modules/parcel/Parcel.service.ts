@@ -73,14 +73,9 @@ export const ParcelServices = {
   }) {
     const parcel = await prisma.parcel.findUnique({
       where: { id: parcel_id },
-      select: {
-        driver: {
-          select: {
-            name: true,
-            id: true,
-          },
-        },
-        user_id: true,
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
@@ -93,6 +88,15 @@ export const ParcelServices = {
         StatusCodes.CONFLICT,
         `${parcel?.driver?.name?.split(' ')[0]} is already accepted this parcel`,
       );
+
+    if (parcel.status === EParcelStatus.ACCEPTED) {
+      return parcel;
+    } else if (parcel.status !== EParcelStatus.REQUESTED) {
+      throw new ServerError(
+        StatusCodes.CONFLICT,
+        `This trip is already ${parcel.status.toLowerCase()}`,
+      );
+    }
 
     const acceptedParcel = await prisma.parcel.update({
       where: { id: parcel_id },
