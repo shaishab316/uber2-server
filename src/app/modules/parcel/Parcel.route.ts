@@ -54,6 +54,14 @@ const all = Router();
     purifyRequest(ParcelValidations.requestForParcelV2),
     ParcelControllers.requestForParcelV2,
   );
+
+  //? Cancel parcel v2
+  all.post(
+    '/cancel-parcel',
+    auth.user,
+    purifyRequest(ParcelValidations.cancelParcelV2),
+    ParcelControllers.cancelParcelV2,
+  );
 }
 
 const admin = Router();

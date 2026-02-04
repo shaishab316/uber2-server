@@ -38,7 +38,7 @@ export const ParcelServices = {
   async requestForParcel(payload: TRequestForParcel) {
     const driver_ids = await getNearestDriver(payload);
 
-    const parcel = await prisma.parcel.create({
+    const { helper, ...parcel } = await prisma.parcel.create({
       data: {
         ...payload,
         slug: await generateParcelSlug(),
@@ -57,8 +57,8 @@ export const ParcelServices = {
       },
     });
 
-    if (parcel.helper) {
-      await processSingleDriverDispatch(parcel.helper);
+    if (helper) {
+      await processSingleDriverDispatch(helper);
     }
 
     return parcel;

@@ -2,6 +2,7 @@ import catchAsync from '@/app/middlewares/catchAsync';
 import { ParcelServices } from './Parcel.service';
 import { calculateParcelCost } from './Parcel.utils';
 import {
+  TCancelParcelV2,
   TDeliverParcel,
   TGetSuperParcelDetails,
   TRequestForParcelV2,
@@ -112,6 +113,27 @@ export const ParcelControllers = {
 
       return {
         message: 'Parcel request submitted successfully',
+        data: {
+          kind: RIDE_KIND.PARCEL,
+          trip: null,
+          parcel: data,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * cancel parcel v2
+   */
+  cancelParcelV2: catchAsync<TCancelParcelV2>(
+    async ({ body: payload, user }) => {
+      const data = await ParcelServices.cancelParcel({
+        parcel_id: payload.parcel_id,
+        user_id: user.id,
+      });
+
+      return {
+        message: 'Parcel cancelled successfully',
         data: {
           kind: RIDE_KIND.PARCEL,
           trip: null,

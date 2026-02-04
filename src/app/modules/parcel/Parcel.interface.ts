@@ -54,3 +54,8 @@ export type TGetSuperParcelDetails = {
 export type TRequestForParcelV2 = z.infer<
   typeof ParcelValidations.requestForParcelV2
 >;
+
+/**
+ * cancel parcel v2
+ */
+export type TCancelParcelV2 = z.infer<typeof ParcelValidations.cancelParcelV2>;

@@ -81,4 +81,15 @@ export const ParcelValidations = {
   requestForParcelV2: z.object({
     body: requestForParcel,
   }),
+
+  /**
+   * cancel parcel v2
+   */
+  cancelParcelV2: z.object({
+    body: z.object({
+      parcel_id: z.string().refine(exists('parcel'), {
+        error: ({ input }) => `Parcel not found with id: ${input}`,
+      }),
+    }),
+  }),
 };
