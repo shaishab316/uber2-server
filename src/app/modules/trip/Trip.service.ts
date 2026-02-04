@@ -493,6 +493,17 @@ export const TripServices = {
       };
     }
 
+    if (trip.status === ETripStatus.REQUESTED) {
+      throw new ServerError(
+        StatusCodes.BAD_REQUEST,
+        'Trip has not started yet',
+      );
+    } else if (trip.status === ETripStatus.CANCELLED) {
+      throw new ServerError(StatusCodes.BAD_REQUEST, 'Trip was cancelled');
+    } else if (trip.status === ETripStatus.COMPLETED) {
+      throw new ServerError(StatusCodes.BAD_REQUEST, 'Trip already completed');
+    }
+
     return prisma.$transaction(async tx => {
       //? Mark trip as paid
       const trip = await tx.trip.update({

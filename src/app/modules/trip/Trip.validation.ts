@@ -85,6 +85,19 @@ export const TripValidations = {
       trip_id: _.trip_id,
     }),
   }),
+
+  /**
+   * Driver Part +++++++++++++++++++++++++++++
+   */
+
+  /**
+   * Accept Trip Validation
+   */
+  acceptTripV2: z.object({
+    body: z.object({
+      trip_id: _.trip_id,
+    }),
+  }),
 };
 
 /**

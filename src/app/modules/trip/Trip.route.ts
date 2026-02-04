@@ -3,15 +3,17 @@ import { TripControllers } from './Trip.controller';
 import purifyRequest from '@/app/middlewares/purifyRequest';
 import { QueryValidations } from '../query/Query.validation';
 import { TripValidations } from './Trip.validation';
+import auth from '@/app/middlewares/auth';
 
 const all = Router();
 {
   //? Get last trip for user or driver
-  all.get('/recover-trip', TripControllers.getLastTrip);
+  all.get('/recover-trip', auth.all, TripControllers.getLastTrip);
 
   //? Get trip details
   all.get(
     '/:trip_id',
+    auth.all,
     purifyRequest(QueryValidations.exists('trip_id', 'trip')),
     TripControllers.getTripDetails,
   );
@@ -34,6 +36,7 @@ const all = Router();
    */
   all.post(
     '/new-trip-request',
+    auth.user,
     purifyRequest(TripValidations.requestForTripV2),
     TripControllers.requestForTripV2,
   );
@@ -45,6 +48,7 @@ const all = Router();
    */
   all.post(
     '/cancel-trip',
+    auth.user,
     purifyRequest(TripValidations.cancelTripV2),
     TripControllers.cancelTripV2,
   );
@@ -55,9 +59,26 @@ const all = Router();
    * [user] Pays for a completed trip by providing payment details.
    */
   all.post(
-    '/pay-trip',
+    '/pay-trip' /** Todo: not tested yet */,
+    auth.user,
     purifyRequest(TripValidations.payForTripV2),
     TripControllers.payForTripV2,
+  );
+
+  /**
+   * Driver Routes +++++++++++++++++++++++++++++
+   */
+
+  /**
+   * Accept trip v2
+   *
+   * [driver] Accepts a trip request by providing the trip ID.
+   */
+  all.post(
+    '/accept-trip',
+    auth.driver,
+    purifyRequest(TripValidations.acceptTripV2),
+    TripControllers.acceptTripV2,
   );
 }
 

@@ -7,12 +7,15 @@ import type {
   TRideResponseV2,
   TCancelTripV2,
   TPayForTripV2,
+  TAcceptTripV2,
 } from './Trip.interface';
 import { StatusCodes } from 'http-status-codes';
 import { ParcelServices } from '../parcel/Parcel.service';
 import { NotificationServices } from '../notification/Notification.service';
 import { RIDE_KIND } from './Trip.constant';
 import { SocketServices } from '../socket/Socket.service';
+import { userOmit } from '../user/User.constant';
+import { prisma } from '@/utils/db';
 
 export const TripControllers = {
   getTripDetails: catchAsync(async ({ params }) => {
@@ -160,4 +163,42 @@ export const TripControllers = {
       } satisfies TRideResponseV2,
     };
   }),
+
+  /**
+   * Accept trip v2
+   */
+  acceptTripV2: catchAsync<TAcceptTripV2>(
+    async ({ body: payload, user: driver }) => {
+      const trip = await TripServices.acceptTrip({
+        driver_id: driver.id,
+        trip_id: payload.trip_id,
+      });
+
+      if (trip.user_id) {
+        //? Notify user that driver accepted the trip
+        SocketServices.emitToUser(trip.user_id, 'trip:accepted', {
+          driver: await prisma.user.findUnique({
+            where: {
+              id: driver.id,
+            },
+            omit: userOmit.DRIVER,
+          }),
+          trip,
+
+          /**
+           * Todo: fix this emit
+           */
+        });
+      }
+
+      return {
+        message: 'Trip accepted successfully',
+        data: {
+          kind: RIDE_KIND.TRIP,
+          trip,
+          parcel: null,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
 };
