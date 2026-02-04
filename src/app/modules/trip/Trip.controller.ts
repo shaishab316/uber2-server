@@ -165,6 +165,10 @@ export const TripControllers = {
   }),
 
   /**
+   * Driver Part +++++++++++++++++++++++++++++
+   */
+
+  /**
    * Accept trip v2
    */
   acceptTripV2: catchAsync<TAcceptTripV2>(
@@ -193,6 +197,27 @@ export const TripControllers = {
 
       return {
         message: 'Trip accepted successfully',
+        data: {
+          kind: RIDE_KIND.TRIP,
+          trip,
+          parcel: null,
+        } satisfies TRideResponseV2,
+      };
+    },
+  ),
+
+  /**
+   * Driver cancel trip v2
+   */
+  cancelTripRequestV2: catchAsync<TCancelTripV2>(
+    async ({ body: payload, user: driver }) => {
+      const trip = await TripServices.driverCancelTrip({
+        driver_id: driver.id,
+        trip_id: payload.trip_id,
+      });
+
+      return {
+        message: 'Trip cancelled successfully',
         data: {
           kind: RIDE_KIND.TRIP,
           trip,

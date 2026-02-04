@@ -80,6 +80,18 @@ const all = Router();
     purifyRequest(TripValidations.acceptTripV2),
     TripControllers.acceptTripV2,
   );
+
+  /**
+   * Cancel trip request v2
+   *
+   * [driver] Cancels a trip request by providing the trip ID.
+   */
+  all.post(
+    '/cancel-trip-request',
+    auth.driver,
+    purifyRequest(TripValidations.cancelTripV2),
+    TripControllers.cancelTripRequestV2,
+  );
 }
 
 const admin = Router();

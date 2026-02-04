@@ -67,14 +67,9 @@ export const TripServices = {
   }) {
     const trip = await prisma.trip.findUnique({
       where: { id: trip_id },
-      select: {
-        driver: {
-          select: {
-            name: true,
-            id: true,
-          },
-        },
-        user_id: true,
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
       },
     });
 
@@ -86,6 +81,15 @@ export const TripServices = {
       throw new ServerError(
         StatusCodes.CONFLICT,
         `${trip?.driver?.name?.split(' ')[0]} is already accepted this trip`,
+      );
+    }
+
+    if (trip.status === ETripStatus.ACCEPTED) {
+      return trip;
+    } else if (trip.status !== ETripStatus.REQUESTED) {
+      throw new ServerError(
+        StatusCodes.CONFLICT,
+        `This trip is already ${trip.status.toLowerCase()}`,
       );
     }
 
@@ -314,6 +318,10 @@ export const TripServices = {
   }) {
     const trip = await prisma.trip.findUnique({
       where: { id: trip_id },
+      include: {
+        user: { omit: userOmit.USER },
+        driver: { omit: userOmit.DRIVER },
+      },
     });
 
     if (!trip) {
@@ -335,7 +343,7 @@ export const TripServices = {
     }
 
     if (trip.status === ETripStatus.REQUESTED) {
-      const trip = await prisma.trip.update({
+      const updatedTrip = await prisma.trip.update({
         where: { id: trip_id },
         data: {
           processing_driver_id: null,
@@ -347,10 +355,10 @@ export const TripServices = {
         },
       });
 
-      if (!trip.helper) return;
+      if (!updatedTrip.helper) return trip;
 
       //? Proceed to next driver in queue
-      await processSingleDriverDispatch(trip.helper);
+      await processSingleDriverDispatch(updatedTrip.helper);
     } else {
       await prisma.trip.update({
         where: { id: trip_id },
@@ -367,6 +375,8 @@ export const TripServices = {
         type: 'WARNING',
       });
     }
+
+    return trip;
   },
 
   async startTrip({
