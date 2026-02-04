@@ -161,17 +161,10 @@ export const ParcelControllers = {
       );
 
       //? Notify driver that parcel has been paid
-      SocketServices.emitToUser(parcel.driver_id!, 'parcel:paid', {
-        parcel,
-        transaction,
-        user: {
-          name: user.name,
-          trip_received_count: user.trip_received_count,
-          avatar: user.avatar,
-          rating: user.rating,
-          rating_count: user.rating_count,
-        },
-      });
+      SocketServices.emitToUser(parcel.driver_id!, 'driver-trip', {
+        kind: RIDE_KIND.PARCEL,
+        data: parcel,
+      } satisfies TRideResponseV2);
 
       return {
         message: 'Parcel paid successfully',
