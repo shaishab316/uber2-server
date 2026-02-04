@@ -17,8 +17,16 @@ import { NotificationRoutes } from '@/app/modules/notification/Notification.rout
 import { TripRoutes } from '@/app/modules/trip/Trip.route';
 import { ContextPageRoutes } from '@/app/modules/contextPage/ContextPage.route';
 import { RideHistoryRoutes } from '@/app/modules/rideHistory/RideHistory.route';
+import { UserControllers } from '@/app/modules/user/User.controller';
 
 const appRouter = Router();
+
+/**
+ * Get user location
+ *
+ * [GET] /user-location
+ */
+appRouter.get('/user-location', auth.all, UserControllers.getUserLocationV2);
 
 //? Media upload endpoint
 appRouter.post(
