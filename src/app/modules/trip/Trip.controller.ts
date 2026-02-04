@@ -180,14 +180,10 @@ export const TripControllers = {
     });
 
     //? Notify driver that trip has been paid
-    SocketServices.emitToUser(trip.driver_id!, 'trip:paid', {
-      trip,
-      transaction,
-
-      /**
-       * Todo: fix this emit
-       */
-    });
+    SocketServices.emitToUser(trip.driver_id!, 'driver-trip', {
+      kind: RIDE_KIND.TRIP,
+      data: trip,
+    } satisfies TRideResponseV2);
 
     return {
       message: 'Trip paid successfully',
