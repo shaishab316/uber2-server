@@ -29,6 +29,9 @@ import { NotificationServices } from '../notification/Notification.service';
 // import config from '@/config';
 // import { emailTemplate } from '@/templates';
 import { errorLogger } from '@/utils/logger';
+import { sendEmail } from '@/utils/sendMail';
+import { emailTemplate } from '@/templates';
+import config from '@/config';
 
 export const UserServices = {
   async userRegister({ password, email, phone, role }: TUserRegister) {
@@ -298,19 +301,16 @@ export const UserServices = {
 
     await NotificationServices.createNotification({
       user_id: user.id,
-      title:
-        action === 'approve'
-          ? 'Account Approved'
-          : 'Account Rejected',
+      title: action === 'approve' ? 'Account Approved' : 'Account Rejected',
       message:
         action === 'approve'
           ? 'Your account has been approved. You can now log in and start using our services.'
           : 'Your account verification has been rejected. Please contact support for further assistance.',
-      type: "INFO",
+      type: 'INFO',
     });
 
     if (action === 'approve') {
-      return prisma.user.update({
+      const data = await prisma.user.update({
         where: { id: user_id },
         data: {
           is_verification_pending: false,
@@ -319,8 +319,36 @@ export const UserServices = {
         },
         omit: userSelfOmit.USER,
       });
+
+      if (data.email) {
+        await sendEmail({
+          to: data.email,
+          subject: `Your ${config.server.name} Account has been Approved!`,
+          html: emailTemplate({
+            userName: data.name,
+            template: 'account_approved',
+            otp: '',
+          }),
+        });
+      }
+
+      return data;
     } else {
-      return this.deleteAccount({ user_id });
+      const data = this.deleteAccount({ user_id });
+
+      if (user.email) {
+        await sendEmail({
+          to: user.email,
+          subject: `Your ${config.server.name} Account has been Rejected`,
+          html: emailTemplate({
+            userName: user.name,
+            template: 'account_rejected',
+            otp: '',
+          }),
+        });
+      }
+
+      return data;
     }
   },
 
