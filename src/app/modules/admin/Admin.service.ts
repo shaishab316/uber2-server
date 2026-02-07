@@ -88,7 +88,9 @@ export const AdminServices = {
     end_date,
     start_date,
   }: TUserTripDetailsArgs) {
-    const where: Prisma.TripWhereInput = { user_id };
+    const where: Prisma.TripWhereInput = {
+      OR: [{ user_id }, { driver_id: user_id }],
+    };
 
     if (start_date || end_date) {
       where.completed_at = {};
@@ -141,7 +143,9 @@ export const AdminServices = {
     end_date,
     start_date,
   }: TUserTripDetailsArgs) {
-    const where: Prisma.ParcelWhereInput = { user_id };
+    const where: Prisma.ParcelWhereInput = {
+      OR: [{ user_id: user_id }, { driver_id: user_id }],
+    };
 
     if (start_date || end_date) {
       where.delivered_at = {};
