@@ -2,11 +2,17 @@ import config from '../config';
 import ms from 'ms';
 import { accountVerifyTemplate } from './accountVerifyTemplate';
 import { resetPasswordTemplate } from './resetPasswordTemplate';
+import { accountApprovedTemplate } from './accountApprovedTemplate';
+import { accountRejectedTemplate } from './accountRejectedTemplate';
 
 export type TTemplate = {
   userName: string;
   otp: string;
-  template: 'reset_password' | 'account_verify';
+  template:
+    | 'reset_password'
+    | 'account_verify'
+    | 'account_approved'
+    | 'account_rejected';
 };
 
 export type TTemplateData = {
@@ -43,5 +49,7 @@ export const emailTemplate = ({
   return {
     account_verify: accountVerifyTemplate,
     reset_password: resetPasswordTemplate,
+    account_approved: accountApprovedTemplate,
+    account_rejected: accountRejectedTemplate,
   }[template](data);
 };
