@@ -1,4 +1,5 @@
 import { TSocketHandler } from '../socket/Socket.interface';
+import { SocketServices } from '../socket/Socket.service';
 import { catchAsyncSocket } from '../socket/Socket.utils';
 import { DriverServices } from './Driver.service';
 import { DriverValidations } from './Driver.validation';
@@ -33,6 +34,21 @@ export const DriverSocket: TSocketHandler = async ({ socket }) => {
         ...payload,
         driver_id: driver.id,
       });
+
+      return payload;
+    }, DriverValidations.refreshLocation),
+  );
+
+  socket.on(
+    'driver:update_location',
+    catchAsyncSocket(async payload => {
+      await DriverServices.updateDriverLocationV2({
+        ...payload,
+        driver_id: driver.id,
+      });
+
+      //? Emit location update to interested parties
+      SocketServices.broadcast(`location::${driver.id}`, payload);
 
       return payload;
     }, DriverValidations.refreshLocation),
