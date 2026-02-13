@@ -13,7 +13,7 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Trip.job';
-import { RIDE_KIND } from './Trip.constant';
+import { DRIVER_EARNING_PERCENTAGE, RIDE_KIND } from './Trip.constant';
 
 export const TripServices = {
   async getTripDetails(trip_id: string) {
@@ -34,11 +34,17 @@ export const TripServices = {
   async requestForTrip(payload: TRequestForTrip) {
     const driver_ids = await getNearestDriver(payload);
 
+    const totalCost = await calculateTripCost(payload);
+    const driverEarning = totalCost * DRIVER_EARNING_PERCENTAGE;
+    const adminEarning = totalCost - driverEarning;
+
     const { helper, ...trip } = await prisma.trip.create({
       data: {
         ...payload,
         slug: await generateTripSlug(),
-        total_cost: await calculateTripCost(payload),
+        total_cost: totalCost,
+        driver_earning: driverEarning,
+        admin_earning: adminEarning,
         date: new Date().toISOString().split('T')[0], // "YYYY-MM-DD"
         helper: {
           create: {
@@ -548,7 +554,7 @@ export const TripServices = {
         where: { id: trip.driver_id! },
         data: {
           balance: {
-            increment: trip.total_cost,
+            increment: trip.driver_earning ?? 0,
           },
         },
       });
@@ -586,7 +592,7 @@ export const TripServices = {
       await tx.transaction.create({
         data: {
           user_id: trip.driver_id!,
-          amount: trip.total_cost,
+          amount: trip.driver_earning ?? 0,
           type: ETransactionType.INCOME,
           ref_trip_id: trip_id,
           payment_method: 'WALLET',

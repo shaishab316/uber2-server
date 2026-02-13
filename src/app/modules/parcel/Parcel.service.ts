@@ -18,7 +18,7 @@ import { userOmit } from '../user/User.constant';
 import { NotificationServices } from '../notification/Notification.service';
 import { SocketServices } from '../socket/Socket.service';
 import { processSingleDriverDispatch } from './Parcel.job';
-import { RIDE_KIND } from '../trip/Trip.constant';
+import { DRIVER_EARNING_PERCENTAGE, RIDE_KIND } from '../trip/Trip.constant';
 import { TRideResponseV2 } from '../trip/Trip.interface';
 
 export const ParcelServices = {
@@ -40,11 +40,17 @@ export const ParcelServices = {
   async requestForParcel(payload: TRequestForParcel) {
     const driver_ids = await getNearestDriver(payload);
 
+    const totalCost = await calculateParcelCost(payload);
+    const driverEarning = totalCost * DRIVER_EARNING_PERCENTAGE;
+    const adminEarning = totalCost - driverEarning;
+
     const { helper, ...parcel } = await prisma.parcel.create({
       data: {
         ...payload,
         slug: await generateParcelSlug(),
-        total_cost: await calculateParcelCost(payload),
+        total_cost: totalCost,
+        driver_earning: driverEarning,
+        admin_earning: adminEarning,
         date: new Date().toISOString().split('T')[0], // "YYYY-MM-DD"
         helper: {
           create: {
@@ -536,7 +542,7 @@ export const ParcelServices = {
         where: { id: parcel.driver_id! },
         data: {
           balance: {
-            increment: parcel.total_cost,
+            increment: parcel.driver_earning,
           },
         },
       });
@@ -574,7 +580,7 @@ export const ParcelServices = {
       await tx.transaction.create({
         data: {
           user_id: parcel.driver_id!,
-          amount: parcel.total_cost,
+          amount: parcel.driver_earning,
           type: ETransactionType.INCOME,
           ref_parcel_id: parcel_id,
           payment_method: 'WALLET',
