@@ -609,6 +609,27 @@ export const TripServices = {
         type: 'INFO',
       });
 
+      //? Emit socket event to driver about trip completion and payment
+      await tx.user.update({
+        where: { id: trip.driver_id! },
+        data: {
+          trip_given_count: {
+            increment: 1,
+          },
+          is_online: true, //? set driver online after trip completion
+        },
+      });
+
+      //? Emit socket event to driver about trip completion and payment
+      await tx.user.update({
+        where: { id: user_id },
+        data: {
+          trip_received_count: {
+            increment: 1,
+          },
+        },
+      });
+
       return { trip, wallet, transaction };
     });
   },
