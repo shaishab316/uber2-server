@@ -43,8 +43,8 @@ export const TripServices = {
         ...payload,
         slug: await generateTripSlug(),
         total_cost: totalCost,
-        driver_earning: driverEarning,
-        admin_earning: adminEarning,
+        driver_earning: +driverEarning.toFixed(2),
+        admin_earning: +adminEarning.toFixed(2),
         date: new Date().toISOString().split('T')[0], // "YYYY-MM-DD"
         helper: {
           create: {
